@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-11 · branch `build/mvp` · tags `mvp-m1` … `mvp-m6` (M6 partial)
+**Last updated:** 2026-11-11 · branch `claude/new-session-4f5ud7` · PR #1 merged; full `build/mvp` integrated
 
 ## Done
 - **M1 foundations** (`build/mvp`): cited `data/` for 3 cities + 2 parks, `make verify`,

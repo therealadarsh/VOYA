@@ -1,7 +1,8 @@
 # VOYA
 
-**Status:** `build/mvp` — 91 tests, cited rules overlay, magic-link sign-in, React
-scaffold in `web/`. Demo places until provider wiring. [`VERIFY.md`](VERIFY.md) ·
+**Status:** **94 tests** on `claude/new-session-4f5ud7` — cited rules, magic-link,
+`voya price-check`, React scaffold in `web/`. Demo places until provider wiring.
+[`VERIFY.md`](VERIFY.md) ·
 [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md) · history: [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
 
 Plan a trip (one day or up to 30) to your budget, door to door. Every cost
