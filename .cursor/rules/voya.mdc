@@ -2,4 +2,4 @@
 description: VOYA project rules entry point
 alwaysApply: true
 ---
-Before any work, read `AGENTS.md` at the repo root and follow it. `docs/PLAN.md` is the source of truth; if it is missing, run the kickoff interview described in AGENTS.md. Never write prompts, question lists, answers or transcripts into the repo.
+Before any work, read `AGENTS.md` at the repo root and follow it. Read docs/PROGRESS.md and the last entries of docs/SESSION_LOG.md first; the owner's plan and brief are in the gitignored .voya-private/ folder. Before stopping for any reason, append a session summary as described in AGENTS.md. Never write prompts, question lists, answers or transcripts into the repo.

@@ -3,77 +3,67 @@
 Read automatically by many AI coding tools. `CLAUDE.md`, `GEMINI.md` and
 `.cursor/rules/voya.mdc` point here.
 
-## How this project is run
+## Read first, in this order
+1. `docs/PROGRESS.md`: what's done, what's next, what's blocked.
+2. The last 2 entries of `docs/SESSION_LOG.md`: what the previous session did.
+3. `.voya-private/PLAN.md` and `.voya-private/CURSOR_PROMPT.md`, if present:
+   the owner's plan and build brief. This folder is **gitignored and local
+   only**.
+4. `DECISIONS.md`, `docs/CONCEPT_MAP.md`, `README.md`.
 
-1. **`docs/PLAN.md` is the single source of truth.** It is written from the
-   owner's answers and replaces every earlier prompt or brief. Follow it.
-2. **No plan yet?** If `docs/PLAN.md` is missing, don't build anything. Run
-   the **kickoff interview** below, then write `docs/PLAN.md` from the
-   answers.
-3. **Changes go through questions, then the plan.** When the owner gives
-   feedback or a new idea:
-   - ask any clarifying questions in the chat;
-   - update `docs/PLAN.md` (the affected sections plus one dated line in its
-     Changelog);
-   - then build.
-4. **Ask; don't store.**
-   - Prompts, question lists, answer files and chat transcripts are never
-     written to the repo. They live in the chat only.
-   - `.gitignore` blocks the usual names. Don't work around it.
-   - The plan records *decisions*, not conversations.
-5. **Privacy of the plan.** `docs/PLAN.md` contains business decisions.
-   - Commit it only while the GitHub repo is **private**.
-   - If you can't confirm that, ask the owner before committing it.
-   - Never copy strategy into code comments, commit messages or public docs.
+## The private folder (`.voya-private/`)
+- It holds the owner's plan, business decisions, prompts and private notes.
+- **Never commit it, and never copy its contents into tracked files, commit
+  messages or code comments.** The GitHub repo may be public.
+- **If `PLAN.md` is missing,** don't build. Run the kickoff interview below
+  in the chat, then write `.voya-private/PLAN.md` from the answers.
+- **When the owner gives feedback or new ideas:**
+  - ask clarifying questions in the chat (at most 4 at a time, each with a
+    recommended option);
+  - update `.voya-private/PLAN.md` and add one dated line to its Changelog;
+  - then build.
+- Prompts, question lists, answers and transcripts never go in tracked files.
+  `.gitignore` blocks the usual names; don't work around it.
 
-## Kickoff interview (only when `docs/PLAN.md` is missing)
+## Session logging (mandatory)
+Do this at the end of every session, before stopping for any reason (task
+done, the owner says stop, about to hit a context or usage limit, handing
+off to another tool):
+1. **Append an entry to `docs/SESSION_LOG.md`** using its template. Keep it
+   technical; no business strategy.
+2. **Update `docs/PROGRESS.md`:** Done / Known limits / Next / Blocked, plus
+   the "Last updated" line (date, branch, commit).
+3. **Update the "Status" line in `README.md`** so it matches PROGRESS.md.
+4. **Optional:** a private session summary (strategy, the owner's ideas) in
+   `.voya-private/SESSION_NOTES.md`.
+5. Commit with the message `log: session summary <date>` and push.
 
-**How to ask:**
-- At most 4 questions per message.
-- Multiple choice with a recommended option first, plus a free-text option.
-- Explain in one line why each question matters.
-- Ask follow-ups when an answer is unclear or contradicts an earlier one.
-- Stop when every topic below has a decision, or an explicit "decide for me"
-  / "later".
+If you're close to a limit, write the log **first**, then continue.
 
-**Topics, in order:**
-1. **Product and first users:** who it's for and what problem it solves
-   (never ask about income; budget only).
-2. **MVP features:** what must exist for the owner to test, and what waits.
-3. **Platform:** web, installable, native; offline needs.
-4. **Launch area:** cities, parks, regions.
-5. **Data sources and one-time data budget:** honour each source's terms;
-   never scrape where forbidden.
-6. **Owner logic: budget fit:** how firm budgets work; what to do with spare
-   money.
-7. **Owner logic: ranking:** how places are picked.
-8. **Owner logic: hidden costs:** which taxes, tips, fees and transport go in
-   the total by default.
-9. **Accounts:** when to ask for sign-in; age rules; what's paid later.
-10. **Runtime AI:** provider and monthly cap.
-11. **Hosting:** provider, region, cost alarm.
-12. **Law and privacy:** regions served.
-13. **Build mode:** autonomous versus checkpoints; who verifies.
-14. **Timeline and goal.**
-15. **Business model** (may be "later").
+## Kickoff interview (only when `.voya-private/PLAN.md` is missing)
+Ask in the chat, at most 4 questions per message, each multiple choice with a
+recommended option. Never ask about income.
 
-**Then write `docs/PLAN.md`** with these sections:
-1. Summary.
-2. Owner decisions (locked; one subsection per topic).
-3. Scope: MVP versus later.
-4. Domain model.
-5. Features with example input and output.
-6. Situations and their expected behaviour.
-7. Architecture.
-8. Milestones.
-9. Definition of done and verification.
-10. Changelog.
+**Topics:**
+1. Product and first users.
+2. MVP features.
+3. Platform.
+4. Launch area.
+5. Data sources and budget (terms first; no forbidden scraping).
+6. Budget-fit logic.
+7. Ranking.
+8. Hidden costs.
+9. Accounts and age rules.
+10. Runtime AI and its cap.
+11. Hosting.
+12. Law and privacy.
+13. Build mode.
+14. Timeline.
+15. Business model (may be "later").
 
-Show the owner a 10-line summary, and start building only after they say
-"go".
+Then write the plan, show a 10-line summary, and wait for "go".
 
 ## Non-negotiables
-
 - **Never invent prices, fares, taxes, hours or statistics.** Real data needs
   a `source` and `observed_at`; test data is marked `synthetic: true`.
 - **Never write the word "guarantee".** Every estimate is labeled "est.".
@@ -81,6 +71,9 @@ Show the owner a 10-line summary, and start building only after they say
   logged, prompted or sent.
 - **The AI proposes; deterministic code computes money, checks the budget and
   applies changes.**
+- **Follow every data source's terms.** No scraping of sites whose terms
+  forbid it. Cache only what the terms allow, and record that in
+  `docs/DATA_SOURCES.md`.
 - **Tests use fakes:** no network, no tokens.
 - **Secrets only in environment variables** (`.env` is gitignored; see
   `.env.example`). Never commit, log or put keys into prompts or traces.
@@ -89,8 +82,8 @@ Show the owner a 10-line summary, and start building only after they say
   `scripts/fetch_reference.sh`).
 
 ## Commands
-
 ```sh
 uv sync
-uv run pytest
+make run     # http://localhost:8000
+make test
 ```

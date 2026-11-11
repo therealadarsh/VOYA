@@ -1,5 +1,9 @@
 # VOYA
 
+**Status:** working MVP on demo data (84 tests). Next: UX redesign, then
+real data connectors. Details: [`docs/PROGRESS.md`](docs/PROGRESS.md) ·
+history: [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
+
 Plan a trip (one day or up to 30) to your budget, door to door. Every cost
 carries a range, a source and a stated confidence, and is always labeled as
 an estimate. During the trip, VOYA tracks what you spend and helps you get
@@ -44,4 +48,8 @@ the same job. Either way, deterministic code computes every number.
 - [`docs/MVP_TEST_GUIDE.md`](docs/MVP_TEST_GUIDE.md): what to try, what's
   intentionally missing.
 - [`DECISIONS.md`](DECISIONS.md): one line per design choice.
-- [`AGENTS.md`](AGENTS.md): rules for AI coding tools working on this repo.
+- [`docs/PROGRESS.md`](docs/PROGRESS.md) and
+  [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md): what's done and what's next,
+  with one summary per working session.
+- [`AGENTS.md`](AGENTS.md): rules for AI coding tools working on this repo,
+  including session logging.
