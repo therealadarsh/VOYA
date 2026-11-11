@@ -86,3 +86,13 @@ design direction (see the private Cursor prompt).
 **Done:** PR #1 merged (735db4c); cited rules, magic link, price-check CLI, providers fakes, 94 tests.
 
 **Next:** Postgres/Alembic, React section-8 shell + Playwright, Foursquare fake→LIVE behind cap.
+
+---
+
+## 2026-11-11 · integration → main
+
+**Goal:** owner requested merge integration branch to `main`.
+
+**Done:** `main` fast-forwarded/reset to `6a464b3` (same as `claude/new-session-4f5ud7`); unrelated old `main` history replaced; `make verify` green on push.
+
+**Note:** Clone `main` and `git pull` — default branch now holds the full MVP stack.
