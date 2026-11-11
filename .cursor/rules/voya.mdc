@@ -1,0 +1,5 @@
+---
+description: VOYA project rules entry point
+alwaysApply: true
+---
+Before any work, read `AGENTS.md` at the repo root and follow it. The build spec is `VOYA_MVP_PROMPT.md`, provided by the owner.
