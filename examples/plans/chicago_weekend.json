@@ -1,0 +1,10 @@
+{
+  "destination": "chicago",
+  "start_date": "2026-12-05",
+  "days": 2,
+  "budget": "350",
+  "firmness": "wiggle",
+  "party": { "adults": 2, "children": [] },
+  "interests": ["food", "architecture"],
+  "pace": "balanced"
+}

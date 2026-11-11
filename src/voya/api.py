@@ -23,6 +23,8 @@ from voya.catalog import load_catalog
 from voya.discover import DiscoverRequest, discover
 from voya.llm import Harness, client_from_env
 from voya.planner import PlanError, PlanRequest, apply_upgrade, build, priced_for
+from voya.accounts import MagicLinkService
+from voya.accounts.magic_link import FakeMailer
 from voya.store import Store, new_id
 from voya.tracking import CATEGORIES, apply_recovery, budget_status, parse_spend_text
 
@@ -47,6 +49,16 @@ def store() -> Store:
     if "store" not in _state:
         _state["store"] = Store()
     return _state["store"]
+
+
+def magic_link() -> MagicLinkService:
+    if "magic" not in _state:
+        _state["magic"] = MagicLinkService(
+            store(),
+            _state.get("mailer") or FakeMailer(),
+            base_url=os.environ.get("VOYA_PUBLIC_URL", "http://localhost:8000"),
+        )
+    return _state["magic"]
 
 
 def harness() -> Harness | None:
@@ -288,13 +300,18 @@ def auth_start(a: AuthIn) -> dict:
             "ADULTS_ONLY",
             "Accounts are for adults (18+). Trips with kids are planned from an adult's account.",
         )
-    token = store().create_user(a.email, True)
-    # DEV MODE: a real deployment emails a magic link instead of returning the token.
-    return {
-        "token": token,
-        "dev_mode": True,
-        "note": "Development sign-in: in production this arrives as an email magic link.",
-    }
+    out = magic_link().request_sign_in(a.email, a.is_adult)
+    if "error" in out:
+        raise ApiError(403, out["error"], out["message"])
+    return out
+
+
+@app.get("/v1/auth/verify")
+def auth_verify(token: str) -> dict:
+    result = magic_link().verify(token)
+    if not result:
+        raise ApiError(400, "INVALID_LINK", "This sign-in link is invalid or expired.")
+    return result
 
 
 @app.post("/v1/plans/{plan_id}/save")

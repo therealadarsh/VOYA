@@ -10,11 +10,11 @@ sync:
 	uv sync --frozen
 
 lint:
-	uv run ruff check src/voya/cost src/voya/pricing src/voya/data scripts tests/test_m1_data.py
-	uv run ruff format --check src/voya/cost src/voya/pricing src/voya/data scripts tests/test_m1_data.py
+	uv run ruff check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py
+	uv run ruff format --check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py
 
 typecheck:
-	uv run mypy src/voya/cost src/voya/pricing src/voya/data
+	uv run mypy src/voya/cost src/voya/pricing src/voya/data src/voya/accounts
 
 policy:
 	uv run python scripts/check_policy.py
@@ -31,7 +31,10 @@ secrets:
 examples:
 	uv run python scripts/validate_examples.py
 
+eval:
+	uv run python -c "print('eval stub: run golden trips in artifacts/evals/ (M6)')"
+
 trace:
 	uv run python -m voya.obs list
 
-.PHONY: run test verify sync lint typecheck policy citations traceability secrets examples trace
+.PHONY: run test verify sync lint typecheck policy citations traceability secrets examples eval trace
