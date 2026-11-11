@@ -6,3 +6,18 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Ask in chat, don't store (AGENTS.md): prompts, question lists, answers, transcripts.
+# Anchored to the repo root and docs/ so prompt templates inside src/ stay tracked.
+/*[Pp][Rr][Oo][Mm][Pp][Tt]*.md
+/docs/**/*[Pp][Rr][Oo][Mm][Pp][Tt]*.md
+/*[Qq][Uu][Ee][Ss][Tt][Ii][Oo][Nn]*.md
+/docs/**/*[Qq][Uu][Ee][Ss][Tt][Ii][Oo][Nn]*.md
+/*[Aa][Nn][Ss][Ww][Ee][Rr]*.md
+/docs/**/*[Aa][Nn][Ss][Ww][Ee][Rr]*.md
+/*[Tt][Rr][Aa][Nn][Ss][Cc][Rr][Ii][Pp][Tt]*.md
+/docs/**/*[Tt][Rr][Aa][Nn][Ss][Cc][Rr][Ii][Pp][Tt]*.md
+/*[Cc][Oo][Nn][Vv][Ee][Rr][Ss][Aa][Tt][Ii][Oo][Nn]*.md
+/docs/**/*[Cc][Oo][Nn][Vv][Ee][Rr][Ss][Aa][Tt][Ii][Oo][Nn]*.md
+/docs/private/
+/.voya-private/

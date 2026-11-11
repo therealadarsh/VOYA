@@ -2,4 +2,4 @@
 description: VOYA project rules entry point
 alwaysApply: true
 ---
-Before any work, read `AGENTS.md` at the repo root and follow it. The build spec is `VOYA_MVP_PROMPT.md`, provided by the owner.
+Before any work, read `AGENTS.md` at the repo root and follow it. `docs/PLAN.md` is the source of truth; if it is missing, run the kickoff interview described in AGENTS.md. Never write prompts, question lists, answers or transcripts into the repo.
