@@ -24,3 +24,4 @@ __pycache__/
 
 # local runtime data (database, traces, logs)
 var/
+data/owner_checks/entries.jsonl

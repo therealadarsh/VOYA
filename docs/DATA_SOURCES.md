@@ -8,6 +8,7 @@ terms forbid it. Test code uses fakes only (`LIVE=1` caps spend at $1/run).
 | Source | Use | Cache / storage | Attribution |
 |---|---|---|---|
 | **Cited JSON in `data/`** | Sales tax, transit fares, park fees for launch cities/parks | Indefinite (we own the extracts; each value has `source`, `quote`, `observed_at`) | N/A (rules); UI shows rule source links |
+| **Owner price checks** `data/owner_checks/` | Owned `owner_check` evidence (commissioned / visit / official page) | Stored as JSONL with method, URL, `observed_at`; not scraped | Shown in line evidence |
 | **Demo catalog** `src/voya/catalog/demo.json` | Planner MVP UI until real connectors land | Bundled; `synthetic: true` | "Demo prices" banner |
 | **Foursquare Places API** (chosen, not wired in M1) | Ratings, categories, price tier for enrichment | Per Foursquare ToS (IDs + allowed fields; TTL in `external_cache` when implemented) | Foursquare logo/link in UI when shown |
 | **OpenStreetMap / Overpass** | POI backfill (later) | ODbL: derived DB in separate table; attribute © OSM | © OpenStreetMap contributors |

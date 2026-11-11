@@ -495,9 +495,30 @@ def ops(x_ops_token: str | None = Header(None)) -> dict:
     from datetime import UTC, datetime
 
     now = datetime.now(UTC)
+    from voya.curate.price_check import approved_for_city, coverage_ratio
+    from voya.planner import PlanRequest, priced_for
+
+    sample = PlanRequest(
+        destination="chicago",
+        start_date=now.date(),
+        budget=Decimal("200"),
+        party={"adults": 2},
+    )
+    try:
+        _d, _c, priced = priced_for(sample)
+        names = [
+            ln.cost.label
+            for ln in priced.lines
+            if ln.kind == "place" and ln.cost.category in ("food", "attraction", "activity")
+        ]
+        cov = coverage_ratio(city="Chicago", planned_place_names=names)
+    except Exception:
+        cov = None
     return {
         "ai_spend_month_usd": str(store().ai_spent(f"month:{now:%Y-%m}")),
         "ai_helper": "model" if harness() else "built-in",
+        "owner_price_checks_approved": len(approved_for_city("Chicago")),
+        "owner_check_coverage_chicago_est": cov,
     }
 
 

@@ -8,6 +8,8 @@
 
 **Try first:** `make run` → plan Chicago weekend; set `VOYA_DEV_SIGNIN=0` to exercise magic-link flow in tests.
 
+**Data strategy (2026-11-11):** `voya price-check` CLI, `owner_check` source, `providers/` fakes, coverage on `/v1/ops` (with token).
+
 **Known gaps (honest):**
 - Postgres/Alembic not wired (SQLite only).
 - Playwright + axe not automated yet (`web/` React scaffold only).
