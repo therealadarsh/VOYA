@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOYA · trips that fit your budget</title>
+<meta name="description" content="Plan a trip to your budget, door to door, with honest estimates.">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">VOYA</span><span class="tag">Trips that fit your budget</span></div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="plan" aria-selected="true">Plan</button>
+    <button role="tab" data-tab="discover">Discover</button>
+    <button role="tab" data-tab="trip">My trip</button>
+  </nav>
+</header>
+<div id="demo-banner" class="banner" hidden>Demo prices: places and prices are made up for testing. Every amount is an estimate.</div>
+
+<main>
+  <!-- PLAN FORM -->
+  <section id="tab-plan" class="tab">
+    <form id="plan-form" class="card form" autocomplete="off">
+      <h1>Where, when, and how much?</h1>
+      <label>Where
+        <select name="destination" id="f-dest" required></select>
+      </label>
+      <div class="row">
+        <label>Start date <input type="date" name="start_date" id="f-date" required></label>
+        <label>Days <input type="number" name="days" id="f-days" min="1" max="30" value="1" required></label>
+      </div>
+      <div class="row">
+        <label>Budget (USD) <input type="number" name="budget" id="f-budget" min="1" step="1" placeholder="150" required></label>
+        <label>Adults <input type="number" name="adults" id="f-adults" min="1" max="12" value="1" required></label>
+      </div>
+      <fieldset class="kids">
+        <legend>Kids (optional)</legend>
+        <div id="kids-list" class="chips"></div>
+        <div class="row tight">
+          <select id="kid-band" aria-label="Kid age"><option value="0-5">Age 0–5</option><option value="6-12">Age 6–12</option><option value="13-17">Age 13–17</option></select>
+          <button type="button" class="ghost" id="add-kid">+ Add kid</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>What do you enjoy?</legend>
+        <div id="interests" class="chips"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Pace</legend>
+        <div class="seg" id="pace">
+          <button type="button" data-v="relaxed">Relaxed</button>
+          <button type="button" data-v="balanced" aria-pressed="true">Balanced</button>
+          <button type="button" data-v="packed">Packed</button>
+        </div>
+      </fieldset>
+      <fieldset class="firm">
+        <legend id="firm-q">Is this budget a hard limit, or is there a little wiggle room?</legend>
+        <div class="seg big" id="firmness">
+          <button type="button" data-v="hard">Hard limit</button>
+          <button type="button" data-v="wiggle">Some wiggle room</button>
+        </div>
+        <p class="hint" id="firm-hint">Hard limit: the plan fits even if prices come in high. Wiggle room: it fits in about 9 of 10 price scenarios.</p>
+      </fieldset>
+      <details>
+        <summary>More options</summary>
+        <div id="lodging-box" hidden>
+          <label class="check"><input type="checkbox" id="f-lodging-booked"> I've already booked where I'm staying</label>
+          <label id="lodging-amt-wrap" hidden>Lodging total (USD) <input type="number" id="f-lodging-amt" min="0" step="1"></label>
+        </div>
+        <label>Starting from (adds an optional "getting there" estimate)
+          <select id="f-from"><option value="">— I'm already there —</option></select>
+        </label>
+        <div class="row">
+          <label>Getting there by
+            <select id="f-mode"><option value="drive">Car</option><option value="train">Train</option></select>
+          </label>
+          <label class="check"><input type="checkbox" id="f-gt-include"> Include in total</label>
+        </div>
+        <fieldset>
+          <legend>Plan around something fixed (optional)</legend>
+          <div class="row">
+            <label>What <input id="f-anchor-title" placeholder="e.g. Ball game"></label>
+            <label>Starts <input type="time" id="f-anchor-start"></label>
+          </div>
+          <div class="row">
+            <label>Hours <input type="number" id="f-anchor-hours" min="0.5" max="12" step="0.5" value="2"></label>
+            <label>Cost for everyone (USD) <input type="number" id="f-anchor-cost" min="0" step="1" value="0"></label>
+          </div>
+        </fieldset>
+      </details>
+      <p class="error" id="plan-error" role="alert" hidden></p>
+      <button class="primary" type="submit" id="plan-btn">Plan my trip</button>
+      <p class="hint center"><a href="#" data-goto="discover">Not sure where? See what your budget can do →</a></p>
+    </form>
+
+    <div id="plan-view" hidden></div>
+  </section>
+
+  <!-- DISCOVER -->
+  <section id="tab-discover" class="tab" hidden>
+    <form id="disc-form" class="card form">
+      <h1>What can my budget do?</h1>
+      <label>From <select id="d-from"><option value="">Anywhere</option></select></label>
+      <div class="row">
+        <label>Date <input type="date" id="d-date" required></label>
+        <label>Days <input type="number" id="d-days" min="1" max="30" value="1"></label>
+      </div>
+      <div class="row">
+        <label>Budget (USD) <input type="number" id="d-budget" min="1" required placeholder="120"></label>
+        <label>Adults <input type="number" id="d-adults" min="1" max="12" value="1"></label>
+      </div>
+      <fieldset><legend>What do you enjoy?</legend><div id="d-interests" class="chips"></div></fieldset>
+      <fieldset><legend>Hard limit or some wiggle room?</legend>
+        <div class="seg" id="d-firmness">
+          <button type="button" data-v="hard">Hard limit</button>
+          <button type="button" data-v="wiggle" aria-pressed="true">Some wiggle room</button>
+        </div>
+      </fieldset>
+      <button class="primary" type="submit">Show me options</button>
+    </form>
+    <div id="disc-results"></div>
+  </section>
+
+  <!-- MY TRIP -->
+  <section id="tab-trip" class="tab" hidden>
+    <div id="trip-view"></div>
+  </section>
+</main>
+
+<!-- helper sheet -->
+<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="sheet-body">
+    <div class="sheet-head"><h2 id="sheet-title">Ask VOYA</h2><button class="ghost" id="sheet-close" aria-label="Close">✕</button></div>
+    <div class="chips" id="helper-chips"></div>
+    <form id="helper-form">
+      <textarea id="helper-msg" rows="2" maxlength="500" placeholder="e.g. It's raining, what now?"></textarea>
+      <div class="row tight">
+        <label>Time <input type="time" id="helper-time"></label>
+        <label>Day <select id="helper-day"></select></label>
+        <label class="check"><input type="checkbox" id="helper-rain"> Raining</label>
+      </div>
+      <button class="primary" type="submit">Ask</button>
+    </form>
+    <div id="helper-out" aria-live="polite"></div>
+  </div>
+</div>
+
+<!-- sign-in -->
+<div id="signin" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="signin-title">
+  <div class="sheet-body">
+    <div class="sheet-head"><h2 id="signin-title">Sign in to keep this trip</h2><button class="ghost" id="signin-close" aria-label="Close">✕</button></div>
+    <form id="signin-form">
+      <label>Email <input type="email" id="si-email" required autocomplete="email"></label>
+      <label class="check"><input type="checkbox" id="si-adult" required> I'm 18 or older</label>
+      <p class="hint">Trips with kids are planned from an adult's account. We never ask about income.</p>
+      <p class="error" id="si-error" hidden></p>
+      <button class="primary" type="submit">Continue</button>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden role="status"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

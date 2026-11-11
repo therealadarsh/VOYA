@@ -21,3 +21,6 @@ __pycache__/
 /docs/**/*[Cc][Oo][Nn][Vv][Ee][Rr][Ss][Aa][Tt][Ii][Oo][Nn]*.md
 /docs/private/
 /.voya-private/
+
+# local runtime data (database, traces, logs)
+var/

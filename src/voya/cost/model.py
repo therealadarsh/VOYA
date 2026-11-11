@@ -35,7 +35,22 @@ def _to_cents(v: Decimal) -> Decimal:
 # so totals of many lines never drift (0.1 + 0.2 != 0.3 in float).
 Money = Annotated[Decimal, Field(ge=0, allow_inf_nan=False), AfterValidator(_to_cents)]
 CurrencyCode = Annotated[str, Field(pattern=r"^[A-Z]{3}$")]
-Category = Literal["food", "attraction", "activity", "transport", "other"]
+Category = Literal[
+    "food",
+    "attraction",
+    "activity",
+    "transport",
+    "transit",
+    "getting_there",
+    "lodging",
+    "tax",
+    "tip",
+    "fee",
+    "extras",
+    "gifts",
+    "park_fee",
+    "other",
+]
 
 
 class CostSource(StrEnum):
@@ -45,12 +60,21 @@ class CostSource(StrEnum):
     PRICE_RANGE = "price_range"  # provider's per-place price range
     PRICE_BUCKET = "price_bucket"  # provider's $-$$$$ level mapped to money
     TYPE_GUESS = "type_guess"  # our per-category guess, no place data
+    FARE_QUOTE = "fare_quote"  # official transit/park fare or fee
+    RULE = "rule"  # computed from a rules table (sales tax, occupancy tax)
+    SETTING = "setting"  # product default the user can edit (tip %, gifts, extras)
+    USER_ENTERED = "user_entered"  # exact amount the user typed (booked lodging, anchor ticket)
 
 
 # Sources that count as "backed by real data" in plan totals. A price bucket
 # is NOT: the level is observed, but the money amount is our mapping.
 DATA_BACKED_SOURCES: frozenset[CostSource] = frozenset(
-    {CostSource.USER_ACTUAL, CostSource.PRICE_RANGE}
+    {
+        CostSource.USER_ACTUAL,
+        CostSource.PRICE_RANGE,
+        CostSource.FARE_QUOTE,
+        CostSource.USER_ENTERED,
+    }
 )
 
 

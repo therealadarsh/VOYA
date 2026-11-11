@@ -1,0 +1,2000 @@
+{
+ "synthetic": true,
+ "notice": "DEMO DATA: place names, prices, taxes, fares and fees are made up for demos and tests. Replace with cited data before real use.",
+ "version": "demo-2026-11-11",
+ "destinations": [
+  {
+   "id": "new-york",
+   "name": "New York City",
+   "kind": "city",
+   "state": "NY",
+   "tz": "America/New_York",
+   "center": [
+    40.754,
+    -73.984
+   ],
+   "rules": {
+    "sales_tax_pct": "9.0",
+    "occupancy_tax_pct": "15.0",
+    "transit_fare": "3.00",
+    "extras_per_person_day": "8.00",
+    "lodging_night": {
+     "low": "170",
+     "point": "230",
+     "high": "320"
+    },
+    "park_fee_vehicle": "0"
+   },
+   "places": [
+    {
+     "id": "nyc-skydeck",
+     "name": "Midtown Skyline Deck",
+     "category": "attraction",
+     "tags": [
+      "architecture",
+      "views"
+     ],
+     "open": "08:00",
+     "close": "23:00",
+     "duration_min": 75,
+     "rating": 4.6,
+     "reviews": 9000,
+     "price": {
+      "low": "40",
+      "point": "44",
+      "high": "48",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.758,
+     "lng": -73.982
+    },
+    {
+     "id": "nyc-greenway",
+     "name": "Riverside Greenway Walk",
+     "category": "attraction",
+     "tags": [
+      "nature",
+      "views"
+     ],
+     "open": "06:00",
+     "close": "22:00",
+     "duration_min": 60,
+     "rating": 4.7,
+     "reviews": 5200,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.744,
+     "lng": -74.004
+    },
+    {
+     "id": "nyc-artmuseum",
+     "name": "Grand Avenue Art Museum",
+     "category": "attraction",
+     "tags": [
+      "art",
+      "history"
+     ],
+     "open": "10:00",
+     "close": "17:30",
+     "duration_min": 120,
+     "rating": 4.8,
+     "reviews": 15000,
+     "price": {
+      "low": "25",
+      "point": "30",
+      "high": "30",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.779,
+     "lng": -73.964
+    },
+    {
+     "id": "nyc-ferry",
+     "name": "Harbor Ferry Loop",
+     "category": "attraction",
+     "tags": [
+      "views",
+      "nature"
+     ],
+     "open": "07:00",
+     "close": "21:00",
+     "duration_min": 50,
+     "rating": 4.6,
+     "reviews": 7000,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.704,
+     "lng": -73.974
+    },
+    {
+     "id": "nyc-gallery",
+     "name": "Gallery Row Walk",
+     "category": "attraction",
+     "tags": [
+      "art"
+     ],
+     "open": "11:00",
+     "close": "18:00",
+     "duration_min": 60,
+     "rating": 4.5,
+     "reviews": 800,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "type_guess",
+      "confidence": 0.5,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.749,
+     "lng": -74.001
+    },
+    {
+     "id": "nyc-library",
+     "name": "Brownstone Garden Library",
+     "category": "attraction",
+     "tags": [
+      "architecture",
+      "history"
+     ],
+     "open": "09:00",
+     "close": "18:00",
+     "duration_min": 45,
+     "rating": 4.7,
+     "reviews": 310,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "type_guess",
+      "confidence": 0.5,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": true,
+     "evening": false,
+     "lat": 40.762,
+     "lng": -73.987
+    },
+    {
+     "id": "nyc-history",
+     "name": "Old Port History Museum",
+     "category": "attraction",
+     "tags": [
+      "history"
+     ],
+     "open": "10:00",
+     "close": "17:00",
+     "duration_min": 90,
+     "rating": 4.4,
+     "reviews": 2100,
+     "price": {
+      "low": "12",
+      "point": "18",
+      "high": "22",
+      "source": "price_bucket",
+      "confidence": 0.7,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.709,
+     "lng": -73.979
+    },
+    {
+     "id": "nyc-foodtour",
+     "name": "Lower Side Food History Tour",
+     "category": "activity",
+     "tags": [
+      "food",
+      "history"
+     ],
+     "open": "11:00",
+     "close": "16:00",
+     "duration_min": 150,
+     "rating": 4.9,
+     "reviews": 1200,
+     "price": {
+      "low": "45",
+      "point": "55",
+      "high": "60",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.719,
+     "lng": -73.974
+    },
+    {
+     "id": "nyc-comedy",
+     "name": "Basement Comedy Night",
+     "category": "activity",
+     "tags": [
+      "nightlife"
+     ],
+     "open": "19:30",
+     "close": "23:30",
+     "duration_min": 90,
+     "rating": 4.6,
+     "reviews": 1900,
+     "price": {
+      "low": "15",
+      "point": "22",
+      "high": "30",
+      "source": "price_bucket",
+      "confidence": 0.7,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": true,
+     "lat": 40.734,
+     "lng": -73.989
+    },
+    {
+     "id": "nyc-slice",
+     "name": "Corner Slice Counter",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "10:00",
+     "close": "23:00",
+     "duration_min": 25,
+     "rating": 4.5,
+     "reviews": 4000,
+     "price": {
+      "low": "4",
+      "point": "6",
+      "high": "9",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.755,
+     "lng": -73.981
+    },
+    {
+     "id": "nyc-dumpling",
+     "name": "Dumpling House",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "11:00",
+     "close": "21:00",
+     "duration_min": 35,
+     "rating": 4.6,
+     "reviews": 2600,
+     "price": {
+      "low": "7",
+      "point": "10",
+      "high": "14",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.716,
+     "lng": -73.972
+    },
+    {
+     "id": "nyc-diner",
+     "name": "Neighborhood Diner",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "07:00",
+     "close": "22:00",
+     "duration_min": 50,
+     "rating": 4.3,
+     "reviews": 1500,
+     "price": {
+      "low": "15",
+      "point": "20",
+      "high": "26",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.764,
+     "lng": -73.99
+    },
+    {
+     "id": "nyc-foodhall",
+     "name": "Market Hall Food Court",
+     "category": "food",
+     "tags": [
+      "food",
+      "shopping"
+     ],
+     "open": "08:00",
+     "close": "21:00",
+     "duration_min": 40,
+     "rating": 4.5,
+     "reviews": 3300,
+     "price": {
+      "low": "10",
+      "point": "14",
+      "high": "20",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.742,
+     "lng": -74.004
+    },
+    {
+     "id": "nyc-bistro",
+     "name": "Bistro on Ninth",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "12:00",
+     "close": "22:30",
+     "duration_min": 75,
+     "rating": 4.6,
+     "reviews": 1800,
+     "price": {
+      "low": "35",
+      "point": "45",
+      "high": "58",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.76,
+     "lng": -73.994
+    },
+    {
+     "id": "nyc-tasting",
+     "name": "Chef's Tasting Counter",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "17:30",
+     "close": "22:30",
+     "duration_min": 120,
+     "rating": 4.8,
+     "reviews": 900,
+     "price": {
+      "low": "90",
+      "point": "115",
+      "high": "140",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 40.751,
+     "lng": -73.992
+    }
+   ]
+  },
+  {
+   "id": "san-francisco",
+   "name": "San Francisco",
+   "kind": "city",
+   "state": "CA",
+   "tz": "America/Los_Angeles",
+   "center": [
+    37.788,
+    -122.407
+   ],
+   "rules": {
+    "sales_tax_pct": "8.6",
+    "occupancy_tax_pct": "14.0",
+    "transit_fare": "2.75",
+    "extras_per_person_day": "8.00",
+    "lodging_night": {
+     "low": "160",
+     "point": "215",
+     "high": "300"
+    },
+    "park_fee_vehicle": "0"
+   },
+   "places": [
+    {
+     "id": "sf-bridgewalk",
+     "name": "Golden Strait Bridge Walk",
+     "category": "attraction",
+     "tags": [
+      "views",
+      "nature"
+     ],
+     "open": "05:00",
+     "close": "21:00",
+     "duration_min": 90,
+     "rating": 4.8,
+     "reviews": 12000,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.808,
+     "lng": -122.467
+    },
+    {
+     "id": "sf-cablecar",
+     "name": "Heritage Cable Car Ride",
+     "category": "attraction",
+     "tags": [
+      "history",
+      "views"
+     ],
+     "open": "07:00",
+     "close": "22:00",
+     "duration_min": 30,
+     "rating": 4.5,
+     "reviews": 8000,
+     "price": {
+      "low": "8",
+      "point": "8",
+      "high": "8",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.79,
+     "lng": -122.408
+    },
+    {
+     "id": "sf-modernart",
+     "name": "Bayside Modern Art Museum",
+     "category": "attraction",
+     "tags": [
+      "art"
+     ],
+     "open": "10:00",
+     "close": "17:00",
+     "duration_min": 120,
+     "rating": 4.6,
+     "reviews": 9000,
+     "price": {
+      "low": "25",
+      "point": "30",
+      "high": "30",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.786,
+     "lng": -122.401
+    },
+    {
+     "id": "sf-gardens",
+     "name": "Botanical Hill Gardens",
+     "category": "attraction",
+     "tags": [
+      "nature"
+     ],
+     "open": "07:30",
+     "close": "18:00",
+     "duration_min": 75,
+     "rating": 4.7,
+     "reviews": 4300,
+     "price": {
+      "low": "0",
+      "point": "10",
+      "high": "12",
+      "source": "price_bucket",
+      "confidence": 0.7,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.77,
+     "lng": -122.467
+    },
+    {
+     "id": "sf-murals",
+     "name": "Mission Mural Alleys",
+     "category": "attraction",
+     "tags": [
+      "art",
+      "history"
+     ],
+     "open": "09:00",
+     "close": "19:00",
+     "duration_min": 60,
+     "rating": 4.6,
+     "reviews": 350,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "type_guess",
+      "confidence": 0.5,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": true,
+     "evening": false,
+     "lat": 37.758,
+     "lng": -122.407
+    },
+    {
+     "id": "sf-wharf",
+     "name": "Pier Sea Lion Viewing",
+     "category": "attraction",
+     "tags": [
+      "nature",
+      "views"
+     ],
+     "open": "08:00",
+     "close": "20:00",
+     "duration_min": 40,
+     "rating": 4.4,
+     "reviews": 6000,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "type_guess",
+      "confidence": 0.5,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.808,
+     "lng": -122.412
+    },
+    {
+     "id": "sf-science",
+     "name": "Academy of Sciences Hall",
+     "category": "attraction",
+     "tags": [
+      "nature",
+      "family"
+     ],
+     "open": "09:30",
+     "close": "17:00",
+     "duration_min": 150,
+     "rating": 4.7,
+     "reviews": 11000,
+     "price": {
+      "low": "35",
+      "point": "42",
+      "high": "46",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.77,
+     "lng": -122.466
+    },
+    {
+     "id": "sf-alcatraz",
+     "name": "Island Prison Tour",
+     "category": "activity",
+     "tags": [
+      "history"
+     ],
+     "open": "08:45",
+     "close": "18:30",
+     "duration_min": 180,
+     "rating": 4.8,
+     "reviews": 20000,
+     "price": {
+      "low": "45",
+      "point": "48",
+      "high": "52",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.828,
+     "lng": -122.409
+    },
+    {
+     "id": "sf-jazz",
+     "name": "Fillmore Jazz Set",
+     "category": "activity",
+     "tags": [
+      "nightlife"
+     ],
+     "open": "19:30",
+     "close": "23:30",
+     "duration_min": 90,
+     "rating": 4.6,
+     "reviews": 1100,
+     "price": {
+      "low": "20",
+      "point": "28",
+      "high": "35",
+      "source": "price_bucket",
+      "confidence": 0.7,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": true,
+     "lat": 37.782,
+     "lng": -122.433
+    },
+    {
+     "id": "sf-burrito",
+     "name": "Mission Burrito Window",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "10:00",
+     "close": "22:00",
+     "duration_min": 30,
+     "rating": 4.7,
+     "reviews": 5100,
+     "price": {
+      "low": "9",
+      "point": "12",
+      "high": "15",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.758,
+     "lng": -122.405
+    },
+    {
+     "id": "sf-dimsum",
+     "name": "Chinatown Dim Sum Room",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "09:00",
+     "close": "15:00",
+     "duration_min": 50,
+     "rating": 4.5,
+     "reviews": 2400,
+     "price": {
+      "low": "12",
+      "point": "16",
+      "high": "22",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "lunch"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.794,
+     "lng": -122.408
+    },
+    {
+     "id": "sf-ferrymarket",
+     "name": "Ferry Building Market Stalls",
+     "category": "food",
+     "tags": [
+      "food",
+      "shopping"
+     ],
+     "open": "08:00",
+     "close": "20:00",
+     "duration_min": 40,
+     "rating": 4.6,
+     "reviews": 7000,
+     "price": {
+      "low": "12",
+      "point": "16",
+      "high": "24",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.796,
+     "lng": -122.394
+    },
+    {
+     "id": "sf-noodle",
+     "name": "Sunset Noodle Bar",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "11:30",
+     "close": "21:30",
+     "duration_min": 50,
+     "rating": 4.5,
+     "reviews": 1300,
+     "price": {
+      "low": "16",
+      "point": "20",
+      "high": "26",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.768,
+     "lng": -122.457
+    },
+    {
+     "id": "sf-seafood",
+     "name": "Embarcadero Seafood Grill",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "17:00",
+     "close": "22:00",
+     "duration_min": 90,
+     "rating": 4.6,
+     "reviews": 2100,
+     "price": {
+      "low": "45",
+      "point": "60",
+      "high": "80",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.798,
+     "lng": -122.397
+    }
+   ]
+  },
+  {
+   "id": "chicago",
+   "name": "Chicago",
+   "kind": "city",
+   "state": "IL",
+   "tz": "America/Chicago",
+   "center": [
+    41.882,
+    -87.628
+   ],
+   "rules": {
+    "sales_tax_pct": "10.3",
+    "occupancy_tax_pct": "17.0",
+    "transit_fare": "2.50",
+    "extras_per_person_day": "7.00",
+    "lodging_night": {
+     "low": "130",
+     "point": "180",
+     "high": "250"
+    },
+    "park_fee_vehicle": "0"
+   },
+   "places": [
+    {
+     "id": "chi-cultural",
+     "name": "Lakefront Cultural Center",
+     "category": "attraction",
+     "tags": [
+      "architecture",
+      "art"
+     ],
+     "open": "10:00",
+     "close": "19:00",
+     "duration_min": 45,
+     "rating": 4.7,
+     "reviews": 3200,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "price_range",
+      "confidence": 0.9,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": true,
+     "evening": false,
+     "lat": 41.884,
+     "lng": -87.625
+    },
+    {
+     "id": "chi-rivercruise",
+     "name": "River Architecture Cruise",
+     "category": "activity",
+     "tags": [
+      "architecture",
+      "views"
+     ],
+     "open": "10:00",
+     "close": "19:00",
+     "duration_min": 75,
+     "rating": 4.9,
+     "reviews": 25000,
+     "price": {
+      "low": "46",
+      "point": "52",
+      "high": "58",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.888,
+     "lng": -87.632
+    },
+    {
+     "id": "chi-artinst",
+     "name": "Art Institute Galleries",
+     "category": "attraction",
+     "tags": [
+      "art",
+      "history"
+     ],
+     "open": "11:00",
+     "close": "17:00",
+     "duration_min": 150,
+     "rating": 4.8,
+     "reviews": 30000,
+     "price": {
+      "low": "32",
+      "point": "35",
+      "high": "35",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.879,
+     "lng": -87.624
+    },
+    {
+     "id": "chi-bean",
+     "name": "Millennium Plaza Sculpture",
+     "category": "attraction",
+     "tags": [
+      "art",
+      "architecture",
+      "views"
+     ],
+     "open": "06:00",
+     "close": "23:00",
+     "duration_min": 30,
+     "rating": 4.7,
+     "reviews": 40000,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.882,
+     "lng": -87.622
+    },
+    {
+     "id": "chi-lakewalk",
+     "name": "Lakeshore Trail Walk",
+     "category": "attraction",
+     "tags": [
+      "nature",
+      "views"
+     ],
+     "open": "06:00",
+     "close": "22:00",
+     "duration_min": 60,
+     "rating": 4.8,
+     "reviews": 6000,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.897,
+     "lng": -87.618
+    },
+    {
+     "id": "chi-skydeck",
+     "name": "Skyline Glass Ledge",
+     "category": "attraction",
+     "tags": [
+      "architecture",
+      "views"
+     ],
+     "open": "09:00",
+     "close": "22:00",
+     "duration_min": 60,
+     "rating": 4.4,
+     "reviews": 15000,
+     "price": {
+      "low": "30",
+      "point": "36",
+      "high": "42",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.878,
+     "lng": -87.636
+    },
+    {
+     "id": "chi-conservatory",
+     "name": "Garfield Glass Conservatory",
+     "category": "attraction",
+     "tags": [
+      "nature"
+     ],
+     "open": "10:00",
+     "close": "17:00",
+     "duration_min": 75,
+     "rating": 4.8,
+     "reviews": 2800,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "5",
+      "source": "price_bucket",
+      "confidence": 0.7,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": true,
+     "evening": false,
+     "lat": 41.882,
+     "lng": -87.718
+    },
+    {
+     "id": "chi-blues",
+     "name": "South Loop Blues Club",
+     "category": "activity",
+     "tags": [
+      "nightlife"
+     ],
+     "open": "19:00",
+     "close": "23:59",
+     "duration_min": 90,
+     "rating": 4.6,
+     "reviews": 1700,
+     "price": {
+      "low": "15",
+      "point": "20",
+      "high": "25",
+      "source": "price_bucket",
+      "confidence": 0.7,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": true,
+     "lat": 41.87,
+     "lng": -87.63
+    },
+    {
+     "id": "chi-hotdog",
+     "name": "Classic Hot Dog Stand",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "10:30",
+     "close": "22:00",
+     "duration_min": 25,
+     "rating": 4.5,
+     "reviews": 3600,
+     "price": {
+      "low": "6",
+      "point": "8",
+      "high": "11",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.89,
+     "lng": -87.638
+    },
+    {
+     "id": "chi-foodhall",
+     "name": "Loop Food Hall",
+     "category": "food",
+     "tags": [
+      "food",
+      "shopping"
+     ],
+     "open": "08:00",
+     "close": "20:00",
+     "duration_min": 40,
+     "rating": 4.4,
+     "reviews": 2000,
+     "price": {
+      "low": "10",
+      "point": "14",
+      "high": "19",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.883,
+     "lng": -87.631
+    },
+    {
+     "id": "chi-taqueria",
+     "name": "Pilsen Taqueria",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "10:00",
+     "close": "22:00",
+     "duration_min": 40,
+     "rating": 4.7,
+     "reviews": 2500,
+     "price": {
+      "low": "10",
+      "point": "13",
+      "high": "17",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.857,
+     "lng": -87.663
+    },
+    {
+     "id": "chi-deepdish",
+     "name": "Deep Dish Parlor",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "11:00",
+     "close": "22:00",
+     "duration_min": 75,
+     "rating": 4.6,
+     "reviews": 9000,
+     "price": {
+      "low": "22",
+      "point": "28",
+      "high": "36",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.892,
+     "lng": -87.632
+    },
+    {
+     "id": "chi-steak",
+     "name": "Riverside Steakhouse",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "17:00",
+     "close": "23:00",
+     "duration_min": 100,
+     "rating": 4.7,
+     "reviews": 3100,
+     "price": {
+      "low": "70",
+      "point": "90",
+      "high": "120",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.889,
+     "lng": -87.63
+    }
+   ]
+  },
+  {
+   "id": "yosemite",
+   "name": "Yosemite National Park",
+   "kind": "park",
+   "state": "CA",
+   "tz": "America/Los_Angeles",
+   "center": [
+    37.746,
+    -119.594
+   ],
+   "rules": {
+    "sales_tax_pct": "7.3",
+    "occupancy_tax_pct": "12.0",
+    "transit_fare": "0",
+    "extras_per_person_day": "10.00",
+    "lodging_night": {
+     "low": "150",
+     "point": "240",
+     "high": "360"
+    },
+    "park_fee_vehicle": "35.00"
+   },
+   "places": [
+    {
+     "id": "yos-falls",
+     "name": "Lower Falls Loop Trail",
+     "category": "attraction",
+     "tags": [
+      "nature",
+      "views"
+     ],
+     "open": "00:00",
+     "close": "23:59",
+     "duration_min": 75,
+     "rating": 4.9,
+     "reviews": 9000,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.752,
+     "lng": -119.599
+    },
+    {
+     "id": "yos-valleyview",
+     "name": "Valley View Pullout",
+     "category": "attraction",
+     "tags": [
+      "views",
+      "nature"
+     ],
+     "open": "00:00",
+     "close": "23:59",
+     "duration_min": 30,
+     "rating": 4.8,
+     "reviews": 5000,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.721,
+     "lng": -119.654
+    },
+    {
+     "id": "yos-visitor",
+     "name": "Valley Visitor Center",
+     "category": "attraction",
+     "tags": [
+      "history",
+      "nature",
+      "family"
+     ],
+     "open": "09:00",
+     "close": "17:00",
+     "duration_min": 45,
+     "rating": 4.6,
+     "reviews": 3000,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.748,
+     "lng": -119.593
+    },
+    {
+     "id": "yos-museum",
+     "name": "Valley Heritage Museum",
+     "category": "attraction",
+     "tags": [
+      "history",
+      "art"
+     ],
+     "open": "10:00",
+     "close": "16:00",
+     "duration_min": 45,
+     "rating": 4.5,
+     "reviews": 900,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "type_guess",
+      "confidence": 0.5,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": true,
+     "evening": false,
+     "lat": 37.748,
+     "lng": -119.592
+    },
+    {
+     "id": "yos-meadow",
+     "name": "Cook Meadow Boardwalk",
+     "category": "attraction",
+     "tags": [
+      "nature"
+     ],
+     "open": "00:00",
+     "close": "23:59",
+     "duration_min": 40,
+     "rating": 4.7,
+     "reviews": 1400,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.742,
+     "lng": -119.604
+    },
+    {
+     "id": "yos-tour",
+     "name": "Valley Floor Guided Tour",
+     "category": "activity",
+     "tags": [
+      "history",
+      "nature",
+      "views"
+     ],
+     "open": "10:00",
+     "close": "16:00",
+     "duration_min": 120,
+     "rating": 4.6,
+     "reviews": 2100,
+     "price": {
+      "low": "35",
+      "point": "40",
+      "high": "45",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.745,
+     "lng": -119.588
+    },
+    {
+     "id": "yos-ranger",
+     "name": "Evening Ranger Talk",
+     "category": "activity",
+     "tags": [
+      "nature",
+      "family",
+      "history"
+     ],
+     "open": "19:00",
+     "close": "21:00",
+     "duration_min": 60,
+     "rating": 4.8,
+     "reviews": 600,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": true,
+     "lat": 37.746,
+     "lng": -119.59
+    },
+    {
+     "id": "yos-deli",
+     "name": "Village Deli",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "07:00",
+     "close": "20:00",
+     "duration_min": 30,
+     "rating": 4.2,
+     "reviews": 1800,
+     "price": {
+      "low": "10",
+      "point": "14",
+      "high": "18",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.749,
+     "lng": -119.591
+    },
+    {
+     "id": "yos-grill",
+     "name": "Lodge Pizza Deck",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "11:00",
+     "close": "21:00",
+     "duration_min": 50,
+     "rating": 4.3,
+     "reviews": 1500,
+     "price": {
+      "low": "15",
+      "point": "20",
+      "high": "26",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.746,
+     "lng": -119.586
+    },
+    {
+     "id": "yos-diningroom",
+     "name": "Grand Lodge Dining Room",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "17:30",
+     "close": "21:00",
+     "duration_min": 90,
+     "rating": 4.5,
+     "reviews": 2200,
+     "price": {
+      "low": "45",
+      "point": "60",
+      "high": "80",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 37.747,
+     "lng": -119.584
+    }
+   ]
+  },
+  {
+   "id": "indiana-dunes",
+   "name": "Indiana Dunes National Park",
+   "kind": "park",
+   "state": "IN",
+   "tz": "America/Chicago",
+   "center": [
+    41.653,
+    -87.052
+   ],
+   "rules": {
+    "sales_tax_pct": "7.0",
+    "occupancy_tax_pct": "10.0",
+    "transit_fare": "0",
+    "extras_per_person_day": "8.00",
+    "lodging_night": {
+     "low": "110",
+     "point": "150",
+     "high": "210"
+    },
+    "park_fee_vehicle": "25.00"
+   },
+   "places": [
+    {
+     "id": "dun-beach",
+     "name": "West Beach Dune Trail",
+     "category": "attraction",
+     "tags": [
+      "nature",
+      "views"
+     ],
+     "open": "06:00",
+     "close": "23:00",
+     "duration_min": 90,
+     "rating": 4.7,
+     "reviews": 3400,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.66,
+     "lng": -87.132
+    },
+    {
+     "id": "dun-succession",
+     "name": "Dune Succession Climb",
+     "category": "attraction",
+     "tags": [
+      "nature"
+     ],
+     "open": "06:00",
+     "close": "23:00",
+     "duration_min": 60,
+     "rating": 4.8,
+     "reviews": 1600,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.661,
+     "lng": -87.13
+    },
+    {
+     "id": "dun-visitor",
+     "name": "Dunes Visitor Center",
+     "category": "attraction",
+     "tags": [
+      "history",
+      "family",
+      "nature"
+     ],
+     "open": "09:00",
+     "close": "17:00",
+     "duration_min": 40,
+     "rating": 4.6,
+     "reviews": 1300,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.633,
+     "lng": -87.022
+    },
+    {
+     "id": "dun-farm",
+     "name": "Heritage Homestead Farm",
+     "category": "attraction",
+     "tags": [
+      "history",
+      "family"
+     ],
+     "open": "10:00",
+     "close": "16:00",
+     "duration_min": 60,
+     "rating": 4.6,
+     "reviews": 500,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "type_guess",
+      "confidence": 0.5,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": true,
+     "evening": false,
+     "lat": 41.645,
+     "lng": -87.012
+    },
+    {
+     "id": "dun-bog",
+     "name": "Cowles Bog Loop",
+     "category": "attraction",
+     "tags": [
+      "nature"
+     ],
+     "open": "06:00",
+     "close": "23:00",
+     "duration_min": 90,
+     "rating": 4.6,
+     "reviews": 700,
+     "price": {
+      "low": "0",
+      "point": "0",
+      "high": "0",
+      "source": "fare_quote",
+      "confidence": 0.95,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.657,
+     "lng": -87.042
+    },
+    {
+     "id": "dun-kayak",
+     "name": "Lake Kayak Rental",
+     "category": "activity",
+     "tags": [
+      "nature"
+     ],
+     "open": "10:00",
+     "close": "18:00",
+     "duration_min": 90,
+     "rating": 4.5,
+     "reviews": 300,
+     "price": {
+      "low": "30",
+      "point": "40",
+      "high": "50",
+      "source": "price_bucket",
+      "confidence": 0.7,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.663,
+     "lng": -87.102
+    },
+    {
+     "id": "dun-stars",
+     "name": "Dunes Night Sky Walk",
+     "category": "activity",
+     "tags": [
+      "nature",
+      "family"
+     ],
+     "open": "20:00",
+     "close": "22:30",
+     "duration_min": 75,
+     "rating": 4.7,
+     "reviews": 250,
+     "price": {
+      "low": "0",
+      "point": "5",
+      "high": "10",
+      "source": "type_guess",
+      "confidence": 0.5,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [],
+     "hidden_gem": false,
+     "evening": true,
+     "lat": 41.653,
+     "lng": -87.052
+    },
+    {
+     "id": "dun-cafe",
+     "name": "Beach Pavilion Cafe",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "09:00",
+     "close": "19:00",
+     "duration_min": 35,
+     "rating": 4.2,
+     "reviews": 700,
+     "price": {
+      "low": "10",
+      "point": "14",
+      "high": "18",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": false,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.662,
+     "lng": -87.092
+    },
+    {
+     "id": "dun-tavern",
+     "name": "Lakeside Tavern",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "11:00",
+     "close": "22:00",
+     "duration_min": 70,
+     "rating": 4.4,
+     "reviews": 1100,
+     "price": {
+      "low": "18",
+      "point": "24",
+      "high": "32",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": true,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.643,
+     "lng": -87.032
+    },
+    {
+     "id": "dun-picnic",
+     "name": "Town Market Picnic Deli",
+     "category": "food",
+     "tags": [
+      "food"
+     ],
+     "open": "07:00",
+     "close": "20:00",
+     "duration_min": 25,
+     "rating": 4.5,
+     "reviews": 400,
+     "price": {
+      "low": "8",
+      "point": "11",
+      "high": "14",
+      "source": "price_range",
+      "confidence": 0.8,
+      "unit": "person"
+     },
+     "indoor": true,
+     "sit_down": false,
+     "meals": [
+      "lunch",
+      "dinner"
+     ],
+     "hidden_gem": false,
+     "evening": false,
+     "lat": 41.638,
+     "lng": -87.017
+    }
+   ]
+  }
+ ],
+ "routes": [
+  {
+   "to": "yosemite",
+   "drive_km": 310,
+   "drive_min": 270,
+   "train_fare": null,
+   "train_min": null,
+   "parking_per_day": "0",
+   "from": "san-francisco"
+  },
+  {
+   "to": "indiana-dunes",
+   "drive_km": 80,
+   "drive_min": 75,
+   "train_fare": "9.00",
+   "train_min": 90,
+   "parking_per_day": "0",
+   "from": "chicago"
+  },
+  {
+   "to": "chicago",
+   "drive_km": 1270,
+   "drive_min": 750,
+   "train_fare": "110.00",
+   "train_min": 1140,
+   "parking_per_day": "35",
+   "from": "new-york"
+  }
+ ],
+ "fuel_price_per_gallon": {
+  "CA": "5.20",
+  "IL": "3.90",
+  "NY": "3.80",
+  "IN": "3.60"
+ },
+ "default_mpg": 28
+}

@@ -12,3 +12,15 @@ One line per major choice and why. Newest at the bottom.
 - **Plan totals report `high_total` as a sum of line highs**: simple and conservative; it is a bound, not a joint interval, and is labeled so.
 - **Mixed-currency plans are rejected by `summarize`** until Phase 2 adds FX: silently adding yen to dollars is worse than an error.
 - **Bucket/type point values reused from Daytrip's `estimateCost`** (MIT, credited in `THIRD_PARTY_NOTICES.md`); VOYA's bands and confidences are initial priors to be calibrated in Phases 5–6.
+- **MVP runs on a synthetic demo catalog** (`synthetic: true`, made-up names, "Demo prices" banner): real cited data needs API keys and a data budget; inventing real-looking prices for real places would mislead.
+- **Hard limit = max(sum of highs, 97th percentile); wiggle room = 90th percentile**: low-confidence lines have tails past their stated high, so a pure sum of highs could be looser than wiggle room.
+- **Lodging estimates are a rule-based planning range at 80% confidence**: the traveller chooses a place within the range; treating it as a 50% guess made every multi-day plan infeasible.
+- **Restaurants may repeat on different days, sights never repeat**: small catalogs otherwise force expensive meals late in a trip.
+- **Worth-it upgrades must add at least $5 and still fit**: smaller deltas are swaps, not upgrades; ranked by interest match, rating gain and popularity.
+- **Plans are stored as requests and re-planned deterministically**, with a version history for undo; proposals are single-use and bound to their content and plan version.
+- **The AI only picks a tool; code computes every number**: works without any model (built-in router), and model output is schema-validated.
+- **Runtime AI via OpenRouter behind one `LLMClient` interface**, default model `openrouter/auto`, configurable per role; caps $0.15/task, $1.50/user/day, $30/month.
+- **SQLite for the MVP**, same table shapes as the planned Postgres schema.
+- **Plain HTML/CSS/JS frontend with no build step** for speed; a React/Vite rewrite can come once the UX settles.
+- **Sign-in returns a token directly (dev mode)**; production sends an email magic link.
+- **Memory is opt-in per tap** and limited to interests, pace, tip %, firmness and adults; never income or locations.

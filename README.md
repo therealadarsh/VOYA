@@ -1,41 +1,47 @@
 # VOYA
 
-A budget-first trip planner. Every cost estimate carries a range, a source and
-a stated confidence, and is always labeled as an estimate.
+Plan a trip (one day or up to 30) to your budget, door to door. Every cost
+carries a range, a source and a stated confidence, and is always labeled as
+an estimate. During the trip, VOYA tracks what you spend and helps you get
+back under budget.
 
-## Status
+> **Demo data.** The bundled catalog (`src/voya/catalog/demo.json`) is
+> synthetic: made-up place names, prices, taxes and fares for 3 cities and
+> 2 national parks. The app shows a "Demo prices" banner while it's in use.
+> Real, cited data replaces it before any real use.
 
-| Part | Status |
-|---|---|
-| Reference notes (`docs/daytrip-notes.md`) | done |
-| Cost model (`src/voya/cost/`) | done, 40 tests |
-| MVP | in progress |
-
-## Setup
+## Run it
 
 ```sh
-uv sync                        # Python 3.12 venv + deps
-uv run pytest                  # tests
-./scripts/fetch_reference.sh   # optional: read-only reference project at a pinned commit
+uv sync                                   # Python 3.12 + dependencies
+make run                                  # http://localhost:8000
+make test                                 # 84 tests, no network, no AI tokens
 ```
 
-Copy `.env.example` to `.env` for local configuration. `.env` is gitignored;
-never commit keys.
+Optional: set `OPENROUTER_API_KEY` (and `VOYA_LLM_MODEL_HELPER`) in `.env` to
+let a model choose the helper's tools. Without a key, a built-in router does
+the same job. Either way, deterministic code computes every number.
 
-## Cost model (`src/voya/cost/`)
+## What works
 
-A `CostLine` has:
-- `amount` (point estimate), plus `low` and `high`;
-- `currency`;
-- `source`: `user_actual`, `price_range`, `price_bucket` or `type_guess`;
-- `observed_at` (timezone-aware);
-- `confidence`: the stated probability that the real price falls in
-  `[low, high]`.
+| Feature | Where |
+|---|---|
+| **Plan a trip** with honest ranges, hidden costs (sales tax, tips, transit, extras), a gifts & souvenirs allowance, multi-day lodging, and kids in the party | `planner.py`, `POST /v1/plans` |
+| **Budget fit:** "hard limit" (fits even if prices run high) or "some wiggle room" (fits in about 9 of 10 simulated price scenarios) | `planner.evaluate`, `uncertainty.py` |
+| **Savings first, then "Worth it?":** up to 3 upgrades that still fit | `planner.worth_it` |
+| **Day trip / plan around a fixed activity** (e.g. a ball game) | `PlanRequest.anchor`, `getting_there` |
+| **Getting there** as an optional add-on (drive or train) | `planner.getting_there` |
+| **Discover:** "What can my budget do from here?" | `discover.py`, `POST /v1/discover` |
+| **Track spend** with live status and ways to get back under | `tracking.py`, `/v1/plans/{id}/spend`, `/budget` |
+| **Ask VOYA:** what now / cheaper / swap / ideas / why so expensive | `agent.py`, `/v1/plans/{id}/helper` |
+| **Accounts:** plan without one; sign in to save; 18+; export / delete; opt-in memory | `api.py`, `store.py` |
+| **Web app:** mobile-first, light and dark, no build step | `src/voya/web/` |
 
-Money is `Decimal`, rounded to cents. `summarize(lines)` reports point, low and
-high totals, the share of spend backed by real price data, and breakdowns by
-source and category.
+## Docs
 
-## For AI coding tools
-
-See [`AGENTS.md`](AGENTS.md).
+- [`docs/CONCEPT_MAP.md`](docs/CONCEPT_MAP.md): where each agent-engineering
+  concept lives in the code, the test that proves it, and a hands-on "try it".
+- [`docs/MVP_TEST_GUIDE.md`](docs/MVP_TEST_GUIDE.md): what to try, what's
+  intentionally missing.
+- [`DECISIONS.md`](DECISIONS.md): one line per design choice.
+- [`AGENTS.md`](AGENTS.md): rules for AI coding tools working on this repo.
