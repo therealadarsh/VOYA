@@ -1,0 +1,16 @@
+{
+  "synthetic": false,
+  "source": "National Park Service — Indiana Dunes National Park",
+  "url": "https://www.nps.gov/indu/planyourvisit/fees.htm",
+  "observed_at": "2026-11-11T12:00:00+00:00",
+  "quote": "No entrance fee to access the national park lands (fees may apply at affiliated state park areas).",
+  "fees": [
+    {
+      "park_code": "INDU",
+      "park_name": "Indiana Dunes National Park",
+      "fee_type": "entrance",
+      "amount_usd": "0.00",
+      "unit": "none"
+    }
+  ]
+}

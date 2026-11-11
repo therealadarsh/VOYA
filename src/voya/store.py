@@ -90,7 +90,10 @@ class Store:
         pid = new_id("pln")
         with self.tx() as c:
             c.execute("INSERT INTO plans VALUES (?,?,?,?)", (pid, owner, _now(), _now()))
-            c.execute("INSERT INTO plan_versions VALUES (?,?,?,?,?)", (pid, 1, request_json, "created", _now()))
+            c.execute(
+                "INSERT INTO plan_versions VALUES (?,?,?,?,?)",
+                (pid, 1, request_json, "created", _now()),
+            )
         return pid
 
     def plan(self, pid: str) -> dict | None:
@@ -102,17 +105,29 @@ class Store:
                 "SELECT * FROM plan_versions WHERE plan_id=? ORDER BY version DESC LIMIT 1", (pid,)
             ).fetchone()
             c.execute("UPDATE plans SET opened_at=? WHERE id=?", (_now(), pid))
-        return {"id": pid, "owner": row["owner"], "version": ver["version"], "request_json": ver["request_json"]}
+        return {
+            "id": pid,
+            "owner": row["owner"],
+            "version": ver["version"],
+            "request_json": ver["request_json"],
+        }
 
     def add_version(self, pid: str, request_json: str, reason: str) -> int:
         with self.tx() as c:
-            v = c.execute("SELECT MAX(version) FROM plan_versions WHERE plan_id=?", (pid,)).fetchone()[0]
-            c.execute("INSERT INTO plan_versions VALUES (?,?,?,?,?)", (pid, v + 1, request_json, reason, _now()))
+            v = c.execute(
+                "SELECT MAX(version) FROM plan_versions WHERE plan_id=?", (pid,)
+            ).fetchone()[0]
+            c.execute(
+                "INSERT INTO plan_versions VALUES (?,?,?,?,?)",
+                (pid, v + 1, request_json, reason, _now()),
+            )
         return v + 1
 
     def undo(self, pid: str) -> bool:
         with self.tx() as c:
-            v = c.execute("SELECT MAX(version) FROM plan_versions WHERE plan_id=?", (pid,)).fetchone()[0]
+            v = c.execute(
+                "SELECT MAX(version) FROM plan_versions WHERE plan_id=?", (pid,)
+            ).fetchone()[0]
             if not v or v <= 1:
                 return False
             c.execute("DELETE FROM plan_versions WHERE plan_id=? AND version=?", (pid, v))
@@ -120,19 +135,29 @@ class Store:
 
     def claim(self, pid: str, owner: str) -> bool:
         with self.tx() as c:
-            cur = c.execute("UPDATE plans SET owner=? WHERE id=? AND (owner IS NULL OR owner=?)", (owner, pid, owner))
+            cur = c.execute(
+                "UPDATE plans SET owner=? WHERE id=? AND (owner IS NULL OR owner=?)",
+                (owner, pid, owner),
+            )
         return cur.rowcount == 1
 
     def plans_for(self, owner: str) -> list[str]:
         with self.tx() as c:
-            return [r["id"] for r in c.execute("SELECT id FROM plans WHERE owner=? ORDER BY created_at DESC", (owner,))]
+            return [
+                r["id"]
+                for r in c.execute(
+                    "SELECT id FROM plans WHERE owner=? ORDER BY created_at DESC", (owner,)
+                )
+            ]
 
     # -- users ---------------------------------------------------------------
     def create_user(self, email: str, adult: bool) -> str:
         token = secrets.token_urlsafe(24)
         with self.tx() as c:
-            c.execute("INSERT INTO users VALUES (?,?,?,?)",
-                      (_hash(token), _hash(email.strip().lower()), int(adult), _now()))
+            c.execute(
+                "INSERT INTO users VALUES (?,?,?,?)",
+                (_hash(token), _hash(email.strip().lower()), int(adult), _now()),
+            )
         return token
 
     def owner_for(self, token: str | None) -> str | None:
@@ -156,50 +181,108 @@ class Store:
     # -- preferences (memory) --------------------------------------------------
     def set_pref(self, owner: str, key: str, value: str, source: str) -> None:
         with self.tx() as c:
-            c.execute("INSERT OR REPLACE INTO preferences VALUES (?,?,?,?,?)", (owner, key, value, source, _now()))
+            c.execute(
+                "INSERT OR REPLACE INTO preferences VALUES (?,?,?,?,?)",
+                (owner, key, value, source, _now()),
+            )
 
     def prefs(self, owner: str) -> list[dict]:
         with self.tx() as c:
-            return [dict(r) for r in c.execute("SELECT key, value, source, updated_at FROM preferences WHERE owner=?", (owner,))]
+            return [
+                dict(r)
+                for r in c.execute(
+                    "SELECT key, value, source, updated_at FROM preferences WHERE owner=?", (owner,)
+                )
+            ]
 
     def forget_pref(self, owner: str, key: str) -> None:
         with self.tx() as c:
             c.execute("DELETE FROM preferences WHERE owner=? AND key=?", (owner, key))
 
     # -- spends --------------------------------------------------------------
-    def add_spend(self, pid: str, amount: Decimal, category: str, line_id: str | None,
-                  note: str | None, day: int | None, idem_key: str) -> tuple[dict, bool]:
+    def add_spend(
+        self,
+        pid: str,
+        amount: Decimal,
+        category: str,
+        line_id: str | None,
+        note: str | None,
+        day: int | None,
+        idem_key: str,
+    ) -> tuple[dict, bool]:
         with self.tx() as c:
-            row = c.execute("SELECT * FROM spends WHERE plan_id=? AND idem_key=?", (pid, idem_key)).fetchone()
+            row = c.execute(
+                "SELECT * FROM spends WHERE plan_id=? AND idem_key=?", (pid, idem_key)
+            ).fetchone()
             if row:
                 return dict(row), False
             sid = new_id("spd")
-            c.execute("INSERT INTO spends VALUES (?,?,?,?,?,?,?,?,?)",
-                      (sid, pid, str(amount), category, line_id, (note or "")[:120], day, idem_key, _now()))
+            c.execute(
+                "INSERT INTO spends VALUES (?,?,?,?,?,?,?,?,?)",
+                (
+                    sid,
+                    pid,
+                    str(amount),
+                    category,
+                    line_id,
+                    (note or "")[:120],
+                    day,
+                    idem_key,
+                    _now(),
+                ),
+            )
             return dict(c.execute("SELECT * FROM spends WHERE id=?", (sid,)).fetchone()), True
 
     def spends(self, pid: str) -> list[dict]:
         with self.tx() as c:
-            return [dict(r) for r in c.execute("SELECT * FROM spends WHERE plan_id=? ORDER BY created_at", (pid,))]
+            return [
+                dict(r)
+                for r in c.execute(
+                    "SELECT * FROM spends WHERE plan_id=? ORDER BY created_at", (pid,)
+                )
+            ]
 
     def delete_spend(self, pid: str, sid: str) -> bool:
         with self.tx() as c:
-            return c.execute("DELETE FROM spends WHERE plan_id=? AND id=?", (pid, sid)).rowcount == 1
+            return (
+                c.execute("DELETE FROM spends WHERE plan_id=? AND id=?", (pid, sid)).rowcount == 1
+            )
 
     # -- proposals -------------------------------------------------------------
-    def add_proposal(self, pid: str, base_version: int, request_json: str, summary: str,
-                     delta: Decimal, raises: bool) -> tuple[str, str]:
+    def add_proposal(
+        self,
+        pid: str,
+        base_version: int,
+        request_json: str,
+        summary: str,
+        delta: Decimal,
+        raises: bool,
+    ) -> tuple[str, str]:
         prop_id, token = new_id("prp"), secrets.token_urlsafe(16)
         bound = _hash(token + request_json)
         with self.tx() as c:
-            c.execute("INSERT INTO proposals VALUES (?,?,?,?,?,?,?,?,0,?)",
-                      (prop_id, pid, base_version, request_json, summary, str(delta), int(raises), bound, _now()))
+            c.execute(
+                "INSERT INTO proposals VALUES (?,?,?,?,?,?,?,?,0,?)",
+                (
+                    prop_id,
+                    pid,
+                    base_version,
+                    request_json,
+                    summary,
+                    str(delta),
+                    int(raises),
+                    bound,
+                    _now(),
+                ),
+            )
         return prop_id, token
 
     def take_proposal(self, pid: str, prop_id: str, token: str) -> dict | None:
         """Single-use: returns the proposal once if the token matches its content."""
         with self.tx() as c:
-            row = c.execute("SELECT * FROM proposals WHERE id=? AND plan_id=?", (prop_id, pid)).fetchone()
+            row = c.execute(
+                "SELECT * FROM proposals WHERE id=? AND plan_id=?", (prop_id, pid)
+            ).fetchone()
             if not row or row["used"] or _hash(token + row["request_json"]) != row["token_hash"]:
                 return None
             c.execute("UPDATE proposals SET used=1 WHERE id=?", (prop_id,))

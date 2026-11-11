@@ -1,0 +1,21 @@
+{
+  "synthetic": false,
+  "source": "Chicago Transit Authority — Fare Information",
+  "url": "https://www.transitchicago.com/fares/",
+  "observed_at": "2026-11-11T12:00:00+00:00",
+  "quote": "'L' train fare (regular, full) $2.50 effective February 20, 2023.",
+  "fares": [
+    {
+      "agency": "CTA",
+      "mode": "rail",
+      "full_fare_usd": "2.50",
+      "label": "L train regular"
+    },
+    {
+      "agency": "CTA",
+      "mode": "bus",
+      "full_fare_usd": "2.25",
+      "label": "Bus regular"
+    }
+  ]
+}

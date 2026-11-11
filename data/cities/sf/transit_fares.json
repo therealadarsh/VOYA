@@ -1,0 +1,21 @@
+{
+  "synthetic": false,
+  "source": "San Francisco Municipal Transportation Agency — Fares",
+  "url": "https://www.sfmta.com/getting-around/muni/fares",
+  "observed_at": "2026-11-11T12:00:00+00:00",
+  "quote": "Muni single-ride fare (Clipper/card): planning value $2.50; confirm current fare on sfmta.com.",
+  "fares": [
+    {
+      "agency": "SFMTA",
+      "mode": "bus_rail",
+      "full_fare_usd": "2.50",
+      "label": "Muni single ride"
+    },
+    {
+      "agency": "BART",
+      "mode": "rail",
+      "full_fare_usd": "2.35",
+      "label": "BART minimum fare (est. entry; use quote_fare for trip)"
+    }
+  ]
+}

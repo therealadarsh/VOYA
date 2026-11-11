@@ -258,8 +258,10 @@ def choose(req: PlanRequest, dest: Destination) -> list[Pick]:
                     pick.place, pick.locked = p, True
             if pick.place is None:
                 cands = [
-                    p for p in dest.places
-                    if p.id not in excluded and not _taken(p, day, so_far)
+                    p
+                    for p in dest.places
+                    if p.id not in excluded
+                    and not _taken(p, day, so_far)
                     and _slot_fits(p, kind, time, req.raining)
                 ]
                 if cands:
@@ -279,8 +281,12 @@ def choose(req: PlanRequest, dest: Destination) -> list[Pick]:
 
 
 def _enforce_gem(
-    day: list[Pick], earlier: list[Pick], dest: Destination, excluded: set[str],
-    interests: set[str], raining: bool,
+    day: list[Pick],
+    earlier: list[Pick],
+    dest: Destination,
+    excluded: set[str],
+    interests: set[str],
+    raining: bool,
 ) -> None:
     sights = [p for p in day if p.kind == "sight" and p.place]
     if not sights or any(p.place and p.place.hidden_gem for p in sights):
@@ -289,8 +295,10 @@ def _enforce_gem(
         if pick.locked:
             continue
         gems = [
-            g for g in dest.places
-            if g.hidden_gem and g.id not in excluded
+            g
+            for g in dest.places
+            if g.hidden_gem
+            and g.id not in excluded
             and not _taken(g, pick.day, earlier + day, skip=pick)
             and _slot_fits(g, "sight", pick.time, raining)
         ]
@@ -335,16 +343,27 @@ def _derived(parent: CostLine, rate: Decimal, label: str, cat: str, src: CostSou
     )
 
 
-def _exact(label: str, cat: str, amount: Decimal, src: CostSource, obs: datetime, conf: float = 1.0) -> CostLine:
+def _exact(
+    label: str, cat: str, amount: Decimal, src: CostSource, obs: datetime, conf: float = 1.0
+) -> CostLine:
     if src is CostSource.USER_ACTUAL:
         return CostLine.actual(label, cat, amount, "USD", obs)  # type: ignore[arg-type]
     return CostLine(
-        label=label, category=cat, amount=amount, low=amount, high=amount,  # type: ignore[arg-type]
-        currency="USD", source=src, observed_at=obs, confidence=conf,
+        label=label,
+        category=cat,
+        amount=amount,
+        low=amount,
+        high=amount,  # type: ignore[arg-type]
+        currency="USD",
+        source=src,
+        observed_at=obs,
+        confidence=conf,
     )
 
 
-def getting_there(req: PlanRequest, cat: Catalog, dest: Destination) -> tuple[dict | None, CostLine | None]:
+def getting_there(
+    req: PlanRequest, cat: Catalog, dest: Destination
+) -> tuple[dict | None, CostLine | None]:
     g = req.getting_there
     if not g.from_id:
         return None, None
@@ -355,7 +374,9 @@ def getting_there(req: PlanRequest, cat: Catalog, dest: Destination) -> tuple[di
     origin = cat.destination(g.from_id)
     if g.mode == "train" and route.train_fare is not None:
         amount = route.train_fare * req.party.size * 2
-        line = _exact("Train there and back", "getting_there", amount, CostSource.FARE_QUOTE, obs, 0.95)
+        line = _exact(
+            "Train there and back", "getting_there", amount, CostSource.FARE_QUOTE, obs, 0.95
+        )
         minutes = route.train_min
     else:
         state = origin.state if origin else dest.state
@@ -364,16 +385,27 @@ def getting_there(req: PlanRequest, cat: Catalog, dest: Destination) -> tuple[di
         vehicles = math.ceil(req.party.size / 5)
         amount = gallons * fuel_price * vehicles + route.parking_per_day * req.days * vehicles
         line = CostLine(
-            label="Drive there and back (fuel, parking)", category="getting_there",
-            amount=amount, low=amount * D("0.85"), high=amount * D("1.25"),
-            currency="USD", source=CostSource.RULE, observed_at=obs, confidence=0.7,
+            label="Drive there and back (fuel, parking)",
+            category="getting_there",
+            amount=amount,
+            low=amount * D("0.85"),
+            high=amount * D("1.25"),
+            currency="USD",
+            source=CostSource.RULE,
+            observed_at=obs,
+            confidence=0.7,
         )
         minutes = route.drive_min
     info = {
-        "available": True, "mode": g.mode if (g.mode == "train" and route.train_fare) else "drive",
-        "est": str(line.amount), "low": str(line.low), "high": str(line.high),
-        "minutes_one_way": minutes, "source": line.source.value,
-        "included": g.include_in_total, "label": f"est. ${line.amount:,.0f} to get there and back",
+        "available": True,
+        "mode": g.mode if (g.mode == "train" and route.train_fare) else "drive",
+        "est": str(line.amount),
+        "low": str(line.low),
+        "high": str(line.high),
+        "minutes_one_way": minutes,
+        "source": line.source.value,
+        "included": g.include_in_total,
+        "label": f"est. ${line.amount:,.0f} to get there and back",
     }
     return info, line
 
@@ -390,7 +422,9 @@ def price(req: PlanRequest, picks: list[Pick], dest: Destination, cat: Catalog) 
         for pick in [p for p in picks if p.day == day]:
             if pick.kind == "anchor" and req.anchor:
                 loc = _anchor_loc(req, dest)
-                cost = _exact(req.anchor.title, "activity", req.anchor.cost, CostSource.USER_ENTERED, obs)
+                cost = _exact(
+                    req.anchor.title, "activity", req.anchor.cost, CostSource.USER_ENTERED, obs
+                )
                 lines.append(PlanLine(pick.slot_id, day, "anchor", cost))
             elif pick.place:
                 loc = (pick.place.lat, pick.place.lng)
@@ -398,70 +432,165 @@ def price(req: PlanRequest, picks: list[Pick], dest: Destination, cat: Catalog) 
                 lines.append(PlanLine(pick.slot_id, day, "place", cost))
                 if pick.place.category == "food" and rules.sales_tax_pct > 0:
                     rate = rules.sales_tax_pct / 100
-                    lines.append(PlanLine(
-                        f"{pick.slot_id}-tax", day, "tax",
-                        _derived(cost, rate, f"est. sales tax ({rules.sales_tax_pct}%)", "tax", CostSource.RULE),
-                        parent_id=pick.slot_id, rate=float(rate)))
+                    lines.append(
+                        PlanLine(
+                            f"{pick.slot_id}-tax",
+                            day,
+                            "tax",
+                            _derived(
+                                cost,
+                                rate,
+                                f"est. sales tax ({rules.sales_tax_pct}%)",
+                                "tax",
+                                CostSource.RULE,
+                            ),
+                            parent_id=pick.slot_id,
+                            rate=float(rate),
+                        )
+                    )
                 if pick.place.sit_down and req.tip_pct > 0:
                     rate = req.tip_pct / 100
-                    lines.append(PlanLine(
-                        f"{pick.slot_id}-tip", day, "tip",
-                        _derived(cost, rate, f"est. tip ({req.tip_pct}%)", "tip", CostSource.SETTING),
-                        parent_id=pick.slot_id, rate=float(rate)))
+                    lines.append(
+                        PlanLine(
+                            f"{pick.slot_id}-tip",
+                            day,
+                            "tip",
+                            _derived(
+                                cost, rate, f"est. tip ({req.tip_pct}%)", "tip", CostSource.SETTING
+                            ),
+                            parent_id=pick.slot_id,
+                            rate=float(rate),
+                        )
+                    )
             else:
                 continue
-            if prev_loc is not None and rules.transit_fare > 0 and haversine_km(prev_loc, loc) > WALK_KM:
+            if (
+                prev_loc is not None
+                and rules.transit_fare > 0
+                and haversine_km(prev_loc, loc) > WALK_KM
+            ):
                 legs += 1
                 fare = rules.transit_fare * size
-                lines.append(PlanLine(
-                    f"d{day}-t{legs}", day, "transit",
-                    _exact(f"Transit to {pick.place.name if pick.place else req.anchor.title if req.anchor else 'next stop'}",
-                           "transit", fare, CostSource.FARE_QUOTE, obs, 0.95)))
+                lines.append(
+                    PlanLine(
+                        f"d{day}-t{legs}",
+                        day,
+                        "transit",
+                        _exact(
+                            f"Transit to {pick.place.name if pick.place else req.anchor.title if req.anchor else 'next stop'}",
+                            "transit",
+                            fare,
+                            CostSource.FARE_QUOTE,
+                            obs,
+                            0.95,
+                        ),
+                    )
+                )
             prev, prev_loc = pick, loc
         if rules.extras_per_person_day > 0:
-            lines.append(PlanLine(
-                f"d{day}-extras", day, "extras",
-                _exact("Water, snacks, lockers (est.)", "extras", rules.extras_per_person_day * size,
-                       CostSource.SETTING, obs)))
+            lines.append(
+                PlanLine(
+                    f"d{day}-extras",
+                    day,
+                    "extras",
+                    _exact(
+                        "Water, snacks, lockers (est.)",
+                        "extras",
+                        rules.extras_per_person_day * size,
+                        CostSource.SETTING,
+                        obs,
+                    ),
+                )
+            )
     if rules.park_fee_vehicle > 0:
         vehicles = math.ceil(size / 5)
-        lines.append(PlanLine("park-fee", 0, "park_fee", _exact(
-            f"Park entrance ({vehicles} vehicle{'s' if vehicles > 1 else ''})", "park_fee",
-            rules.park_fee_vehicle * vehicles, CostSource.FARE_QUOTE, obs, 0.95)))
+        lines.append(
+            PlanLine(
+                "park-fee",
+                0,
+                "park_fee",
+                _exact(
+                    f"Park entrance ({vehicles} vehicle{'s' if vehicles > 1 else ''})",
+                    "park_fee",
+                    rules.park_fee_vehicle * vehicles,
+                    CostSource.FARE_QUOTE,
+                    obs,
+                    0.95,
+                ),
+            )
+        )
     nights = req.days - 1
     status = req.lodging.status
     if status == "auto":
         status = "estimate" if nights > 0 else "none"
     if nights > 0 and status == "booked" and req.lodging.amount is not None:
-        lines.append(PlanLine("lodging", None, "lodging", _exact(
-            "Lodging (booked)", "lodging", req.lodging.amount, CostSource.USER_ENTERED, obs)))
+        lines.append(
+            PlanLine(
+                "lodging",
+                None,
+                "lodging",
+                _exact(
+                    "Lodging (booked)", "lodging", req.lodging.amount, CostSource.USER_ENTERED, obs
+                ),
+            )
+        )
     elif nights > 0 and status == "estimate":
         rooms = math.ceil(size / 4)
         n = D(nights * rooms)
         ln = rules.lodging_night
         lodge = CostLine(
-            label=f"Lodging estimate ({nights} night{'s' if nights > 1 else ''})", category="lodging",
-            amount=ln.point * n, low=ln.low * n, high=ln.high * n, currency="USD",
+            label=f"Lodging estimate ({nights} night{'s' if nights > 1 else ''})",
+            category="lodging",
+            amount=ln.point * n,
+            low=ln.low * n,
+            high=ln.high * n,
+            currency="USD",
             # A planning range for a place the traveller will choose, not a random
             # price: the range comes from the city's lodging rule at 80% confidence.
-            source=CostSource.RULE, observed_at=obs, confidence=0.8)
+            source=CostSource.RULE,
+            observed_at=obs,
+            confidence=0.8,
+        )
         lines.append(PlanLine("lodging", None, "lodging", lodge))
         if rules.occupancy_tax_pct > 0:
             rate = rules.occupancy_tax_pct / 100
-            lines.append(PlanLine("lodging-tax", None, "tax", _derived(
-                lodge, rate, f"est. lodging tax ({rules.occupancy_tax_pct}%)", "tax", CostSource.RULE),
-                parent_id="lodging", rate=float(rate)))
+            lines.append(
+                PlanLine(
+                    "lodging-tax",
+                    None,
+                    "tax",
+                    _derived(
+                        lodge,
+                        rate,
+                        f"est. lodging tax ({rules.occupancy_tax_pct}%)",
+                        "tax",
+                        CostSource.RULE,
+                    ),
+                    parent_id="lodging",
+                    rate=float(rate),
+                )
+            )
     gifts = req.gifts_amount if req.gifts_amount is not None else req.budget * req.gifts_pct / 100
     if gifts > 0:
-        lines.append(PlanLine("gifts", None, "gifts", _exact(
-            "Gifts & souvenirs (est. allowance)", "gifts", gifts, CostSource.SETTING, obs)))
+        lines.append(
+            PlanLine(
+                "gifts",
+                None,
+                "gifts",
+                _exact(
+                    "Gifts & souvenirs (est. allowance)", "gifts", gifts, CostSource.SETTING, obs
+                ),
+            )
+        )
     gt_info, gt_line = getting_there(req, cat, dest)
     if gt_line is not None and req.getting_there.include_in_total:
         lines.append(PlanLine("getting-there", None, "getting_there", gt_line))
     fit = evaluate(lines, req, cat)
     notes = []
     if req.party.children:
-        notes.append("Children are priced at adult rates unless a child price is known; many places are cheaper for kids.")
+        notes.append(
+            "Children are priced at adult rates unless a child price is known; many places are cheaper for kids."
+        )
     return Priced(picks, lines, fit, gt_info, notes)
 
 
@@ -470,9 +599,12 @@ def evaluate(lines: list[PlanLine], req: PlanRequest, cat: Catalog) -> Fit:
     index = {ln.line_id: i for i, ln in enumerate(lines)}
     sims = [
         SimLine(
-            low=float(ln.cost.low), high=float(ln.cost.high), confidence=ln.cost.confidence,
+            low=float(ln.cost.low),
+            high=float(ln.cost.high),
+            confidence=ln.cost.confidence,
             category=ln.cost.category,
-            parent=index.get(ln.parent_id) if ln.parent_id else None, rate=ln.rate,
+            parent=index.get(ln.parent_id) if ln.parent_id else None,
+            rate=ln.rate,
         )
         for ln in lines
     ]
@@ -485,8 +617,12 @@ def evaluate(lines: list[PlanLine], req: PlanRequest, cat: Catalog) -> Fit:
     else:
         metric = quantile(totals, WIGGLE_QUANTILE)
     return Fit(
-        point=s.point_total, low=s.low_total, high=s.high_total, metric=metric,
-        p_under=p_under(totals, req.budget), ok=metric <= req.budget,
+        point=s.point_total,
+        low=s.low_total,
+        high=s.high_total,
+        metric=metric,
+        p_under=p_under(totals, req.budget),
+        ok=metric <= req.budget,
     )
 
 
@@ -508,8 +644,10 @@ def repair(req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog) ->
             if pk.locked or not pk.place or pk.place.price.high == 0:
                 continue
             cands = [
-                p for p in dest.places
-                if not _taken(p, pk.day, picks, skip=pk) and p.id not in req.exclude
+                p
+                for p in dest.places
+                if not _taken(p, pk.day, picks, skip=pk)
+                and p.id not in req.exclude
                 and _slot_fits(p, pk.kind, pk.time, req.raining)
                 and _per_person_high(p) < _per_person_high(pk.place)
             ]
@@ -573,9 +711,15 @@ def worth_it(req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog) 
             )
             key = (-round(score, 3), delta)
             item = {
-                "upgrade_id": f"{pk.slot_id}:{alt.id}", "slot_id": pk.slot_id, "slot_kind": pk.kind,
-                "title": alt.name, "replaces": cur.name, "delta": str(_money(delta)),
-                "new_total": str(tp.fit.point), "why": why, "fits": True,
+                "upgrade_id": f"{pk.slot_id}:{alt.id}",
+                "slot_id": pk.slot_id,
+                "slot_kind": pk.kind,
+                "title": alt.name,
+                "replaces": cur.name,
+                "delta": str(_money(delta)),
+                "new_total": str(tp.fit.point),
+                "why": why,
+                "fits": True,
             }
             if best is None or key < best[0]:
                 best = (key, item)
@@ -615,9 +759,15 @@ def build(req: PlanRequest, cat: Catalog | None = None) -> dict:
 def _line_dict(ln: PlanLine) -> dict:
     c = ln.cost
     return {
-        "line_id": ln.line_id, "label": c.label, "category": c.category,
-        "amount": str(c.amount), "low": str(c.low), "high": str(c.high),
-        "source": c.source.value, "confidence": c.confidence, "is_estimate": c.is_estimate,
+        "line_id": ln.line_id,
+        "label": c.label,
+        "category": c.category,
+        "amount": str(c.amount),
+        "low": str(c.low),
+        "high": str(c.high),
+        "source": c.source.value,
+        "confidence": c.confidence,
+        "is_estimate": c.is_estimate,
     }
 
 
@@ -642,7 +792,9 @@ def _why(pick: Pick, req: PlanRequest, prev: tuple[float, float] | None) -> str:
     return " · ".join(bits).capitalize()
 
 
-def render(req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog, upgrades: list[dict]) -> dict:
+def render(
+    req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog, upgrades: list[dict]
+) -> dict:
     fit = priced.fit
     by_parent: dict[str, list[PlanLine]] = {}
     for ln in priced.lines:
@@ -656,38 +808,83 @@ def render(req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog, up
         for pick in [p for p in priced.picks if p.day == d]:
             ln = line_by_id.get(pick.slot_id)
             if pick.kind == "anchor" and req.anchor and ln:
-                items.append({"line_id": pick.slot_id, "time": pick.time, "kind": "anchor",
-                              "title": req.anchor.title, "category": "activity", "why": "Your fixed plan",
-                              "cost": _line_dict(ln), "children": [], "item_total": str(ln.cost.amount)})
+                items.append(
+                    {
+                        "line_id": pick.slot_id,
+                        "time": pick.time,
+                        "kind": "anchor",
+                        "title": req.anchor.title,
+                        "category": "activity",
+                        "why": "Your fixed plan",
+                        "cost": _line_dict(ln),
+                        "children": [],
+                        "item_total": str(ln.cost.amount),
+                    }
+                )
                 prev = _anchor_loc(req, dest)
                 continue
             if not pick.place or not ln:
                 if pick.slot_id in req.skips:
-                    items.append({"line_id": pick.slot_id, "time": pick.time, "kind": pick.kind,
-                                  "title": "Free time", "category": "other", "why": "You removed this stop",
-                                  "cost": None, "children": [], "item_total": "0.00"})
+                    items.append(
+                        {
+                            "line_id": pick.slot_id,
+                            "time": pick.time,
+                            "kind": pick.kind,
+                            "title": "Free time",
+                            "category": "other",
+                            "why": "You removed this stop",
+                            "cost": None,
+                            "children": [],
+                            "item_total": "0.00",
+                        }
+                    )
                 continue
             kids = by_parent.get(pick.slot_id, [])
             total = ln.cost.amount + sum((k.cost.amount for k in kids), D(0))
             p = pick.place
-            items.append({
-                "line_id": pick.slot_id, "time": pick.time, "kind": pick.kind, "place_id": p.id,
-                "title": p.name, "category": p.category, "indoor": p.indoor,
-                "hidden_gem": p.hidden_gem, "lat": p.lat, "lng": p.lng,
-                "duration_min": p.duration_min, "why": _why(pick, req, prev),
-                "cost": _line_dict(ln), "children": [_line_dict(k) for k in kids],
-                "item_total": str(_money(total)),
-            })
+            items.append(
+                {
+                    "line_id": pick.slot_id,
+                    "time": pick.time,
+                    "kind": pick.kind,
+                    "place_id": p.id,
+                    "title": p.name,
+                    "category": p.category,
+                    "indoor": p.indoor,
+                    "hidden_gem": p.hidden_gem,
+                    "lat": p.lat,
+                    "lng": p.lng,
+                    "duration_min": p.duration_min,
+                    "why": _why(pick, req, prev),
+                    "cost": _line_dict(ln),
+                    "children": [_line_dict(k) for k in kids],
+                    "item_total": str(_money(total)),
+                }
+            )
             prev = (p.lat, p.lng)
         transit = [_line_dict(ln) for ln in priced.lines if ln.day == d and ln.kind == "transit"]
         day_total = sum((ln.cost.amount for ln in priced.lines if ln.day == d), D(0))
-        days.append({"day": d, "date": str(req.start_date + timedelta(days=d)), "items": items,
-                     "transit": transit, "day_total": str(_money(day_total))})
+        days.append(
+            {
+                "day": d,
+                "date": str(req.start_date + timedelta(days=d)),
+                "items": items,
+                "transit": transit,
+                "day_total": str(_money(day_total)),
+            }
+        )
     s = summarize([ln.cost for ln in priced.lines], currency="USD")
-    hidden = sum((ln.cost.amount for ln in priced.lines
-                  if ln.cost.category in ("tax", "tip", "transit", "extras", "fee")), D(0))
-    trip_lines = [_line_dict(ln) for ln in priced.lines
-                  if ln.day is None or ln.kind in ("extras", "park_fee")]
+    hidden = sum(
+        (
+            ln.cost.amount
+            for ln in priced.lines
+            if ln.cost.category in ("tax", "tip", "transit", "extras", "fee")
+        ),
+        D(0),
+    )
+    trip_lines = [
+        _line_dict(ln) for ln in priced.lines if ln.day is None or ln.kind in ("extras", "park_fee")
+    ]
     status = "ready" if fit.ok else "infeasible"
     out = {
         "status": status,
@@ -695,12 +892,18 @@ def render(req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog, up
         "demo_data": cat.synthetic,
         "data_notice": cat.notice if cat.synthetic else None,
         "headline": {
-            "label": "Estimated total", "point": str(fit.point), "low": str(fit.low),
-            "high": str(fit.high), "budget": str(_money(req.budget)), "firmness": req.firmness,
-            "fit_value": str(fit.metric), "p_under_budget_est": fit.p_under,
+            "label": "Estimated total",
+            "point": str(fit.point),
+            "low": str(fit.low),
+            "high": str(fit.high),
+            "budget": str(_money(req.budget)),
+            "firmness": req.firmness,
+            "fit_value": str(fit.metric),
+            "p_under_budget_est": fit.p_under,
             "you_could_keep": str(_money(max(req.budget - fit.point, D(0)))),
             "hidden_costs": str(_money(hidden)),
-            "data_backed_share": s.data_backed_share, "is_estimate": s.is_estimate,
+            "data_backed_share": s.data_backed_share,
+            "is_estimate": s.is_estimate,
         },
         "worth_it": upgrades,
         "getting_there_optional": priced.getting_there,
@@ -730,9 +933,16 @@ def priced_for(req: PlanRequest, cat: Catalog | None = None) -> tuple[Destinatio
     return dest, cat, repair(req, price(req, choose(req, dest), dest, cat), dest, cat)
 
 
-def slot_alternatives(req: PlanRequest, priced: Priced, dest: Destination, slot_id: str,
-                      *, cheaper: bool = False, tag: str | None = None,
-                      indoor: bool | None = None) -> list[Place]:
+def slot_alternatives(
+    req: PlanRequest,
+    priced: Priced,
+    dest: Destination,
+    slot_id: str,
+    *,
+    cheaper: bool = False,
+    tag: str | None = None,
+    indoor: bool | None = None,
+) -> list[Place]:
     """Places that could fill a slot instead of its current pick, best-ranked first."""
     pick = next((p for p in priced.picks if p.slot_id == slot_id), None)
     if pick is None or pick.kind == "anchor":
@@ -742,7 +952,9 @@ def slot_alternatives(req: PlanRequest, priced: Priced, dest: Destination, slot_
     for p in dest.places:
         if cur and p.id == cur.id or p.id in req.exclude:
             continue
-        if _taken(p, pick.day, priced.picks, skip=pick) or not _slot_fits(p, pick.kind, pick.time, False):
+        if _taken(p, pick.day, priced.picks, skip=pick) or not _slot_fits(
+            p, pick.kind, pick.time, False
+        ):
             continue
         if cheaper and cur and p.price.point >= cur.price.point:
             continue

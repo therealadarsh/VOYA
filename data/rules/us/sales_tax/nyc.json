@@ -1,0 +1,9 @@
+{
+  "synthetic": false,
+  "source": "NY State Department of Taxation and Finance — NYC sales tax",
+  "url": "https://www.tax.ny.gov/pubs_and_bulls/tg_bulletins/st/city_of_new_york.htm",
+  "observed_at": "2026-11-11T12:00:00+00:00",
+  "quote": "New York City total sales and use tax rate is 8.875%.",
+  "jurisdiction": "nyc",
+  "combined_rate": "0.08875"
+}

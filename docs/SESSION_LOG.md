@@ -56,3 +56,23 @@ no-build frontend, dev sign-in, opt-in memory).
 
 **Questions for the owner:** places-data provider and budget; map provider;
 design direction (see the private Cursor prompt).
+
+---
+
+## 2026-11-11 · Cursor Cloud Agent · branch build/mvp · 6edd483..HEAD
+
+**Goal:** adopt owner PLAN.md (autonomous M1–M6); complete M1 foundations.
+
+**Done:**
+- `docs/BUILD_PLAN.md` (Foursquare, OpenRouter models, Indiana Dunes).
+- CostLine extensions; `pricing/` + `data/` loaders; cited JSON under `data/`.
+- `make verify` (scoped lint, mypy on money code, 88 tests, policy scripts).
+- `docs/DATA_SOURCES.md`, `VERIFY.md` M1, tag `mvp-m1`.
+
+**Decisions:** Foursquare places; INDU second park; see `DECISIONS.md`.
+
+**Not done / known issues:** Planner still uses demo catalog; M2+ milestones open.
+
+**Next:** M2 planner refactor and cited fares in plan lines.
+
+**Questions for the owner:** none (plan is source of truth).

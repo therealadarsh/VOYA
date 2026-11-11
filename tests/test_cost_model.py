@@ -228,7 +228,15 @@ class TestEstimators:
     @pytest.mark.parametrize(
         "kwargs, source",
         [
-            (dict(range_start=D(10), range_end=D(20), range_currency="EUR", level=PriceLevel.EXPENSIVE), CostSource.PRICE_RANGE),
+            (
+                dict(
+                    range_start=D(10),
+                    range_end=D(20),
+                    range_currency="EUR",
+                    level=PriceLevel.EXPENSIVE,
+                ),
+                CostSource.PRICE_RANGE,
+            ),
             (dict(level=PriceLevel.EXPENSIVE, place_type="museum"), CostSource.PRICE_BUCKET),
             (dict(place_type="museum"), CostSource.TYPE_GUESS),
             (dict(), CostSource.TYPE_GUESS),

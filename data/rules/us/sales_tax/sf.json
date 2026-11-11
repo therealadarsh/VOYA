@@ -1,0 +1,9 @@
+{
+  "synthetic": false,
+  "source": "California Department of Tax and Fee Administration — City and County Rates",
+  "url": "https://www.cdtfa.ca.gov/taxes-and-fees/sales-use-tax-rates.htm",
+  "observed_at": "2026-11-11T12:00:00+00:00",
+  "quote": "San Francisco combined district rate published on CDTFA rate table (used for planning sales tax line).",
+  "jurisdiction": "sf",
+  "combined_rate": "0.08625"
+}
