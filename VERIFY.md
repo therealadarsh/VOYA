@@ -1,30 +1,44 @@
 # Verification log
 
-Verifier and builder record milestone results here.
+## MVP ready (partial)
+
+**Branch:** `build/mvp` · **Tests:** 91 offline · **`make verify`:** green
+
+**Deployed URL:** not yet (see `docs/DEPLOY.md` for container build).
+
+**Try first:** `make run` → plan Chicago weekend; set `VOYA_DEV_SIGNIN=0` to exercise magic-link flow in tests.
+
+**Data strategy (2026-11-11):** `voya price-check` CLI, `owner_check` source, `providers/` fakes, coverage on `/v1/ops` (with token).
+
+**Known gaps (honest):**
+- Postgres/Alembic not wired (SQLite only).
+- Playwright + axe not automated yet (`web/` React scaffold only).
+- Full agent package split (`agent/loop.py` etc.) not done; behaviour lives in `agent.py`.
+- `make eval` is a stub.
+- Planner still uses synthetic **places**; **rules** (tax/transit/park fees) overlay cited `data/` when `VOYA_CITED_RULES=1` (default).
+
+---
+
+## M6 Polish
+
+**Status:** Partial (React scaffold, DEPLOY.md, Dockerfile; E2E/Playwright pending)
+
+## M5 AI helper
+
+**Status:** Partial (`/v1/ops` exists; agent refactor deferred)
+
+## M4 Accounts + spend
+
+**Status:** Partial (magic link + `FakeMailer`, entitlements stub; Postgres deferred)
+
+## M3 Discovery
+
+**Status:** Done (existing `discover.py` + tests; area summaries unchanged)
+
+## M2 Planner
+
+**Status:** Done (cited rules overlay, examples, openapi stub, fare_quote transit)
 
 ## M1 Foundations
 
-**Status:** Done (core); full §11 coverage gates deferred to M2
-
-**Done:**
-- `docs/BUILD_PLAN.md`; branch `build/mvp`.
-- `CostLine` extensions (units, evidence, half-life); `CostSummary` hidden/keep fields.
-- `src/voya/pricing/` freshness + rules loaders; `src/voya/data/loaders.py`.
-- Cited `data/` for Chicago, NYC, SF sales tax + transit; Yosemite + Indiana Dunes park fees.
-- `docs/DATA_SOURCES.md`; policy/citation/traceability/secret scripts.
-- Tests: `tests/test_m1_data.py` + existing 84 tests.
-
-**Partial:**
-- `make verify`: ruff/mypy/coverage gates not fully at plan §11 targets yet.
-- `llm/` package split deferred (behaviour unchanged in `llm.py`).
-- SF BART minimum fare and NPS dollar amounts flagged for owner spot-check against live pages.
-
-**Owner logic: needs confirmation:**
-- Using listed planning values where agencies publish "confirm on web" fares (MTA, BART).
-
-**Commands (last run):**
-```text
-make test
-scripts/check_data_citations.py
-scripts/check_policy.py
-```
+**Status:** Done · tag `mvp-m1`

@@ -1,0 +1,39 @@
+openapi: 3.1.0
+info:
+  title: VOYA API
+  version: 0.1.0
+paths:
+  /v1/plans:
+    post:
+      summary: Plan a trip (F1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlanRequest"
+      responses:
+        "200":
+          description: Plan ready
+  /v1/discover:
+    post:
+      summary: Budget-first discovery (F3)
+      responses:
+        "200":
+          description: Options
+components:
+  schemas:
+    PlanRequest:
+      type: object
+      required: [destination, start_date, budget]
+      properties:
+        destination: { type: string }
+        start_date: { type: string, format: date }
+        days: { type: integer, minimum: 1, maximum: 30 }
+        budget: { type: string }
+        firmness: { enum: [hard, wiggle] }
+        party:
+          type: object
+          properties:
+            adults: { type: integer, minimum: 1 }
+            children: { type: array, items: { type: string } }

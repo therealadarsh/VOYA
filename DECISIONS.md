@@ -28,3 +28,5 @@ One line per major choice and why. Newest at the bottom.
 - **Foursquare Places API** as the commercial places provider (≤$50 one-time enrichment); fakes in tests.
 - **Second launch park:** Indiana Dunes (INDU), reachable from Chicago; entrance fee $0 per NPS page cited in `data/`.
 - **OpenRouter models (target):** helper `openrouter/google/gemini-2.5-flash`, narration `openrouter/openai/gpt-4o-mini` (override via env).
+- **`owner_check` cost source:** approved rows from `voya price-check` (pending → approve); coverage on `/v1/ops`.
+- **Data strategy (2026-11-11):** paid APIs for display only; licensed data per licence; owned prices via insider notes + price-check — no scraping.

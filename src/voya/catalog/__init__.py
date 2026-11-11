@@ -119,7 +119,12 @@ class Catalog(BaseModel):
 @lru_cache(maxsize=4)
 def load_catalog(path: str | None = None) -> Catalog:
     data = json.loads(Path(path or DEMO_PATH).read_text())
-    return Catalog.model_validate(data)
+    cat = Catalog.model_validate(data)
+    from voya.pricing.cited_rules import cited_rules_enabled, overlay_rules
+
+    if cited_rules_enabled():
+        cat = overlay_rules(cat)
+    return cat
 
 
 def haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:

@@ -2,7 +2,7 @@
 
 import random
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 import numpy as np
 import pytest
@@ -125,9 +125,11 @@ def test_sales_tax_and_tip_are_separate_labeled_lines():
     tax = [l for l in lines if l.kind == "tax"]
     tip = [l for l in lines if l.kind == "tip"]
     assert tax and tip
+    rate = load_catalog().destination("chicago").rules.sales_tax_pct / D(100)
     for t in tax:
         parent = next(l for l in lines if l.line_id == t.parent_id)
-        assert t.cost.amount == (parent.cost.amount * D("0.103")).quantize(D("0.01"))
+        expected = (parent.cost.amount * rate).quantize(D("0.01"), rounding=ROUND_HALF_UP)
+        assert t.cost.amount == expected
     assert all("est." in l.cost.label for l in tax + tip)
 
 

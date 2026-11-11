@@ -17,10 +17,28 @@ def main() -> int:
     bad = 0
     for path in EX.rglob("*.json"):
         try:
-            json.loads(path.read_text(encoding="utf-8"))
+            raw = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as e:
             print(f"{path}: {e}")
             bad += 1
+            continue
+        if "destination" in raw and "start_date" in raw:
+            from datetime import date
+            from decimal import Decimal
+
+            from voya.planner import PlanRequest
+
+            kw = dict(raw)
+            if isinstance(kw.get("start_date"), str):
+                y, m, d = kw["start_date"].split("-")
+                kw["start_date"] = date(int(y), int(m), int(d))
+            if isinstance(kw.get("budget"), str):
+                kw["budget"] = Decimal(kw["budget"])
+            try:
+                PlanRequest(**kw)
+            except (ValueError, TypeError) as e:
+                print(f"{path}: PlanRequest validation: {e}")
+                bad += 1
     if bad:
         return 1
     print("validate_examples: ok")

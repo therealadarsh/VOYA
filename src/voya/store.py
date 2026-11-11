@@ -49,6 +49,9 @@ CREATE TABLE IF NOT EXISTS proposals (
 CREATE TABLE IF NOT EXISTS ai_spend (
   scope TEXT PRIMARY KEY, usd TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS magic_links (
+  token_hash TEXT PRIMARY KEY, email TEXT NOT NULL, expires_at TEXT NOT NULL
+);
 """
 
 
@@ -151,6 +154,27 @@ class Store:
             ]
 
     # -- users ---------------------------------------------------------------
+    def save_magic_link(self, email: str, token: str, expires: datetime) -> None:
+        em = email.strip().lower()
+        with self.tx() as c:
+            c.execute(
+                "INSERT OR REPLACE INTO magic_links VALUES (?,?,?)",
+                (_hash(token), em, expires.isoformat(timespec="seconds")),
+            )
+
+    def consume_magic_link(self, token: str) -> str | None:
+        h = _hash(token)
+        with self.tx() as c:
+            row = c.execute("SELECT email, expires_at FROM magic_links WHERE token_hash=?", (h,)).fetchone()
+            if not row:
+                return None
+            if datetime.fromisoformat(row["expires_at"]) < datetime.now(UTC):
+                c.execute("DELETE FROM magic_links WHERE token_hash=?", (h,))
+                return None
+            email = row["email"]
+            c.execute("DELETE FROM magic_links WHERE token_hash=?", (h,))
+        return email
+
     def create_user(self, email: str, adult: bool) -> str:
         token = secrets.token_urlsafe(24)
         with self.tx() as c:

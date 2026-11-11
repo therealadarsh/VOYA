@@ -80,6 +80,7 @@ class CostSource(StrEnum):
     """Where a number came from, best evidence first."""
 
     USER_ACTUAL = "user_actual"  # what a traveler reports they paid
+    OWNER_CHECK = "owner_check"  # commissioned or owner-verified price (see voya price-check)
     PRICE_RANGE = "price_range"  # provider's per-place price range
     PRICE_BUCKET = "price_bucket"  # provider's $-$$$$ level mapped to money
     TYPE_GUESS = "type_guess"  # our per-category guess, no place data
@@ -94,6 +95,7 @@ class CostSource(StrEnum):
 DATA_BACKED_SOURCES: frozenset[CostSource] = frozenset(
     {
         CostSource.USER_ACTUAL,
+        CostSource.OWNER_CHECK,
         CostSource.PRICE_RANGE,
         CostSource.FARE_QUOTE,
         CostSource.USER_ENTERED,

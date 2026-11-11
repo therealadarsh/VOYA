@@ -1,7 +1,7 @@
 # VOYA
 
-**Status:** working MVP on demo data (88 tests); M1 cited data + `make verify` on
-`build/mvp`. Next: M2 planner. Details: [`docs/PROGRESS.md`](docs/PROGRESS.md) ·
+**Status:** `build/mvp` — 91 tests, cited rules overlay, magic-link sign-in, React
+scaffold in `web/`. Demo places until provider wiring. [`VERIFY.md`](VERIFY.md) ·
 [`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md) · history: [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
 
 Plan a trip (one day or up to 30) to your budget, door to door. Every cost

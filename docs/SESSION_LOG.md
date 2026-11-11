@@ -76,3 +76,13 @@ design direction (see the private Cursor prompt).
 **Next:** M2 planner refactor and cited fares in plan lines.
 
 **Questions for the owner:** none (plan is source of truth).
+
+---
+
+## 2026-11-11 · Cursor Cloud Agent · PR #1 merged · build/mvp → claude/new-session-4f5ud7
+
+**Goal:** land M1–data-strategy work via approved PR.
+
+**Done:** PR #1 merged (735db4c); cited rules, magic link, price-check CLI, providers fakes, 94 tests.
+
+**Next:** Postgres/Alembic, React section-8 shell + Playwright, Foursquare fake→LIVE behind cap.
