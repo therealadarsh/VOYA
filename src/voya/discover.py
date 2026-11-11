@@ -41,26 +41,53 @@ def discover(req: DiscoverRequest) -> dict:
             else:
                 kind, minutes = ("city day" if req.days == 1 else "trip"), None
         preq = PlanRequest(
-            destination=dest.id, start_date=req.start_date, days=req.days, budget=req.budget,
-            firmness=req.firmness, party=req.party, interests=req.interests, pace=req.pace,
-            getting_there={"from_id": req.from_id if (req.from_id and req.from_id != dest.id) else None},
+            destination=dest.id,
+            start_date=req.start_date,
+            days=req.days,
+            budget=req.budget,
+            firmness=req.firmness,
+            party=req.party,
+            interests=req.interests,
+            pace=req.pace,
+            getting_there={
+                "from_id": req.from_id if (req.from_id and req.from_id != dest.id) else None
+            },
         )
         plan = build(preq, cat)
         h = plan["headline"]
         items = [it for d in plan["days"] for it in d["items"] if it.get("place_id")]
         match = sum(1 for it in items if "matches" in (it.get("why") or "").lower())
-        options.append({
-            "destination": dest.id, "name": dest.name, "kind": kind, "fits": plan["status"] == "ready",
-            "est_total": h["point"], "range": [h["low"], h["high"]],
-            "p_under_budget_est": h["p_under_budget_est"], "you_could_keep": h["you_could_keep"],
-            "gap": plan.get("gap"), "minutes_one_way": minutes,
-            "getting_there_optional": plan.get("getting_there_optional"),
-            "highlights": [it["title"] for it in items if it["category"] != "food"][:3],
-            "interest_matches": match,
-            "plan_request": preq.model_dump(mode="json"),
-        })
-    options.sort(key=lambda o: (not o["fits"], -o["interest_matches"],
-                                -Decimal(o["you_could_keep"]), o["minutes_one_way"] or 0))
-    return {"options": options[:6], "demo_data": cat.synthetic, "is_estimate": True,
-            "empty_note": None if any(o["fits"] for o in options)
-            else "Nothing fits this budget yet. Here are the closest options and how far over they are."}
+        options.append(
+            {
+                "destination": dest.id,
+                "name": dest.name,
+                "kind": kind,
+                "fits": plan["status"] == "ready",
+                "est_total": h["point"],
+                "range": [h["low"], h["high"]],
+                "p_under_budget_est": h["p_under_budget_est"],
+                "you_could_keep": h["you_could_keep"],
+                "gap": plan.get("gap"),
+                "minutes_one_way": minutes,
+                "getting_there_optional": plan.get("getting_there_optional"),
+                "highlights": [it["title"] for it in items if it["category"] != "food"][:3],
+                "interest_matches": match,
+                "plan_request": preq.model_dump(mode="json"),
+            }
+        )
+    options.sort(
+        key=lambda o: (
+            not o["fits"],
+            -o["interest_matches"],
+            -Decimal(o["you_could_keep"]),
+            o["minutes_one_way"] or 0,
+        )
+    )
+    return {
+        "options": options[:6],
+        "demo_data": cat.synthetic,
+        "is_estimate": True,
+        "empty_note": None
+        if any(o["fits"] for o in options)
+        else "Nothing fits this budget yet. Here are the closest options and how far over they are.",
+    }

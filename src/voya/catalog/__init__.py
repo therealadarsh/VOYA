@@ -113,9 +113,7 @@ class Catalog(BaseModel):
         return next((d for d in self.destinations if d.id == dest_id), None)
 
     def route(self, from_id: str, to_id: str) -> Route | None:
-        return next(
-            (r for r in self.routes if r.from_id == from_id and r.to == to_id), None
-        )
+        return next((r for r in self.routes if r.from_id == from_id and r.to == to_id), None)
 
 
 @lru_cache(maxsize=4)

@@ -9,7 +9,10 @@ import pytest
 
 from voya.catalog import load_catalog
 from voya.planner import (
-    PlanRequest, apply_upgrade, build, priced_for,
+    PlanRequest,
+    apply_upgrade,
+    build,
+    priced_for,
 )
 from voya.uncertainty import SimLine, quantile, simulate
 
@@ -18,8 +21,13 @@ DAY = date(2026, 11, 14)
 
 
 def req(**kw) -> PlanRequest:
-    base = dict(destination="chicago", start_date=DAY, budget=150, party={"adults": 2},
-                interests=["food", "architecture"])
+    base = dict(
+        destination="chicago",
+        start_date=DAY,
+        budget=150,
+        party={"adults": 2},
+        interests=["food", "architecture"],
+    )
     base.update(kw)
     return PlanRequest(**base)
 
@@ -77,8 +85,14 @@ def test_infeasible_budget_explains_gap_and_free_options():
 
 
 def test_upgrades_always_fit_and_cost_more():
-    r = req(destination="new-york", days=2, budget=700, party={"adults": 2},
-            lodging={"status": "booked", "amount": "0"}, interests=["art", "views"])
+    r = req(
+        destination="new-york",
+        days=2,
+        budget=700,
+        party={"adults": 2},
+        lodging={"status": "booked", "amount": "0"},
+        interests=["art", "views"],
+    )
     p = build(r)
     assert p["worth_it"], "a generous budget should offer worth-it upgrades"
     assert len(p["worth_it"]) <= 3
@@ -127,7 +141,9 @@ def test_transit_extras_counted_and_getting_there_optional():
     p = build(r)
     assert p["getting_there_optional"]["available"] and not p["getting_there_optional"]["included"]
     assert not any(l["category"] == "getting_there" for l in p["trip_lines"])
-    r2 = r.model_copy(update={"getting_there": r.getting_there.model_copy(update={"include_in_total": True})})
+    r2 = r.model_copy(
+        update={"getting_there": r.getting_there.model_copy(update={"include_in_total": True})}
+    )
     p2 = build(r2)
     assert D(p2["headline"]["point"]) > D(p["headline"]["point"])
     assert any(l.kind == "extras" for l in _lines(r))
@@ -146,8 +162,15 @@ def test_park_fee_is_per_vehicle():
 
 
 def test_interests_first_and_one_hidden_gem_per_day():
-    p = build(req(destination="san-francisco", budget=500, interests=["art"], days=2,
-                  lodging={"status": "booked", "amount": "0"}))
+    p = build(
+        req(
+            destination="san-francisco",
+            budget=500,
+            interests=["art"],
+            days=2,
+            lodging={"status": "booked", "amount": "0"},
+        )
+    )
     cat = load_catalog()
     gems = {pl.id for pl in cat.destination("san-francisco").places if pl.hidden_gem}
     used: set[str] = set()
@@ -162,8 +185,17 @@ def test_interests_first_and_one_hidden_gem_per_day():
 
 def test_quality_floor_and_no_repeated_sights():
     cat = load_catalog()
-    p = build(req(destination="new-york", days=3, budget=2000, lodging={"status": "booked", "amount": "0"}))
-    sights = [i["place_id"] for d in p["days"] for i in d["items"] if i.get("place_id") and i["category"] != "food"]
+    p = build(
+        req(
+            destination="new-york", days=3, budget=2000, lodging={"status": "booked", "amount": "0"}
+        )
+    )
+    sights = [
+        i["place_id"]
+        for d in p["days"]
+        for i in d["items"]
+        if i.get("place_id") and i["category"] != "food"
+    ]
     assert len(sights) == len(set(sights))
     dest = cat.destination("new-york")
     for pid in sights:
@@ -174,8 +206,11 @@ def test_quality_floor_and_no_repeated_sights():
 
 
 def test_anchor_is_fixed_exact_and_blocks_its_time():
-    r = req(destination="san-francisco", budget=200,
-            anchor={"title": "Ball game", "start": "13:00", "duration_min": 180, "cost": "90"})
+    r = req(
+        destination="san-francisco",
+        budget=200,
+        anchor={"title": "Ball game", "start": "13:00", "duration_min": 180, "cost": "90"},
+    )
     p = build(r)
     items = p["days"][0]["items"]
     anchor = next(i for i in items if i["kind"] == "anchor")
@@ -198,6 +233,7 @@ def test_multi_day_lodging_estimate_or_booked():
 
 def test_unknown_destination_is_honest():
     from voya.planner import PlanError
+
     with pytest.raises(PlanError):
         build(req(destination="atlantis"))
 
@@ -219,9 +255,15 @@ def test_guard_property_random_proposals_never_produce_unfit_ready_plans():
     cat = load_catalog()
     for _ in range(40):
         dest = rng.choice(cat.destinations)
-        r = PlanRequest(destination=dest.id, start_date=DAY, days=rng.randint(1, 3),
-                        budget=rng.choice([40, 90, 200, 500, 1500]), firmness=rng.choice(["hard", "wiggle"]),
-                        party={"adults": rng.randint(1, 4)}, interests=rng.sample(["food", "art", "nature", "history"], 2))
+        r = PlanRequest(
+            destination=dest.id,
+            start_date=DAY,
+            days=rng.randint(1, 3),
+            budget=rng.choice([40, 90, 200, 500, 1500]),
+            firmness=rng.choice(["hard", "wiggle"]),
+            party={"adults": rng.randint(1, 4)},
+            interests=rng.sample(["food", "art", "nature", "history"], 2),
+        )
         p = build(r)
         if p["status"] == "ready":
             assert D(p["headline"]["fit_value"]) <= r.budget

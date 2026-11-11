@@ -27,7 +27,17 @@ from voya.store import Store, new_id
 from voya.tracking import CATEGORIES, apply_recovery, budget_status, parse_spend_text
 
 STATIC = Path(__file__).with_name("web")
-INTERESTS = ["food", "art", "history", "architecture", "nature", "views", "nightlife", "shopping", "family"]
+INTERESTS = [
+    "food",
+    "art",
+    "history",
+    "architecture",
+    "nature",
+    "views",
+    "nightlife",
+    "shopping",
+    "family",
+]
 
 app = FastAPI(title="VOYA", version="0.2.0", docs_url="/api/docs", openapi_url="/api/openapi.json")
 _state: dict = {}
@@ -53,24 +63,49 @@ class ApiError(Exception):
 
 @app.exception_handler(ApiError)
 async def _api_error(_: Request, e: ApiError) -> JSONResponse:
-    return JSONResponse(status_code=e.status, content={"error": {
-        "code": e.code, "message": e.message, "hint": e.hint, "trace_id": obs.current_trace()}})
+    return JSONResponse(
+        status_code=e.status,
+        content={
+            "error": {
+                "code": e.code,
+                "message": e.message,
+                "hint": e.hint,
+                "trace_id": obs.current_trace(),
+            }
+        },
+    )
 
 
 @app.exception_handler(RequestValidationError)
 async def _validation_error(_: Request, e: RequestValidationError) -> JSONResponse:
     first = e.errors()[0] if e.errors() else {}
     field = ".".join(str(x) for x in first.get("loc", [])[1:]) or "input"
-    return JSONResponse(status_code=422, content={"error": {
-        "code": "INVALID_INPUT", "message": f"{field}: {first.get('msg', 'invalid value')}",
-        "hint": "Check the highlighted field.", "trace_id": obs.current_trace()}})
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": f"{field}: {first.get('msg', 'invalid value')}",
+                "hint": "Check the highlighted field.",
+                "trace_id": obs.current_trace(),
+            }
+        },
+    )
 
 
 @app.exception_handler(PlanError)
 async def _plan_error(_: Request, e: PlanError) -> JSONResponse:
-    return JSONResponse(status_code=422, content={"error": {
-        "code": "UNSUPPORTED", "message": str(e), "hint": "Pick one of the supported destinations.",
-        "trace_id": obs.current_trace()}})
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": {
+                "code": "UNSUPPORTED",
+                "message": str(e),
+                "hint": "Pick one of the supported destinations.",
+                "trace_id": obs.current_trace(),
+            }
+        },
+    )
 
 
 _hits: dict[str, deque] = defaultdict(deque)
@@ -86,8 +121,16 @@ async def _trace_and_limit(request: Request, call_next):
         while q and now - q[0] > 60:
             q.popleft()
         if len(q) >= RATE_PER_MIN:
-            return JSONResponse(status_code=429, content={"error": {
-                "code": "RATE_LIMIT", "message": "Too many requests. Try again in a minute.", "hint": ""}})
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "error": {
+                        "code": "RATE_LIMIT",
+                        "message": "Too many requests. Try again in a minute.",
+                        "hint": "",
+                    }
+                },
+            )
         q.append(now)
     with obs.span("http", method=request.method, path=request.url.path) as sp:
         response = await call_next(request)
@@ -126,16 +169,26 @@ def own_plan(plan_id: str, o: str) -> tuple[dict, PlanRequest]:
 def plan_payload(plan_id: str, version: int, req: PlanRequest, owner_id: str | None) -> dict:
     with obs.span("plan.build", destination=req.destination, days=req.days):
         plan = build(req)
-    return {"plan_id": plan_id, "version": version, "saved": owner_id is not None,
-            "request": req.model_dump(mode="json"), "plan": plan, "trace_id": obs.current_trace()}
+    return {
+        "plan_id": plan_id,
+        "version": version,
+        "saved": owner_id is not None,
+        "request": req.model_dump(mode="json"),
+        "plan": plan,
+        "trace_id": obs.current_trace(),
+    }
 
 
 def new_version(plan_id: str, req: PlanRequest, reason: str, must_fit: bool = True) -> dict:
     if must_fit:
         _, _, priced = priced_for(req)
         if not priced.fit.ok:
-            raise ApiError(409, "DOES_NOT_FIT", "That change would go over your budget.",
-                           "Try a cheaper option or raise the budget.")
+            raise ApiError(
+                409,
+                "DOES_NOT_FIT",
+                "That change would go over your budget.",
+                "Try a cheaper option or raise the budget.",
+            )
     v = store().add_version(plan_id, req.model_dump_json(), reason)
     rec = store().plan(plan_id)
     return plan_payload(plan_id, v, req, rec["owner"] if rec else None)
@@ -147,11 +200,15 @@ def new_version(plan_id: str, req: PlanRequest, reason: str, must_fit: bool = Tr
 @app.get("/v1/meta")
 def meta() -> dict:
     cat = load_catalog()
-    return {"destinations": [{"id": d.id, "name": d.name, "kind": d.kind} for d in cat.destinations],
-            "routes": [{"from": r.from_id, "to": r.to, "drive_min": r.drive_min} for r in cat.routes],
-            "interests": INTERESTS, "spend_categories": CATEGORIES,
-            "demo_data": cat.synthetic, "data_notice": cat.notice if cat.synthetic else None,
-            "ai_helper": "model" if harness() else "built-in"}
+    return {
+        "destinations": [{"id": d.id, "name": d.name, "kind": d.kind} for d in cat.destinations],
+        "routes": [{"from": r.from_id, "to": r.to, "drive_min": r.drive_min} for r in cat.routes],
+        "interests": INTERESTS,
+        "spend_categories": CATEGORIES,
+        "demo_data": cat.synthetic,
+        "data_notice": cat.notice if cat.synthetic else None,
+        "ai_helper": "model" if harness() else "built-in",
+    }
 
 
 @app.post("/v1/plans")
@@ -187,7 +244,9 @@ def edit_plan(plan_id: str, e: EditIn) -> dict:
     if e.budget is not None:
         upd["budget"] = e.budget
     if e.include_getting_there is not None:
-        upd["getting_there"] = req.getting_there.model_copy(update={"include_in_total": e.include_getting_there})
+        upd["getting_there"] = req.getting_there.model_copy(
+            update={"include_in_total": e.include_getting_there}
+        )
     # The user's own settings are applied even if the plan stops fitting; the plan says so.
     return new_version(plan_id, req.model_copy(update=upd), "edit", must_fit=False)
 
@@ -224,11 +283,18 @@ class AuthIn(BaseModel):
 @app.post("/v1/auth/start")
 def auth_start(a: AuthIn) -> dict:
     if not a.is_adult:
-        raise ApiError(403, "ADULTS_ONLY", "Accounts are for adults (18+). Trips with kids are planned from an adult's account.")
+        raise ApiError(
+            403,
+            "ADULTS_ONLY",
+            "Accounts are for adults (18+). Trips with kids are planned from an adult's account.",
+        )
     token = store().create_user(a.email, True)
     # DEV MODE: a real deployment emails a magic link instead of returning the token.
-    return {"token": token, "dev_mode": True,
-            "note": "Development sign-in: in production this arrives as an email magic link."}
+    return {
+        "token": token,
+        "dev_mode": True,
+        "note": "Development sign-in: in production this arrives as an email magic link.",
+    }
 
 
 @app.post("/v1/plans/{plan_id}/save")
@@ -245,8 +311,15 @@ def my_trips(o: str = Depends(require_owner)) -> dict:
     out = []
     for pid in store().plans_for(o):
         rec, req = load_plan(pid)
-        out.append({"plan_id": pid, "destination": req.destination, "start_date": str(req.start_date),
-                    "days": req.days, "budget": str(req.budget)})
+        out.append(
+            {
+                "plan_id": pid,
+                "destination": req.destination,
+                "start_date": str(req.start_date),
+                "days": req.days,
+                "budget": str(req.budget),
+            }
+        )
     return {"trips": out}
 
 
@@ -267,7 +340,9 @@ def remember(m: MemoryIn, o: str = Depends(require_owner)) -> dict:
     """Only called when the user taps "Remember" (human in the loop for memory)."""
     for k, v in m.values.items():
         if k not in MEMORY_KEYS:
-            raise ApiError(422, "BAD_KEY", f"VOYA doesn't remember '{k}'.", ", ".join(sorted(MEMORY_KEYS)))
+            raise ApiError(
+                422, "BAD_KEY", f"VOYA doesn't remember '{k}'.", ", ".join(sorted(MEMORY_KEYS))
+            )
         store().set_pref(o, k, v[:200], "you tapped Remember")
     return {"remembered": store().prefs(o)}
 
@@ -283,7 +358,9 @@ def export(o: str = Depends(require_owner)) -> dict:
     trips = []
     for pid in store().plans_for(o):
         rec, req = load_plan(pid)
-        trips.append({"plan_id": pid, "request": req.model_dump(mode="json"), "spends": store().spends(pid)})
+        trips.append(
+            {"plan_id": pid, "request": req.model_dump(mode="json"), "spends": store().spends(pid)}
+        )
     return {"trips": trips, "preferences": store().prefs(o)}
 
 
@@ -313,13 +390,17 @@ def add_spend(plan_id: str, s: SpendIn, o: str = Depends(require_owner)) -> dict
     if amount is None and s.text:
         parsed = parse_spend_text(s.text)
         if not parsed:
-            raise ApiError(422, "NO_AMOUNT", "I couldn't find an amount in that.", "Try 'lunch 23.40'.")
+            raise ApiError(
+                422, "NO_AMOUNT", "I couldn't find an amount in that.", "Try 'lunch 23.40'."
+            )
         amount, category = parsed[0], category or parsed[1]
     if amount is None:
         raise ApiError(422, "NO_AMOUNT", "Add an amount.")
     if (category or "other") not in CATEGORIES:
         raise ApiError(422, "BAD_CATEGORY", "Unknown category.", ", ".join(CATEGORIES))
-    rec, created = store().add_spend(plan_id, amount, category or "other", s.line_id, s.note or s.text, s.day, s.idempotency_key)
+    rec, created = store().add_spend(
+        plan_id, amount, category or "other", s.line_id, s.note or s.text, s.day, s.idempotency_key
+    )
     _, req = load_plan(plan_id)
     return {"spend": rec, "created": created, "budget": budget_status(req, store().spends(plan_id))}
 
@@ -348,15 +429,21 @@ class RecoveryIn(BaseModel):
 @app.post("/v1/plans/{plan_id}/recovery")
 def take_recovery(plan_id: str, r: RecoveryIn, o: str = Depends(require_owner)) -> dict:
     _, req = own_plan(plan_id, o)
-    return new_version(plan_id, apply_recovery(req, r.slot_id, r.action, r.to_place_id),
-                       f"recovery {r.action} {r.slot_id}", must_fit=False)
+    return new_version(
+        plan_id,
+        apply_recovery(req, r.slot_id, r.action, r.to_place_id),
+        f"recovery {r.action} {r.slot_id}",
+        must_fit=False,
+    )
 
 
 # --------------------------------------------------------------------- helper ---
 
 
 @app.post("/v1/plans/{plan_id}/helper")
-def helper(plan_id: str, h: HelperRequest, request: Request, o: str | None = Depends(owner)) -> dict:
+def helper(
+    plan_id: str, h: HelperRequest, request: Request, o: str | None = Depends(owner)
+) -> dict:
     rec, req = load_plan(plan_id)
     scope = o or (request.client.host if request.client else "anon")
     return respond(store(), plan_id, rec["version"], req, h, harness(), scope)
@@ -373,7 +460,9 @@ def apply_proposal(plan_id: str, proposal_id: str, a: ApplyIn) -> dict:
     if not prop:
         raise ApiError(409, "PROPOSAL_USED", "That suggestion was already used or has expired.")
     if prop["base_version"] != rec["version"]:
-        raise ApiError(409, "STALE", "Your plan changed since this suggestion. Ask again for fresh options.")
+        raise ApiError(
+            409, "STALE", "Your plan changed since this suggestion. Ask again for fresh options."
+        )
     new_req = PlanRequest.model_validate_json(prop["request_json"])
     return new_version(plan_id, new_req, f"proposal {proposal_id}")
 
@@ -387,9 +476,12 @@ def ops(x_ops_token: str | None = Header(None)) -> dict:
     if not expected or x_ops_token != expected:
         raise ApiError(401, "OPS_ONLY", "Operator token required.")
     from datetime import UTC, datetime
+
     now = datetime.now(UTC)
-    return {"ai_spend_month_usd": str(store().ai_spent(f"month:{now:%Y-%m}")),
-            "ai_helper": "model" if harness() else "built-in"}
+    return {
+        "ai_spend_month_usd": str(store().ai_spent(f"month:{now:%Y-%m}")),
+        "ai_helper": "model" if harness() else "built-in",
+    }
 
 
 @app.get("/healthz")

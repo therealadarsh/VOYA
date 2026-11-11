@@ -1,8 +1,8 @@
 # VOYA
 
-**Status:** working MVP on demo data (84 tests). Next: UX redesign, then
-real data connectors. Details: [`docs/PROGRESS.md`](docs/PROGRESS.md) ·
-history: [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
+**Status:** working MVP on demo data (88 tests); M1 cited data + `make verify` on
+`build/mvp`. Next: M2 planner. Details: [`docs/PROGRESS.md`](docs/PROGRESS.md) ·
+[`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md) · history: [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
 
 Plan a trip (one day or up to 30) to your budget, door to door. Every cost
 carries a range, a source and a stated confidence, and is always labeled as

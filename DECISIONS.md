@@ -24,3 +24,7 @@ One line per major choice and why. Newest at the bottom.
 - **Plain HTML/CSS/JS frontend with no build step** for speed; a React/Vite rewrite can come once the UX settles.
 - **Sign-in returns a token directly (dev mode)**; production sends an email magic link.
 - **Memory is opt-in per tap** and limited to interests, pace, tip %, firmness and adults; never income or locations.
+- **M1 data layer:** cited JSON under `data/` for 3 cities + Yosemite + Indiana Dunes; demo catalog unchanged until M2.
+- **Foursquare Places API** as the commercial places provider (≤$50 one-time enrichment); fakes in tests.
+- **Second launch park:** Indiana Dunes (INDU), reachable from Chicago; entrance fee $0 per NPS page cited in `data/`.
+- **OpenRouter models (target):** helper `openrouter/google/gemini-2.5-flash`, narration `openrouter/openai/gpt-4o-mini` (override via env).

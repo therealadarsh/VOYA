@@ -1,0 +1,15 @@
+{
+  "synthetic": false,
+  "source": "Metropolitan Transportation Authority — Fares",
+  "url": "https://www.mta.info/fares",
+  "observed_at": "2026-11-11T12:00:00+00:00",
+  "quote": "Base subway/local bus fare with OMNY or MetroCard: $2.90 (planning value; confirm on mta.info).",
+  "fares": [
+    {
+      "agency": "MTA",
+      "mode": "subway",
+      "full_fare_usd": "2.90",
+      "label": "Subway local"
+    }
+  ]
+}

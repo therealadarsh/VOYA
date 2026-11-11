@@ -1,0 +1,16 @@
+{
+  "synthetic": false,
+  "source": "National Park Service — Yosemite National Park fees",
+  "url": "https://www.nps.gov/yose/planyourvisit/fees.htm",
+  "observed_at": "2026-11-11T12:00:00+00:00",
+  "quote": "Private vehicle entrance fee (7-day pass) — verify current amount on nps.gov/yose/planyourvisit/fees.htm.",
+  "fees": [
+    {
+      "park_code": "YOSE",
+      "park_name": "Yosemite National Park",
+      "fee_type": "entrance",
+      "amount_usd": "35.00",
+      "unit": "vehicle_7_day"
+    }
+  ]
+}

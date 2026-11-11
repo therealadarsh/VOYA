@@ -52,7 +52,9 @@ class LLMResult:
 class LLMClient(Protocol):
     name: str
 
-    def complete_json(self, system: str, user: str, schema_hint: str, max_tokens: int = 600) -> LLMResult: ...
+    def complete_json(
+        self, system: str, user: str, schema_hint: str, max_tokens: int = 600
+    ) -> LLMResult: ...
 
 
 class OpenRouterClient:
@@ -69,20 +71,29 @@ class OpenRouterClient:
         self.in_price = D(os.environ.get("VOYA_LLM_PRICE_IN_PER_M", "1.00"))
         self.out_price = D(os.environ.get("VOYA_LLM_PRICE_OUT_PER_M", "4.00"))
 
-    def complete_json(self, system: str, user: str, schema_hint: str, max_tokens: int = 600) -> LLMResult:
+    def complete_json(
+        self, system: str, user: str, schema_hint: str, max_tokens: int = 600
+    ) -> LLMResult:
         body = {
             "model": self.model,
             "max_tokens": max_tokens,
             "response_format": {"type": "json_object"},
             "messages": [
-                {"role": "system", "content": system + "\nReply with one JSON object only. Schema: " + schema_hint},
+                {
+                    "role": "system",
+                    "content": system + "\nReply with one JSON object only. Schema: " + schema_hint,
+                },
                 {"role": "user", "content": user},
             ],
             "usage": {"include": True},
         }
         try:
-            r = httpx.post(self.URL, json=body, timeout=self.timeout,
-                           headers={"Authorization": f"Bearer {self._key}", "X-Title": "VOYA"})
+            r = httpx.post(
+                self.URL,
+                json=body,
+                timeout=self.timeout,
+                headers={"Authorization": f"Bearer {self._key}", "X-Title": "VOYA"},
+            )
         except httpx.TransportError as e:
             raise LLMError(f"network: {type(e).__name__}", retryable=True) from e
         if r.status_code in (408, 409, 429) or r.status_code >= 500:
@@ -98,7 +109,11 @@ class OpenRouterClient:
         usage = payload.get("usage") or {}
         tin, tout = int(usage.get("prompt_tokens", 0)), int(usage.get("completion_tokens", 0))
         cost = usage.get("cost")
-        usd = D(str(cost)) if cost is not None else (self.in_price * tin + self.out_price * tout) / D(1_000_000)
+        usd = (
+            D(str(cost))
+            if cost is not None
+            else (self.in_price * tin + self.out_price * tout) / D(1_000_000)
+        )
         return LLMResult(data, payload.get("model", self.model), tin, tout, usd)
 
 
@@ -111,7 +126,9 @@ class FakeLLM:
     cost_per_call: Decimal = D("0.001")
     calls: list[str] = field(default_factory=list)
 
-    def complete_json(self, system: str, user: str, schema_hint: str, max_tokens: int = 600) -> LLMResult:
+    def complete_json(
+        self, system: str, user: str, schema_hint: str, max_tokens: int = 600
+    ) -> LLMResult:
         self.calls.append(user)
         if not self.script:
             raise LLMError("fake: no scripted reply", retryable=False)
@@ -134,7 +151,9 @@ class Limits:
 class Harness:
     """Every model call goes through here."""
 
-    def __init__(self, client: LLMClient | None, store: Store, limits: Limits | None = None) -> None:
+    def __init__(
+        self, client: LLMClient | None, store: Store, limits: Limits | None = None
+    ) -> None:
         self.client = client
         self.store = store
         self.limits = limits or Limits()
@@ -152,8 +171,15 @@ class Harness:
             (f"user:{user_scope}:{now:%Y-%m-%d}", self.limits.user_day_usd),
         ]
 
-    def call(self, system: str, user: str, schema_hint: str, user_scope: str,
-             task_spent: Decimal, estimate_usd: Decimal = D("0.01")) -> LLMResult:
+    def call(
+        self,
+        system: str,
+        user: str,
+        schema_hint: str,
+        user_scope: str,
+        task_spent: Decimal,
+        estimate_usd: Decimal = D("0.01"),
+    ) -> LLMResult:
         if self.client is None:
             raise LLMError("no model configured", retryable=False)
         if not self.available:
@@ -179,8 +205,12 @@ class Harness:
                         time.sleep(min(2.0, 0.2 * 2**attempt) * random.random())
                         continue
                     raise
-                sp.update(model=res.model, input_tokens=res.input_tokens,
-                          output_tokens=res.output_tokens, cost_usd=str(res.cost_usd))
+                sp.update(
+                    model=res.model,
+                    input_tokens=res.input_tokens,
+                    output_tokens=res.output_tokens,
+                    cost_usd=str(res.cost_usd),
+                )
             self._failures = 0
             for scope, _ in self._scopes(user_scope):
                 self.store.add_ai_spend(scope, res.cost_usd)

@@ -53,6 +53,29 @@ Category = Literal[
 ]
 
 
+class CostUnit(StrEnum):
+    """How a line's amount scales (plan section 4.1)."""
+
+    PERSON = "person"
+    GROUP = "group"
+    ITEM = "item"
+    RIDE = "ride"
+    VEHICLE = "vehicle"
+    NIGHT = "night"
+    TRIP = "trip"
+
+
+class PriceEvidence(BaseModel):
+    """Citation backing a number (URL, quote, when observed)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    source: str = Field(min_length=1, description="Human-readable source label")
+    url: str | None = None
+    quote: str | None = Field(default=None, max_length=2000)
+    observed_at: AwareDatetime
+
+
 class CostSource(StrEnum):
     """Where a number came from, best evidence first."""
 
@@ -92,6 +115,15 @@ class CostLine(BaseModel):
     source: CostSource
     observed_at: AwareDatetime
     confidence: float = Field(ge=0.0, le=1.0)
+    quantity: Decimal = Field(default=Decimal(1), gt=0)
+    unit: CostUnit = CostUnit.PERSON
+    unit_amount: Money | None = None
+    members: tuple[str, ...] = ()
+    cash_only: bool = False
+    includes_tax: bool = False
+    includes_tip: bool = False
+    evidence: tuple[PriceEvidence, ...] = ()
+    half_life_days: int | None = Field(default=None, gt=0)
 
     @model_validator(mode="after")
     def _check_range(self) -> CostLine:
@@ -103,6 +135,12 @@ class CostLine(BaseModel):
             if not (self.low == self.amount == self.high) or self.confidence != 1.0:
                 raise ValueError(
                     "a user_actual line is a known amount: low == amount == high, confidence 1.0"
+                )
+        if self.unit_amount is not None and self.quantity > 0:
+            expected = _to_cents(self.unit_amount * self.quantity)
+            if expected != self.amount:
+                raise ValueError(
+                    f"unit_amount × quantity must equal amount; got {self.unit_amount}×{self.quantity}≠{self.amount}"
                 )
         return self
 
@@ -167,6 +205,10 @@ class CostSummary(BaseModel):
     by_category: dict[str, Decimal]
     # The stalest number the total leans on; None for an empty plan.
     oldest_observed_at: datetime | None
+    # Optional plan-level fields when summarizing with budget context (section 4.1).
+    hidden_costs: Decimal | None = None
+    you_could_keep: Decimal | None = None
+    getting_there_optional: Decimal | None = None
 
     @property
     def is_estimate(self) -> bool:
@@ -174,7 +216,16 @@ class CostSummary(BaseModel):
         return any(src is not CostSource.USER_ACTUAL for src in self.by_source)
 
 
-def summarize(lines: Sequence[CostLine], currency: str | None = None) -> CostSummary:
+_HIDDEN_CATEGORIES = frozenset({"tax", "tip", "fee", "extras"})
+
+
+def summarize(
+    lines: Sequence[CostLine],
+    currency: str | None = None,
+    *,
+    budget: Decimal | None = None,
+    getting_there_optional: Decimal | None = None,
+) -> CostSummary:
     """Total a plan's lines. All lines must share one currency (FX is Phase 2)."""
     currencies = {line.currency for line in lines}
     if currency is not None:
@@ -191,9 +242,18 @@ def summarize(lines: Sequence[CostLine], currency: str | None = None) -> CostSum
 
     by_source: dict[CostSource, Decimal] = {}
     by_category: dict[str, Decimal] = {}
+    hidden = zero
     for line in lines:
         by_source[line.source] = by_source.get(line.source, zero) + line.amount
         by_category[line.category] = by_category.get(line.category, zero) + line.amount
+        if line.category in _HIDDEN_CATEGORIES:
+            hidden += line.amount
+
+    keep: Decimal | None = None
+    if budget is not None:
+        keep = _to_cents(budget - point)
+        if keep < 0:
+            keep = zero
 
     return CostSummary(
         currency=cur,
@@ -206,4 +266,26 @@ def summarize(lines: Sequence[CostLine], currency: str | None = None) -> CostSum
         by_source=by_source,
         by_category=by_category,
         oldest_observed_at=min((l.observed_at for l in lines), default=None),
+        hidden_costs=hidden if hidden > 0 else (zero if lines else None),
+        you_could_keep=keep,
+        getting_there_optional=getting_there_optional,
     )
+
+
+def default_half_life_days(category: Category) -> int:
+    """Freshness half-lives from plan section 4.2 (days)."""
+    if category == "food":
+        return 180
+    if category in ("attraction", "activity", "park_fee"):
+        return 365
+    if category in ("transit", "getting_there"):
+        return 365
+    if category in ("tax", "tip", "fee", "extras", "gifts", "lodging"):
+        return 365
+    return 365
+
+
+def with_default_half_life(line: CostLine) -> CostLine:
+    if line.half_life_days is not None:
+        return line
+    return line.model_copy(update={"half_life_days": default_half_life_days(line.category)})

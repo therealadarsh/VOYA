@@ -74,8 +74,16 @@ def span(name: str, **attrs: Any) -> Iterator[dict]:
         status = f"error:{type(e).__name__}"
         raise
     finally:
-        _write({"trace_id": tid, "span": name, "ms": round((time.perf_counter() - start) * 1000, 1),
-                "status": status, **attrs, **extra})
+        _write(
+            {
+                "trace_id": tid,
+                "span": name,
+                "ms": round((time.perf_counter() - start) * 1000, 1),
+                "status": status,
+                **attrs,
+                **extra,
+            }
+        )
 
 
 def event(name: str, **attrs: Any) -> None:
@@ -98,7 +106,9 @@ def main(argv: list[str]) -> int:
     if len(argv) >= 2 and argv[0] == "show":
         for rec in load(argv[1]):
             attrs = {k: v for k, v in rec.items() if k not in ("trace_id", "span", "ms", "status")}
-            print(f"{rec['span']:<18} {rec['ms']:>7} ms  {rec['status']:<8} {json.dumps(attrs)[:160]}")
+            print(
+                f"{rec['span']:<18} {rec['ms']:>7} ms  {rec['status']:<8} {json.dumps(attrs)[:160]}"
+            )
         return 0
     if argv and argv[0] == "list":
         path = trace_dir() / "traces.jsonl"
