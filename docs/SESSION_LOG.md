@@ -96,3 +96,21 @@ design direction (see the private Cursor prompt).
 **Done:** `main` fast-forwarded/reset to `6a464b3` (same as `claude/new-session-4f5ud7`); unrelated old `main` history replaced; `make verify` green on push.
 
 **Note:** Clone `main` and `git pull` — default branch now holds the full MVP stack.
+
+---
+
+## 2026-11-12 · Claude Code (cloud) · branch claude/happy-brown-f43m58 · 56647b6..HEAD
+
+**Goal:** discuss a curated "first week" idea bank with rotation, and later
+similarity search over saved ideas.
+
+**Done:** design discussion only; no code changes. Test suite green (94).
+Added the idea bank to PROGRESS "Next".
+
+**Decisions:** none yet. The owner wants the current MVP fully working first;
+vector search is next phase.
+
+**Next:** owner explains the trip cases; then design the idea-bank data shape.
+
+**Questions for the owner:** cases for the first-week sets; how learning
+from usage should feed back.
