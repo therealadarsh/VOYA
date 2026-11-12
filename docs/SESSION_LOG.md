@@ -96,3 +96,37 @@ design direction (see the private Cursor prompt).
 **Done:** `main` fast-forwarded/reset to `6a464b3` (same as `claude/new-session-4f5ud7`); unrelated old `main` history replaced; `make verify` green on push.
 
 **Note:** Clone `main` and `git pull` — default branch now holds the full MVP stack.
+
+---
+
+## 2026-11-12 · Claude Code (cloud) · review of main 56647b6 (no code changes)
+
+**Goal:** independently check the Cursor M1–M6 work merged to `main`.
+
+**Done:**
+- `make verify` green from a clean `uv sync --frozen`: ruff, mypy, 94 tests,
+  and policy, citation, secret, traceability and example checks.
+- No tracked private files, no secrets in the full git history, no banned
+  word in product code. `docs/BUILD_PLAN.md` is technical only.
+- Test diff since `6edd483`: no assertions weakened or skipped (removed
+  lines were reformatted; the tax test now reads the cited rate).
+- Mutation checks, each caught: budget check loosened (guard property test),
+  hard limit = median (hard ≥ wiggle test), sales tax dropped (tax/tip test).
+- Browser walkthrough on a phone-sized screen: plan → helper → sign in and
+  save → log spend → discover, with no page or server errors. Cited NYC tax
+  and fare appear in plan lines.
+- Corrected `docs/PROGRESS.md` (it was stale: test count, sign-in, Next
+  numbering).
+
+**Not done / known issues:**
+- Could not verify the cited values: the session's network blocks the
+  official sites. Several quotes say "planning value; confirm" while marked
+  `synthetic: false`.
+- The tax label rounds 8.875% to 8.88%.
+- Demo places mixed with cited rules.
+
+**Next:** see `docs/PROGRESS.md` → Next (start with verifying the cited
+values).
+
+**Questions for the owner:** confirm the cited values; UX direction;
+provider budget tier.
