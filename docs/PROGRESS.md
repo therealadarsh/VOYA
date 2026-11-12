@@ -52,6 +52,10 @@ The living status of the build. Update it at the end of every session (see
    AI turns them into structured annotations; the owner approves; they show
    as "insider picks".
 4. **Deploy to AWS** with a cost alarm, plus real email sign-in.
+5. **Curated first-week idea bank (next phase, design under discussion):**
+   per-city morning / afternoon / evening options for days 1–7, rotated so
+   users don't all get the same first day; no invented prices. Similarity
+   search (vectors) and a reviewed learning loop come after that.
 
 ## Blocked / needs the owner
 - Choosing the places-data provider and its monthly budget.
