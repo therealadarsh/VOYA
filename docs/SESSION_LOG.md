@@ -114,3 +114,36 @@ vector search is next phase.
 
 **Questions for the owner:** cases for the first-week sets; how learning
 from usage should feed back.
+
+---
+
+## 2026-11-13 · Cursor Cloud Agent · branch cursor/phase-1a-private-preview-3eef · 7301ed8
+
+**Goal:** private preview (production settings, invite gate, email sign-in, durable SQLite, safety, draft legal pages, preview UI, health, container, browser flow, deploy guide).
+
+**Done:**
+- `src/voya/settings.py`: production start refuses to continue until invite code, https URL, absolute data directory, and SMTP values are set.
+- Invite cookie gate, SMTP magic-link mailer (fake SMTP in tests), dev sign-in unchanged.
+- SQLite path from `VOYA_DATA_DIR`; `python -m voya.backup`.
+- Security headers, same-host POST check, draft `/privacy` and `/terms`.
+- Preview label, feedback rows, `/healthz` and `/readyz`, JSON access logs without query strings.
+- `Dockerfile`, `docker-compose.yml`, `docs/DEPLOY.md` (single Docker host and AWS).
+- `tests/test_p1_preview.py`. Browser flow in `tests/browser/test_preview_flow.py` passed with `VOYA_BROWSER=1` (plan, feedback, dev sign-in, save). Default `make verify`: 112 passed, 1 skipped.
+
+**Decisions:** see `DECISIONS.md` (private preview settings, draft legal pages).
+
+**Not done / known issues:**
+- No Docker daemon here, so the image was not built.
+- SMTP account, invite code, public URL, hosting account, alarm amount, and legal wording are unanswered. Draft pages state that they are not legal text.
+- Demo catalog and dev token sign-in remain the local defaults.
+
+**Next:**
+1. Phase 1b on a branch stacked on this one: Postgres, places pipeline, NYC idea bank, sourced-cost banner rule, monitoring, accessibility.
+
+**Questions for the owner:**
+- Which hosting account should the private preview be deployed to?
+- What SMTP host, port, username, password, and From address should magic-link email use?
+- What invite code should the private preview require?
+- What public https URL should magic links use?
+- What monthly hosting budget should the AWS cost alarm use? BUILD_PLAN recorded $20; confirm or replace it before any alarm is created.
+- What wording should the Privacy page and the Terms page use?

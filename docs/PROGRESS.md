@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-13 · branch **`cursor/phase-1a-private-preview-3eef`** · private preview
+**Last updated:** 2026-11-13 · branch **`cursor/phase-1a-private-preview-3eef`** (`7301ed8`) · private preview
 
 ## Done
 - **Private preview (phase 1a):** production settings that refuse to start
