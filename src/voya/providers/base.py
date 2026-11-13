@@ -26,6 +26,8 @@ class PlaceStub:
 class PlacesProvider(Protocol):
     name: str
 
-    def search(self, query: str, *, near_lat: float, near_lng: float, limit: int = 5) -> list[PlaceStub]: ...
+    def search(
+        self, query: str, *, near_lat: float, near_lng: float, limit: int = 5
+    ) -> list[PlaceStub]: ...
 
     def spend_usd(self) -> Decimal: ...

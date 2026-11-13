@@ -116,6 +116,21 @@ class Catalog(BaseModel):
         return next((r for r in self.routes if r.from_id == from_id and r.to == to_id), None)
 
 
+# Guessed or bucket-mapped money keeps the demo banner up. A level is not a price.
+_UNSOURCED_MONEY = {CostSource.TYPE_GUESS, CostSource.PRICE_BUCKET}
+
+
+def show_demo_banner(cat: Catalog, line_sources: tuple[CostSource, ...] = ()) -> bool:
+    """True until the catalog is non-synthetic and no cost is a guess or a bucket mapping."""
+    if cat.synthetic:
+        return True
+    for dest in cat.destinations:
+        for place in dest.places:
+            if place.price.source in _UNSOURCED_MONEY:
+                return True
+    return any(source in _UNSOURCED_MONEY for source in line_sources)
+
+
 @lru_cache(maxsize=4)
 def load_catalog(path: str | None = None) -> Catalog:
     data = json.loads(Path(path or DEMO_PATH).read_text())

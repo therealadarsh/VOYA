@@ -8,7 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from voya.catalog import load_catalog
+from voya.catalog import load_catalog, show_demo_banner
 from voya.planner import PartyIn, PlanRequest, build
 
 MAX_DAY_TRIP_MIN = 180  # one way, door to door
@@ -85,7 +85,7 @@ def discover(req: DiscoverRequest) -> dict:
     )
     return {
         "options": options[:6],
-        "demo_data": cat.synthetic,
+        "demo_data": show_demo_banner(cat),
         "is_estimate": True,
         "empty_note": None
         if any(o["fits"] for o in options)

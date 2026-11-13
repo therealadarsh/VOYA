@@ -1,0 +1,89 @@
+{
+  "synthetic": false,
+  "source": "VOYA editorial list of public place names. This file contains no prices, fares, hours, or statistics.",
+  "observed_at": "2026-11-13T05:00:00+00:00",
+  "quote": "Place names only. Costs are attached in code only from cited fare files.",
+  "city": "nyc",
+  "sets": [
+    {
+      "id": "harbor",
+      "days": [
+        {"day": 1, "slots": [
+          {"part": "morning", "title": "Battery Park", "note": "Start at the harbor. No admission is shown until a source is on file."},
+          {"part": "afternoon", "title": "Statue of Liberty ferry terminal", "note": "The ferry fare is not shown until a source is on file."},
+          {"part": "evening", "title": "Walk through the financial district", "note": "An evening walk. No price is attached."}
+        ]},
+        {"day": 2, "slots": [
+          {"part": "morning", "title": "Central Park, south end", "note": "A morning in the park. No price is attached."},
+          {"part": "afternoon", "title": "The Metropolitan Museum of Art", "note": "Admission is not shown until a source is on file."},
+          {"part": "evening", "title": "Grand Army Plaza at 59th Street", "note": "An evening pause at the park edge. No price is attached."}
+        ]},
+        {"day": 3, "slots": [
+          {"part": "morning", "title": "New York Public Library, Stephen A. Schwarzman Building", "note": "See the building. No ticket price is shown."},
+          {"part": "afternoon", "title": "Bryant Park", "note": "An afternoon outside. No price is attached."},
+          {"part": "evening", "title": "Times Square", "note": "Walk through. No price is attached."}
+        ]},
+        {"day": 4, "slots": [
+          {"part": "morning", "title": "Brooklyn Bridge, Manhattan side", "note": "Walk the bridge. No price is attached."},
+          {"part": "afternoon", "title": "Brooklyn Bridge Park", "note": "Time by the water. No price is attached."},
+          {"part": "evening", "title": "DUMBO streets", "note": "An evening walk. No price is attached."}
+        ]},
+        {"day": 5, "slots": [
+          {"part": "morning", "title": "The High Line, south end", "note": "Walk the park. No price is attached."},
+          {"part": "afternoon", "title": "Chelsea Market", "note": "Look around. Meal prices are not shown until a source is on file."},
+          {"part": "evening", "title": "Hudson River Park", "note": "An evening walk. No price is attached."}
+        ]},
+        {"day": 6, "slots": [
+          {"part": "morning", "title": "Chinatown", "note": "Wander and choose a meal. Prices are not shown until a source is on file."},
+          {"part": "afternoon", "title": "Little Italy", "note": "A short walk north. Prices are not shown until a source is on file."},
+          {"part": "evening", "title": "SoHo", "note": "An evening walk. No price is attached."}
+        ]},
+        {"day": 7, "slots": [
+          {"part": "morning", "title": "The Cloisters", "note": "Admission is not shown until a source is on file."},
+          {"part": "afternoon", "title": "Fort Tryon Park", "note": "An afternoon outside. No price is attached."},
+          {"part": "evening", "title": "Upper West Side", "note": "Head back downtown when you are ready. No price is attached."}
+        ]}
+      ]
+    },
+    {
+      "id": "brooklyn",
+      "days": [
+        {"day": 1, "slots": [
+          {"part": "morning", "title": "Prospect Park", "note": "Start in Brooklyn. No price is attached."},
+          {"part": "afternoon", "title": "Brooklyn Museum", "note": "Admission is not shown until a source is on file."},
+          {"part": "evening", "title": "Grand Army Plaza, Brooklyn", "note": "An evening walk. No price is attached."}
+        ]},
+        {"day": 2, "slots": [
+          {"part": "morning", "title": "Brooklyn Botanic Garden", "note": "Admission is not shown until a source is on file."},
+          {"part": "afternoon", "title": "Prospect Park boathouse area", "note": "An afternoon outside. No price is attached."},
+          {"part": "evening", "title": "Park Slope", "note": "An evening walk. Meal prices are not shown until a source is on file."}
+        ]},
+        {"day": 3, "slots": [
+          {"part": "morning", "title": "Brooklyn Bridge Park", "note": "Morning by the water. No price is attached."},
+          {"part": "afternoon", "title": "Brooklyn Heights Promenade", "note": "A walk with a view. No price is attached."},
+          {"part": "evening", "title": "Brooklyn Bridge", "note": "Walk toward Manhattan. No price is attached."}
+        ]},
+        {"day": 4, "slots": [
+          {"part": "morning", "title": "Central Park, north end", "note": "A morning in the park. No price is attached."},
+          {"part": "afternoon", "title": "American Museum of Natural History", "note": "Admission is not shown until a source is on file."},
+          {"part": "evening", "title": "Columbus Avenue", "note": "An evening walk. No price is attached."}
+        ]},
+        {"day": 5, "slots": [
+          {"part": "morning", "title": "The High Line, north end", "note": "Walk south. No price is attached."},
+          {"part": "afternoon", "title": "Whitney Museum of American Art", "note": "Admission is not shown until a source is on file."},
+          {"part": "evening", "title": "Meatpacking District", "note": "An evening walk. No price is attached."}
+        ]},
+        {"day": 6, "slots": [
+          {"part": "morning", "title": "Williamsburg waterfront", "note": "A morning walk. Meal prices are not shown until a source is on file."},
+          {"part": "afternoon", "title": "Domino Park", "note": "An afternoon outside. No price is attached."},
+          {"part": "evening", "title": "Williamsburg", "note": "An evening walk. No price is attached."}
+        ]},
+        {"day": 7, "slots": [
+          {"part": "morning", "title": "Governors Island ferry terminal", "note": "The ferry fare is not shown until a source is on file."},
+          {"part": "afternoon", "title": "The island's paths", "note": "Walk. No price is attached."},
+          {"part": "evening", "title": "Battery Park", "note": "Come back to the harbor. No price is attached."}
+        ]}
+      ]
+    }
+  ]
+}

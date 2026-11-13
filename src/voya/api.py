@@ -23,7 +23,9 @@ from voya import obs
 from voya.accounts import MagicLinkService
 from voya.accounts.smtp_mailer import mailer_from_settings
 from voya.agent import HelperRequest, respond
-from voya.catalog import load_catalog
+from voya.catalog import load_catalog, show_demo_banner
+from voya.ideas import ideas_after, ideas_for
+from voya.metrics import METRICS
 from voya.discover import DiscoverRequest, discover
 from voya.llm import Harness, client_from_env
 from voya.log import access_log, configure_logging
@@ -168,13 +170,15 @@ def _apply_safety(response: Response, started: float, request: Request) -> Respo
     for key, value in security_headers(production=settings.production).items():
         response.headers.setdefault(key, value)
     response.headers["X-Trace-Id"] = obs.current_trace() or ""
+    duration_ms = int((time.perf_counter() - started) * 1000)
     access_log(
         method=request.method,
         path=request.url.path,
         status_code=response.status_code,
         trace_id=obs.current_trace() or "",
-        duration_ms=int((time.perf_counter() - started) * 1000),
+        duration_ms=duration_ms,
     )
+    METRICS.observe(response.status_code, duration_ms)
     return response
 
 
@@ -288,7 +292,7 @@ def meta() -> dict:
         "routes": [{"from": r.from_id, "to": r.to, "drive_min": r.drive_min} for r in cat.routes],
         "interests": INTERESTS,
         "spend_categories": CATEGORIES,
-        "demo_data": cat.synthetic,
+        "demo_data": show_demo_banner(cat),
         "preview": load_settings().preview_label,
         "data_notice": cat.notice if cat.synthetic else None,
         "ai_helper": "model" if harness() else "built-in",
@@ -656,6 +660,33 @@ def ops(x_ops_token: str | None = Header(None)) -> dict:
         "owner_price_checks_approved": len(approved_for_city("Chicago")),
         "owner_check_coverage_chicago_est": cov,
     }
+
+
+class IdeaNext(BaseModel):
+    current_id: str = Field(min_length=1, max_length=40)
+    days: int = Field(1, ge=1, le=7)
+
+
+@app.get("/v1/ideas")
+def idea_route(city: str = "nyc", seed: str = "voya", days: int = 1) -> dict:
+    if city != "nyc":
+        raise ApiError(404, "NO_IDEAS", "Idea sets for that city are not ready.")
+    if not seed or len(seed) > 80:
+        raise ApiError(422, "INVALID_INPUT", "Use a short seed.")
+    return ideas_for(seed, days)
+
+
+@app.post("/v1/ideas/next")
+def idea_next(body: IdeaNext) -> dict:
+    return ideas_after(body.current_id, body.days)
+
+
+@app.get("/metrics")
+def metrics(x_metrics_token: str | None = Header(None)) -> Response:
+    expected = os.environ.get("VOYA_METRICS_TOKEN")
+    if expected and x_metrics_token != expected:
+        raise ApiError(401, "METRICS_ONLY", "Metrics token required.")
+    return Response(METRICS.render(), media_type="text/plain; version=0.0.4")
 
 
 @app.get("/healthz")

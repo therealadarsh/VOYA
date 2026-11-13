@@ -64,6 +64,11 @@ database answers `SELECT 1`). Logs are JSON on stdout (`VOYA_LOG_FORMAT=json`).
 Access lines include the path and status, not the query string, so magic-link
 tokens are not logged.
 
+`/metrics` is Prometheus text: request count, error count, and total duration.
+Set `VOYA_METRICS_TOKEN` and send it as `X-Metrics-Token` so the scrape is not
+public. Point the host's scraper (or CloudWatch agent plus a sidecar) at that
+URL. No monitoring vendor account is created from this repo.
+
 ## 2. AWS
 
 Use the same image. This is a guide, not a provisioned account.
@@ -75,9 +80,11 @@ Use the same image. This is a guide, not a provisioned account.
    the task definition in plain text.
 3. Put a load balancer or App Runner HTTPS endpoint in front. Set
    `VOYA_PUBLIC_URL` to that `https://` origin.
-4. For this private preview, keep SQLite on a persistent volume (EFS access
-   point or a Lightsail disk) mounted at `/data`. Postgres is the next phase;
-   do not switch the preview to a database that is not wired yet.
+4. For the private preview, SQLite on a volume is enough. For the public MVP,
+   set `DATABASE_URL` to a Postgres URL (`postgresql://...`). The app uses
+   that URL instead of the SQLite file. Back up with `pg_dump` from the host.
+   Do not put the URL on a command line if it contains a password. RDS or
+   Lightsail Postgres both fit. This guide does not create the database.
 5. Schedule `python -m voya.backup` and copy the file to a private S3 bucket
    you control. Keep the bucket from public ACLs.
 6. Ship container stdout to CloudWatch Logs. The JSON lines are the app log.
@@ -102,6 +109,11 @@ These need the owner. The container and this guide do not guess them.
   recorded $20; confirm or replace it before any alarm is created.
 - What wording should the Privacy page and the Terms page use? The pages
   shipped here are drafts and say so. They are not legal text.
+- What is the Foursquare API key, the monthly budget in USD, and the USD to
+  count per search? Live place search stays off until `FOURSQUARE_API_KEY`,
+  `VOYA_PLACES_BUDGET_USD`, `VOYA_PLACES_USD_PER_CALL`, and
+  `VOYA_PLACES_LIVE=1` are set. The demo banner stays up while place prices
+  are still the synthetic catalog.
 
 ## Local image check
 

@@ -147,3 +147,36 @@ from usage should feed back.
 - What public https URL should magic links use?
 - What monthly hosting budget should the AWS cost alarm use? BUILD_PLAN recorded $20; confirm or replace it before any alarm is created.
 - What wording should the Privacy page and the Terms page use?
+
+---
+
+## 2026-11-13 · Cursor Cloud Agent · branch cursor/phase-1b-nyc-mvp-3eef · fc6838f
+
+**Goal:** public NYC slice on top of the private preview: Postgres, places pipeline, idea bank, sourced-cost banner rule, metrics, accessibility.
+
+**Done:**
+- `src/voya/db.py`: SQLite or Postgres. `tests/test_p1_nyc.py` round trip passed against local Postgres 16 when `VOYA_TEST_DATABASE_URL` is set. Default `make verify` skips that test.
+- Foursquare search client. Live calls require a key, a monthly budget, a per-call USD amount, and `VOYA_PLACES_LIVE=1`. Coordinates rounded to 3 decimal places. Price levels are not converted to dollars.
+- `data/ideas/nyc.json`: two 7-day sets. Rotation by seed. "Show me another" advances the set. The only attached cost is the cited MTA fare.
+- `show_demo_banner`: stays on for the synthetic catalog and for any type-guess or price-bucket cost.
+- `/metrics` Prometheus text. Static accessibility checks for labels, language, contrast, and focus. Browser flow passed again, including idea rotation.
+- Default suite: 123 passed, 2 skipped.
+
+**Decisions:** see `DECISIONS.md` (Postgres URL, Foursquare budget gate, demo banner rule, idea bank).
+
+**Not done / known issues:**
+- No Foursquare key or budget, so no live place fetch and no real NYC place prices. The demo banner stays.
+- Hosting, SMTP, invite code, public URL, alarm amount, and legal wording are still unanswered.
+- Vectors, rituals, the learner, extra regions, Europe, and climate were not started.
+
+**Next:**
+1. Owner supplies the blocked values. Then cited NYC place prices can replace the demo catalog.
+
+**Questions for the owner:**
+- Which hosting account should this be deployed to?
+- What SMTP host, port, username, password, and From address should magic-link email use?
+- What invite code should the private preview require?
+- What public https URL should magic links use?
+- What monthly hosting budget should the AWS cost alarm use? BUILD_PLAN recorded $20; confirm or replace it before any alarm is created.
+- What wording should the Privacy page and the Terms page use?
+- What is the Foursquare API key, the monthly budget in USD, and the USD to count per search?
