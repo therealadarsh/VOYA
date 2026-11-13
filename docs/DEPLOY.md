@@ -1,39 +1,118 @@
-# Deploy VOYA on AWS (MVP)
+# Deploy VOYA
 
-Target: one small container (API + built React static files) and Lightsail Postgres or RDS,
-US region, HTTPS, secrets in AWS Secrets Manager, **Budgets alarm at $20/month**.
+Two ways to run the production container. Neither path is provisioned from
+this repo: deploying needs the owner's hosting account (see **Blocked**).
 
-## Prerequisites
+The image is `Dockerfile`. It listens on port 8000, runs as uid 10001, stores
+SQLite at `VOYA_DATA_DIR` (default `/data`), and **exits on startup** when
+`VOYA_ENV=production` and any required setting is missing. The questions it
+prints are the ones to answer before a real start.
 
-- AWS account with ~$100 credits
-- Domain (optional) pointing at load balancer
-- `OPENROUTER_API_KEY`, `FOURSQUARE_API_KEY` (optional) in secrets
-
-## Build
-
-```sh
-uv sync
-cd web && npm ci && npm run build
-docker build -t voya .
-```
-
-## Runtime env
+Required when `VOYA_ENV=production`:
 
 | Name | Purpose |
 |---|---|
-| `DATABASE_URL` | `postgresql+psycopg://...` (SQLite omitted in prod) |
-| `VOYA_DEV_SIGNIN` | `0` (magic link; use SES or similar) |
-| `VOYA_PUBLIC_URL` | `https://your.domain` |
-| `VOYA_CITED_RULES` | `1` |
+| `VOYA_INVITE_CODE` | Private-preview code, 8 or more characters |
+| `VOYA_PUBLIC_URL` | `https://` origin used in magic links |
+| `VOYA_DEV_SIGNIN` | `0` so sign-in sends email |
+| `VOYA_DATA_DIR` | Absolute directory that survives redeploys |
+| `VOYA_SMTP_HOST` | SMTP server |
+| `VOYA_SMTP_PORT` | Usually `587` |
+| `VOYA_SMTP_USERNAME` | SMTP user |
+| `VOYA_SMTP_PASSWORD` | SMTP password |
+| `VOYA_SMTP_FROM` | From address on magic-link mail |
 
-## Budget alarm
+Put secrets in the host's secret store or a gitignored `.env`. Do not bake
+them into the image.
 
-Create an AWS Budgets monthly cost budget with email alert at **$20**.
+## 1. Simple host (Docker Compose)
 
-## Smoke test
+A single Linux machine with Docker. HTTPS terminates at a reverse proxy on
+the same machine (Caddy or nginx). The app container speaks HTTP on loopback.
 
-1. Open `/` on a phone width (~360px).
-2. Plan Chicago → see est. total + demo banner.
-3. Sign in (magic link) → save trip → log spend.
+```sh
+docker build -t voya .
+docker compose up -d
+```
 
-This guide is intentionally short; refine with your chosen Lightsail/ECS template when provisioning.
+`docker-compose.yml` mounts a named volume on `/data`. The database file is
+`/data/voya.db`. Redeploying the container (`docker compose up -d --build`)
+keeps that volume.
+
+Backups use SQLite's backup API and write into the same volume:
+
+```sh
+docker compose exec voya .venv/bin/python -m voya.backup
+```
+
+Run that from cron. Copy `voya-*.db` off the machine as well; a volume that
+dies with the disk is not a backup. Restore by stopping the app and replacing
+`/data/voya.db` with a chosen backup file.
+
+Point the proxy at `127.0.0.1:8000`. The proxy owns the certificate. The
+container sends `Strict-Transport-Security` only when `VOYA_ENV=production`.
+
+Smoke check:
+
+```sh
+curl -fsS http://127.0.0.1:8000/healthz
+curl -fsS http://127.0.0.1:8000/readyz
+```
+
+`/healthz` is liveness (the process is up). `/readyz` is readiness (the
+database answers `SELECT 1`). Logs are JSON on stdout (`VOYA_LOG_FORMAT=json`).
+Access lines include the path and status, not the query string, so magic-link
+tokens are not logged.
+
+## 2. AWS
+
+Use the same image. This is a guide, not a provisioned account.
+
+1. Build the image and push it to a private ECR repository in the region you
+   choose.
+2. Run it as one small service (App Runner, Lightsail containers, or ECS
+   Fargate) with the environment variables above in Secrets Manager, not in
+   the task definition in plain text.
+3. Put a load balancer or App Runner HTTPS endpoint in front. Set
+   `VOYA_PUBLIC_URL` to that `https://` origin.
+4. For this private preview, keep SQLite on a persistent volume (EFS access
+   point or a Lightsail disk) mounted at `/data`. Postgres is the next phase;
+   do not switch the preview to a database that is not wired yet.
+5. Schedule `python -m voya.backup` and copy the file to a private S3 bucket
+   you control. Keep the bucket from public ACLs.
+6. Ship container stdout to CloudWatch Logs. The JSON lines are the app log.
+7. Alarms: `/readyz` failing, and a monthly cost alarm. `docs/BUILD_PLAN.md`
+   recorded **$20** as a working figure. Confirm or replace that amount
+   before creating the alarm (see **Blocked**). This guide does not create
+   the alarm.
+
+Security group: the task accepts traffic from the load balancer only. The
+database port is not public because the preview uses a file on the volume.
+
+## Blocked
+
+These need the owner. The container and this guide do not guess them.
+
+- Which hosting account should the private preview be deployed to?
+- What SMTP host, port, username, password, and From address should
+  magic-link email use?
+- What invite code should the private preview require?
+- What public https URL should magic links use?
+- What monthly hosting budget should the AWS cost alarm use? BUILD_PLAN
+  recorded $20; confirm or replace it before any alarm is created.
+- What wording should the Privacy page and the Terms page use? The pages
+  shipped here are drafts and say so. They are not legal text.
+
+## Local image check
+
+Override the production defaults when you only want to see the process boot:
+
+```sh
+docker run --rm -p 8000:8000 \
+  -e VOYA_ENV=development \
+  -e VOYA_DEV_SIGNIN=1 \
+  -e VOYA_DATA_DIR=/data \
+  voya
+```
+
+Development sign-in returns a token in the response. Production does not.

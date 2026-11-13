@@ -10,11 +10,11 @@ sync:
 	uv sync --frozen
 
 lint:
-	uv run ruff check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py
-	uv run ruff format --check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py
+	uv run ruff check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts src/voya/settings.py src/voya/log.py src/voya/backup.py src/voya/preview.py src/voya/safety.py scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py tests/test_p1_preview.py
+	uv run ruff format --check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts src/voya/settings.py src/voya/log.py src/voya/backup.py src/voya/preview.py src/voya/safety.py scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py tests/test_p1_preview.py
 
 typecheck:
-	uv run mypy src/voya/cost src/voya/pricing src/voya/data src/voya/accounts
+	uv run mypy src/voya/cost src/voya/pricing src/voya/data src/voya/accounts src/voya/settings.py src/voya/log.py src/voya/backup.py src/voya/preview.py src/voya/safety.py
 
 policy:
 	uv run python scripts/check_policy.py
@@ -37,4 +37,7 @@ eval:
 trace:
 	uv run python -m voya.obs list
 
-.PHONY: run test verify sync lint typecheck policy citations traceability secrets examples eval trace
+backup:
+	uv run python -m voya.backup
+
+.PHONY: run test verify sync lint typecheck policy citations traceability secrets examples eval trace backup

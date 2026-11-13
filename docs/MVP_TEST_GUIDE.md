@@ -27,10 +27,13 @@ best).
 
 ## Intentionally missing in the MVP
 - **Real price data:** the demo catalog is synthetic.
-- **Emailed magic links:** sign-in returns a token directly in dev mode.
+- **Live email:** development sign-in returns a token. Production
+  (`VOYA_DEV_SIGNIN=0` plus SMTP settings) sends a magic link. The SMTP
+  account is not configured in this repo.
 - **Receipt photos, community price sharing, rewards, ads/subscriptions,
   native app, other currencies and languages.**
-- **Deployment:** runs locally; see the plan for AWS.
+- **A live host:** the container and [`docs/DEPLOY.md`](DEPLOY.md) are ready.
+  Deploying needs the owner's hosting account.
 
 ## Reporting feedback
 Note what you tried, what you expected, and what happened. A trace ID (the

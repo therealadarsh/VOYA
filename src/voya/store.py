@@ -52,7 +52,17 @@ CREATE TABLE IF NOT EXISTS ai_spend (
 CREATE TABLE IF NOT EXISTS magic_links (
   token_hash TEXT PRIMARY KEY, email TEXT NOT NULL, expires_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS feedback (
+  id TEXT PRIMARY KEY, message TEXT NOT NULL, contact TEXT, created_at TEXT NOT NULL
+);
 """
+
+
+def default_db_path() -> str:
+    explicit = os.environ.get("VOYA_DB")
+    if explicit:
+        return explicit
+    return str(Path(os.environ.get("VOYA_DATA_DIR", "var")) / "voya.db")
 
 
 def _now() -> str:
@@ -69,7 +79,7 @@ def new_id(prefix: str) -> str:
 
 class Store:
     def __init__(self, path: str | None = None) -> None:
-        self.path = path or os.environ.get("VOYA_DB", "var/voya.db")
+        self.path = path or default_db_path()
         if self.path != ":memory:":
             Path(self.path).parent.mkdir(parents=True, exist_ok=True)
         self._conn = sqlite3.connect(self.path, check_same_thread=False)
@@ -77,6 +87,23 @@ class Store:
         self._lock = threading.Lock()
         with self._lock:
             self._conn.executescript(SCHEMA)
+
+    def ping(self) -> None:
+        with self.tx() as c:
+            c.execute("SELECT 1")
+
+    def add_feedback(self, message: str, contact: str | None) -> str:
+        fid = new_id("fbk")
+        with self.tx() as c:
+            c.execute(
+                "INSERT INTO feedback VALUES (?,?,?,?)",
+                (fid, message, contact, _now()),
+            )
+        return fid
+
+    def feedback_all(self) -> list[dict]:
+        with self.tx() as c:
+            return [dict(r) for r in c.execute("SELECT * FROM feedback ORDER BY created_at")]
 
     @contextmanager
     def tx(self) -> Iterator[sqlite3.Connection]:
@@ -165,7 +192,9 @@ class Store:
     def consume_magic_link(self, token: str) -> str | None:
         h = _hash(token)
         with self.tx() as c:
-            row = c.execute("SELECT email, expires_at FROM magic_links WHERE token_hash=?", (h,)).fetchone()
+            row = c.execute(
+                "SELECT email, expires_at FROM magic_links WHERE token_hash=?", (h,)
+            ).fetchone()
             if not row:
                 return None
             if datetime.fromisoformat(row["expires_at"]) < datetime.now(UTC):

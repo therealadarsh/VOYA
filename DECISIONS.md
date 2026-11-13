@@ -30,3 +30,4 @@ One line per major choice and why. Newest at the bottom.
 - **OpenRouter models (target):** helper `openrouter/google/gemini-2.5-flash`, narration `openrouter/openai/gpt-4o-mini` (override via env).
 - **`owner_check` cost source:** approved rows from `voya price-check` (pending → approve); coverage on `/v1/ops`.
 - **Data strategy (2026-11-11):** paid APIs for display only; licensed data per licence; owned prices via insider notes + price-check — no scraping.
+- **Private preview (2026-11-13):** `VOYA_ENV=production` refuses to start until an invite code, https public URL, absolute `VOYA_DATA_DIR`, and SMTP settings are present. Dev sign-in stays the default outside production. SQLite lives in that directory; `python -m voya.backup` copies it. Privacy and Terms pages are drafts until the owner supplies legal wording.

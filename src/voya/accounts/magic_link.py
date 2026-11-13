@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import secrets
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
@@ -26,7 +25,9 @@ class FakeMailer:
 
 
 def dev_mode_returns_token() -> bool:
-    return os.environ.get("VOYA_DEV_SIGNIN", "1").strip().lower() in {"1", "true", "yes"}
+    from voya.settings import load_settings
+
+    return load_settings().dev_signin
 
 
 @dataclass

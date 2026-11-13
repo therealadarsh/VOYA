@@ -1,9 +1,10 @@
 # VOYA
 
-**Status:** **94 tests** on **`main`** — cited rules, magic-link,
-`voya price-check`, React scaffold in `web/`. Demo places until provider wiring.
-[`VERIFY.md`](VERIFY.md) ·
-[`docs/BUILD_PLAN.md`](docs/BUILD_PLAN.md) · history: [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md)
+**Status:** **112 tests** — private preview: invite-code gate, email magic
+links when SMTP is set, SQLite on a persistent directory with backups,
+security headers, `/healthz` and `/readyz`. Demo places until every cost is
+cited. Not deployed (hosting account still needed). See
+[`docs/DEPLOY.md`](docs/DEPLOY.md) · [`docs/PROGRESS.md`](docs/PROGRESS.md).
 
 Plan a trip (one day or up to 30) to your budget, door to door. Every cost
 carries a range, a source and a stated confidence, and is always labeled as
@@ -20,7 +21,7 @@ back under budget.
 ```sh
 uv sync                                   # Python 3.12 + dependencies
 make run                                  # http://localhost:8000
-make test                                 # 84 tests, no network, no AI tokens
+make test                                 # 112 tests, no network, no AI tokens
 ```
 
 Optional: set `OPENROUTER_API_KEY` (and `VOYA_LLM_MODEL_HELPER`) in `.env` to

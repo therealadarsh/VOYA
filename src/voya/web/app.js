@@ -59,6 +59,7 @@
   async function init() {
     state.meta = await api("GET", "/v1/meta");
     $("#demo-banner").hidden = !state.meta.demo_data;
+    if ($("#preview-badge")) $("#preview-badge").hidden = !state.meta.preview;
     const opts = (kind) => state.meta.destinations.filter((d) => d.kind === kind).map((d) => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("");
     $("#f-dest").innerHTML = `<optgroup label="Cities">${opts("city")}</optgroup><optgroup label="National parks">${opts("park")}</optgroup>`;
     const cities = state.meta.destinations.filter((d) => d.kind === "city").map((d) => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("");
@@ -80,6 +81,9 @@
     $("#signin-close").onclick = () => ($("#signin").hidden = true);
     $("#helper-form").onsubmit = (e) => { e.preventDefault(); ask($("#helper-msg").value); };
     $("#signin-form").onsubmit = signIn;
+    $("#feedback-open").onclick = () => { $("#fb-sent").hidden = true; $("#fb-error").hidden = true; $("#feedback").hidden = false; $("#fb-message").focus(); };
+    $("#feedback-close").onclick = () => ($("#feedback").hidden = true);
+    $("#feedback-form").onsubmit = sendFeedback;
     const quick = ["It's raining, what now?", "Make it $20 cheaper", "Swap a stop for something outdoorsy", "Find something I'd like", "Why is dinner so expensive?"];
     $("#helper-chips").innerHTML = quick.map((q) => `<button type="button" class="chip">${esc(q)}</button>`).join("");
     $$("#helper-chips .chip").forEach((c) => (c.onclick = () => { $("#helper-msg").value = c.textContent; if (/rain/i.test(c.textContent)) $("#helper-rain").checked = true; ask(c.textContent); }));
@@ -204,11 +208,21 @@
     try { show(await api("POST", `/v1/plans/${state.planId}/save`), true); toast("Trip saved. You can track spending now."); }
     catch (x) { if (x.status === 401) { state.token = null; store.set("voya.token", null); $("#signin").hidden = false; } else toast(x.message); }
   }
+  async function sendFeedback(e) {
+    e.preventDefault();
+    const err = $("#fb-error"); err.hidden = true;
+    try {
+      await api("POST", "/v1/feedback", { message: $("#fb-message").value, contact: $("#fb-contact").value || null });
+      $("#fb-sent").hidden = false;
+      $("#fb-message").value = "";
+    } catch (x) { err.textContent = x.message; err.hidden = false; }
+  }
   async function signIn(e) {
     e.preventDefault();
     const err = $("#si-error"); err.hidden = true;
     try {
       const r = await api("POST", "/v1/auth/start", { email: $("#si-email").value, is_adult: $("#si-adult").checked });
+      if (r.status === "email_sent") { $("#si-sent").hidden = false; return; }
       state.token = r.token; store.set("voya.token", r.token); $("#signin").hidden = true; await save();
     } catch (x) { err.textContent = x.message; err.hidden = false; }
   }

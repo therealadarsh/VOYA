@@ -21,6 +21,8 @@ h3 { font-size: 1rem; margin: 0 0 6px; }
 .top { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); padding: 10px 16px 0; }
 .brand { max-width: 760px; margin: 0 auto; display: flex; align-items: baseline; gap: 10px; }
 .logo { font-weight: 800; letter-spacing: .12em; color: var(--brand); }
+.preview-badge { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: #6d3b00; color: #fff; border-radius: 999px; padding: 2px 8px; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .tag { color: var(--muted); font-size: .9rem; }
 .tabs { max-width: 760px; margin: 8px auto 0; display: flex; gap: 4px; }
 .tabs button { flex: 1; background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 4px; font: inherit; color: var(--muted); cursor: pointer; }
@@ -93,4 +95,7 @@ button.go { background: var(--brand); color: var(--brand-ink); border-color: var
 .warn-card { border-color: var(--warn); }
 table.ex { width: 100%; border-collapse: collapse; font-size: .88rem; } table.ex td { padding: 4px 6px; border-top: 1px solid var(--line); }
 .muted { color: var(--muted); }
+.foot { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; display: flex; gap: 16px; align-items: center; color: var(--muted); font-size: .9rem; }
+.foot button { background: none; border: 0; padding: 0; color: var(--brand); font: inherit; font-weight: 600; cursor: pointer; }
+textarea { resize: vertical; }
 @media (max-width: 420px) { .headline .big { font-size: 1.8rem; } .row { flex-wrap: wrap; } .row > * { min-width: 130px; } }
