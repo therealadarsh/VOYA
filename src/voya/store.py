@@ -1,4 +1,4 @@
-"""Persistence (SQLite for the MVP; same shape moves to Postgres later).
+"""Persistence (SQLite, or Postgres when `DATABASE_URL` is a postgres URL).
 
 Plans are stored as their *request* (the planner is deterministic), with a
 version history so changes can be undone. Spend entries store only amount,
@@ -11,13 +11,13 @@ import hashlib
 import json
 import os
 import secrets
-import sqlite3
-import threading
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from typing import Iterator
+
+from voya.db import DB, ResultCursor
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS plans (
@@ -62,6 +62,9 @@ def default_db_path() -> str:
     explicit = os.environ.get("VOYA_DB")
     if explicit:
         return explicit
+    url = os.environ.get("DATABASE_URL", "").strip()
+    if url.startswith("postgres"):
+        return url
     return str(Path(os.environ.get("VOYA_DATA_DIR", "var")) / "voya.db")
 
 
@@ -80,13 +83,8 @@ def new_id(prefix: str) -> str:
 class Store:
     def __init__(self, path: str | None = None) -> None:
         self.path = path or default_db_path()
-        if self.path != ":memory:":
-            Path(self.path).parent.mkdir(parents=True, exist_ok=True)
-        self._conn = sqlite3.connect(self.path, check_same_thread=False)
-        self._conn.row_factory = sqlite3.Row
-        self._lock = threading.Lock()
-        with self._lock:
-            self._conn.executescript(SCHEMA)
+        self._db = DB(self.path)
+        self._db.script(SCHEMA)
 
     def ping(self) -> None:
         with self.tx() as c:
@@ -106,14 +104,9 @@ class Store:
             return [dict(r) for r in c.execute("SELECT * FROM feedback ORDER BY created_at")]
 
     @contextmanager
-    def tx(self) -> Iterator[sqlite3.Connection]:
-        with self._lock:
-            try:
-                yield self._conn
-                self._conn.commit()
-            except Exception:
-                self._conn.rollback()
-                raise
+    def tx(self) -> Iterator[ResultCursor]:
+        with self._db.tx() as cursor:
+            yield cursor
 
     # -- plans ---------------------------------------------------------------
     def create_plan(self, request_json: str, owner: str | None = None) -> str:

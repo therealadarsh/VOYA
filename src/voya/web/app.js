@@ -185,9 +185,11 @@
       `<div><span>Water, snacks, lockers</span><span>est. ${money2(plan.trip_lines.filter((l) => l.category === "extras").reduce((a, l) => a + Number(l.amount), 0))}</span></div>` +
       `<div><span>Tip on sit-down meals</span><span>${esc(request.tip_pct)}% <button class="small" id="edit-tip">Edit</button></span></div></div>`;
     if (plan.notes?.length) html += `<p class="hint">${plan.notes.map(esc).join(" ")}</p>`;
+    if (request.destination === "new-york") html += `<div id="ideas" class="card"><h2>First week ideas</h2><p class="hint">Loading ideas…</p></div>`;
     html += `<div class="actions"><button class="ghost" id="new-plan">New plan</button><button class="ghost" id="undo">Undo</button>
       <button class="ghost" id="ask">Ask VOYA</button><button class="primary" style="margin:0" id="save">${saved ? "Saved ✓ · Track spend" : "Save trip"}</button></div>`;
     $("#plan-view").innerHTML = html;
+    if (request.destination === "new-york") loadIdeas(request.days);
 
     $$("[data-up]").forEach((b) => (b.onclick = async () => { try { show(await api("POST", `/v1/plans/${state.planId}/upgrades/${encodeURIComponent(b.dataset.up)}`), true); toast("Upgrade added", { label: "Undo", fn: undo }); } catch (x) { toast(x.message); } }));
     $("#find-like") && ($("#find-like").onclick = () => { openHelper(); $("#helper-msg").value = "Find something I'd like"; ask("Find something I'd like"); });
@@ -207,6 +209,25 @@
     if (!state.token) { $("#signin").hidden = false; return; }
     try { show(await api("POST", `/v1/plans/${state.planId}/save`), true); toast("Trip saved. You can track spending now."); }
     catch (x) { if (x.status === 401) { state.token = null; store.set("voya.token", null); $("#signin").hidden = false; } else toast(x.message); }
+  }
+  function ideaSeed() {
+    let seed = store.get("voya.ideaSeed");
+    if (!seed) { seed = Math.random().toString(36).slice(2); store.set("voya.ideaSeed", seed); }
+    return seed;
+  }
+  function renderIdeas(payload) {
+    const box = $("#ideas");
+    if (!box) return;
+    const days = payload.days.map((d) => `<h3>Day ${d.day}: ${esc(d.slots[0]?.title || "")}</h3>` + d.slots.map((s) => `<p><b>${esc(s.part)}</b> ${esc(s.title)} <span class="hint">${esc(s.note)}</span></p>`).join("")).join("");
+    const transit = payload.transit ? `<p class="hint">Transit est. ${money2(payload.transit.amount)} · ${esc(payload.transit.label)} · ${esc(payload.transit.source)}</p>` : "";
+    box.innerHTML = `<h2>First week ideas</h2><p class="hint">${esc(payload.note)}</p>${transit}${days}<button type="button" class="ghost" id="ideas-another">Show me another</button>`;
+    $("#ideas-another").onclick = async () => {
+      try { renderIdeas(await api("POST", "/v1/ideas/next", { current_id: payload.set_id, days: state.data.request.days })); }
+      catch (x) { toast(x.message); }
+    };
+  }
+  function loadIdeas(days) {
+    api("GET", `/v1/ideas?city=nyc&seed=${encodeURIComponent(ideaSeed())}&days=${days}`).then(renderIdeas).catch((x) => toast(x.message));
   }
   async function sendFeedback(e) {
     e.preventDefault();

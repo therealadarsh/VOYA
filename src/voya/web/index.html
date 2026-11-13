@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <div class="brand"><span class="logo">VOYA</span><span class="preview-badge" id="preview-badge">Preview</span><span class="tag">Trips that fit your budget</span></div>
   <nav class="tabs" role="tablist">
@@ -18,7 +19,7 @@
 </header>
 <div id="demo-banner" class="banner" hidden>Demo prices: places and prices are made up for testing. Every amount is an estimate.</div>
 
-<main>
+<main id="main">
   <!-- PLAN FORM -->
   <section id="tab-plan" class="tab">
     <form id="plan-form" class="card form" autocomplete="off">
@@ -134,7 +135,7 @@
     <div class="sheet-head"><h2 id="sheet-title">Ask VOYA</h2><button class="ghost" id="sheet-close" aria-label="Close">✕</button></div>
     <div class="chips" id="helper-chips"></div>
     <form id="helper-form">
-      <textarea id="helper-msg" rows="2" maxlength="500" placeholder="e.g. It's raining, what now?"></textarea>
+      <label>Message <textarea id="helper-msg" rows="2" maxlength="500" placeholder="e.g. It's raining, what now?"></textarea></label>
       <div class="row tight">
         <label>Time <input type="time" id="helper-time"></label>
         <label>Day <select id="helper-day"></select></label>

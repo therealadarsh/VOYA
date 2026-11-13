@@ -10,11 +10,11 @@ sync:
 	uv sync --frozen
 
 lint:
-	uv run ruff check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts src/voya/settings.py src/voya/log.py src/voya/backup.py src/voya/preview.py src/voya/safety.py scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py tests/test_p1_preview.py
-	uv run ruff format --check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts src/voya/settings.py src/voya/log.py src/voya/backup.py src/voya/preview.py src/voya/safety.py scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py tests/test_p1_preview.py
+	uv run ruff check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts src/voya/settings.py src/voya/log.py src/voya/backup.py src/voya/preview.py src/voya/safety.py src/voya/db.py src/voya/metrics.py src/voya/ideas.py src/voya/providers scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py tests/test_p1_preview.py tests/test_p1_nyc.py tests/test_p1_a11y.py
+	uv run ruff format --check src/voya/cost src/voya/pricing src/voya/data src/voya/accounts src/voya/settings.py src/voya/log.py src/voya/backup.py src/voya/preview.py src/voya/safety.py src/voya/db.py src/voya/metrics.py src/voya/ideas.py src/voya/providers scripts tests/test_m1_data.py tests/test_m2_cited_planner.py tests/test_m4_magic_link.py tests/test_p1_preview.py tests/test_p1_nyc.py tests/test_p1_a11y.py
 
 typecheck:
-	uv run mypy src/voya/cost src/voya/pricing src/voya/data src/voya/accounts src/voya/settings.py src/voya/log.py src/voya/backup.py src/voya/preview.py src/voya/safety.py
+	uv run mypy src/voya/cost src/voya/pricing src/voya/data src/voya/accounts src/voya/settings.py src/voya/log.py src/voya/backup.py src/voya/preview.py src/voya/safety.py src/voya/db.py src/voya/metrics.py src/voya/ideas.py src/voya/providers
 
 policy:
 	uv run python scripts/check_policy.py

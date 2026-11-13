@@ -29,7 +29,16 @@ def backup_sqlite(src: Path, dest_dir: Path, *, now: datetime | None = None) -> 
 
 def main() -> int:
     settings = load_settings()
-    src = Path(os.environ.get("VOYA_DB", str(settings.data_dir / "voya.db")))
+    url = os.environ.get("DATABASE_URL", "").strip()
+    chosen = os.environ.get("VOYA_DB") or (url if url.startswith("postgres") else "")
+    chosen = chosen or str(settings.data_dir / "voya.db")
+    if chosen.startswith("postgres"):
+        print(
+            "Postgres backups use pg_dump from the host. "
+            "Read DATABASE_URL from the environment; do not paste it into a shell history."
+        )
+        return 2
+    src = Path(chosen)
     dest = backup_sqlite(src, settings.data_dir / "backups")
     print(dest)
     return 0

@@ -155,13 +155,12 @@ def test_every_option_fits_and_raising_needs_a_tap():
     out = respond(store, pid, 1, r, HelperRequest(message="find something I'd like"), None, "u1")
     assert out["options"]
     for o in out["options"]:
-        _, _, priced = priced_for(
-            PlanRequest.model_validate_json(
-                store._conn.execute(
-                    "SELECT request_json FROM proposals WHERE id=?", (o["proposal_id"],)
-                ).fetchone()[0]
-            )
-        )
+        with store.tx() as cursor:
+            row = cursor.execute(
+                "SELECT request_json FROM proposals WHERE id=?", (o["proposal_id"],)
+            ).fetchone()
+        assert row is not None
+        _, _, priced = priced_for(PlanRequest.model_validate_json(row[0]))
         assert priced.fit.ok
         assert o["raises_total"] == (D(o["delta"]) > 0)
 

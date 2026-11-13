@@ -13,6 +13,7 @@ _EXEMPT = {
     "/terms",
     "/v1/preview/unlock",
     "/v1/auth/verify",
+    "/metrics",
 }
 
 

@@ -85,11 +85,18 @@ def test_preview_flow(tmp_path: Path) -> None:
             page.get_by_text("Preview", exact=True).wait_for()
             page.locator("#f-dest option").first.wait_for(state="attached")
             page.wait_for_function("() => document.querySelector('#f-date').value")
-            page.locator("#f-budget").fill("300")
+            page.locator("#plan-form").get_by_role("spinbutton", name="Budget (USD)").fill("300")
             page.locator("#f-adults").fill("2")
             page.get_by_role("button", name="Some wiggle room").click()
             page.get_by_role("button", name="Plan my trip").click()
             page.get_by_text("Demo prices").wait_for()
+            page.get_by_role("button", name="Show me another").wait_for()
+            first_idea = page.locator("#ideas h3").first.inner_text()
+            page.get_by_role("button", name="Show me another").click()
+            page.wait_for_function(
+                "(first) => document.querySelector('#ideas h3').textContent !== first",
+                arg=first_idea,
+            )
             page.locator(".headline .big").wait_for()
             assert "est." in page.locator(".headline .big").inner_text()
             page.get_by_role("button", name="Feedback").click()
