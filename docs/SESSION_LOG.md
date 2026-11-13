@@ -180,3 +180,58 @@ from usage should feed back.
 - What monthly hosting budget should the AWS cost alarm use? BUILD_PLAN recorded $20; confirm or replace it before any alarm is created.
 - What wording should the Privacy page and the Terms page use?
 - What is the Foursquare API key, the monthly budget in USD, and the USD to count per search?
+
+---
+
+## 2026-11-13 · Claude Code (cloud) · branch claude/happy-brown-f43m58 · 86762ee (planning)
+
+**Goal:** check deploy readiness; define Phase 1.
+
+**Done:** make verify green (94 tests); local smoke test (health, meta, NYC plan).
+Readiness gaps: synthetic places, fake mailer + dev sign-in default, SQLite file
+in the container, no privacy/terms page, no monitoring/backups, sketch deploy guide.
+Phase 1 split into tracked IDs P1-00…P1-17 (PROGRESS "Next").
+
+**Decisions:** none; hosting and places provider still with the owner.
+
+**Next:** P1-01 onward on branch `phase1-preview`.
+
+**Questions for the owner:** hosting choice; places provider + monthly budget;
+number of preview testers.
+
+---
+
+## 2026-11-13 · Claude Code (cloud) · review of Phase 1 (PR #3, PR #4) · ccd1791
+
+**Goal:** review Phase 1 against P1-00…P1-17.
+
+**Checked:** `make verify` green (123 passed, 2 opt-in skipped); browser flow
+passes with Playwright; production start refuses incomplete settings; invite
+gate returns 401 without the cookie. Docker image not built (no daemon here either).
+
+### Phase 1 report (review)
+| ID | Status | Notes |
+|----|---|---|
+| P1-01 | done | settings + production refusal verified |
+| P1-02 | done | single code, cookie gate |
+| P1-03 | partial | no per-email resend limit (3 sends in a row accepted) |
+| P1-04 | done | `python -m voya.backup`; restore documented |
+| P1-05 | partial | rate limiter keys on client IP; behind a proxy all users share one bucket; no trusted-proxy setting |
+| P1-06 | done (draft) | wording needs the owner |
+| P1-07 | done | feedback stores an optional contact field; privacy page should say so |
+| P1-08 | done | |
+| P1-09 | partial | Dockerfile non-root + healthcheck; image never built; no smoke script |
+| P1-10 | partial | opt-in, Playwright not a dev dep, no `make e2e`; spend, helper, privacy page, desktop width and console errors not covered |
+| P1-11 | done | blocked on host choice |
+| P1-12 | partial | Postgres works; no Alembic migrations or SQLite to Postgres copy |
+| P1-13 | partial | Foursquare client behind fakes and a budget gate; no canonical places table |
+| P1-14 | not to spec | two whole-week sets swapped as a block; no per-slot options, no plan link, no counters; picks written by the agent and marked non-synthetic |
+| P1-15 | blocked | needs places key; banner rule done |
+| P1-16 | partial | `/metrics` open without a token and outside the invite gate |
+| P1-17 | partial | static checks, not axe in a browser |
+| report | missing | the build tool did not write the per-ID table |
+
+**Next:** fix P1-03, P1-05, P1-16 (security), then P1-14 to spec, then P1-10/P1-12/P1-13.
+
+**Questions for the owner:** same blocked values as PROGRESS (host, SMTP, invite code,
+public URL, alarm amount, legal wording, places key and budget).
