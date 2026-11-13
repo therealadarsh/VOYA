@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-13 · branch **`cursor/phase-1b-nyc-mvp-3eef`** · NYC public slice
+**Last updated:** 2026-11-13 · branch **`cursor/phase-1b-nyc-mvp-3eef`** (`fc6838f`) · NYC public slice
 
 ## Done
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres

@@ -150,7 +150,7 @@ from usage should feed back.
 
 ---
 
-## 2026-11-13 · Cursor Cloud Agent · branch cursor/phase-1b-nyc-mvp-3eef
+## 2026-11-13 · Cursor Cloud Agent · branch cursor/phase-1b-nyc-mvp-3eef · fc6838f
 
 **Goal:** public NYC slice on top of the private preview: Postgres, places pipeline, idea bank, sourced-cost banner rule, metrics, accessibility.
 
