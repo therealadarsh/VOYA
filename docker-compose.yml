@@ -1,0 +1,19 @@
+# Simple host: one container and a named volume. Copy .env.example to .env
+# and fill the production values before `docker compose up`. The database
+# file lives in the volume at /data/voya.db.
+services:
+  voya:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      VOYA_DATA_DIR: /data
+    volumes:
+      - voya-data:/data
+    restart: unless-stopped
+
+volumes:
+  voya-data:

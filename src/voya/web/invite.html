@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOYA preview</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<main>
+  <form id="invite-form" class="card form">
+    <p><span class="preview-badge">Preview</span></p>
+    <h1>Invite code</h1>
+    <p class="hint">This preview is limited to people with a code. <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
+    <label>Invite code <input id="invite-code" name="code" autocomplete="off" required></label>
+    <p class="error" id="invite-error" hidden></p>
+    <button class="primary" type="submit">Continue</button>
+  </form>
+</main>
+<script src="/static/invite.js"></script>
+</body>
+</html>

@@ -5,26 +5,32 @@ Run: `uv run uvicorn voya.api:app --reload` then open http://localhost:8000
 
 from __future__ import annotations
 
+import html
 import os
 import time
 from collections import defaultdict, deque
+from contextlib import asynccontextmanager
 from decimal import Decimal
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
 
 from voya import obs
+from voya.accounts import MagicLinkService
+from voya.accounts.smtp_mailer import mailer_from_settings
 from voya.agent import HelperRequest, respond
 from voya.catalog import load_catalog
 from voya.discover import DiscoverRequest, discover
 from voya.llm import Harness, client_from_env
+from voya.log import access_log, configure_logging
 from voya.planner import PlanError, PlanRequest, apply_upgrade, build, priced_for
-from voya.accounts import MagicLinkService
-from voya.accounts.magic_link import FakeMailer
+from voya.preview import COOKIE, code_matches, cookie_for, cookie_matches, is_exempt
+from voya.safety import origin_allowed, security_headers
+from voya.settings import load_settings, production_problems
 from voya.store import Store, new_id
 from voya.tracking import CATEGORIES, apply_recovery, budget_status, parse_spend_text
 
@@ -41,7 +47,25 @@ INTERESTS = [
     "family",
 ]
 
-app = FastAPI(title="VOYA", version="0.2.0", docs_url="/api/docs", openapi_url="/api/openapi.json")
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    settings = load_settings()
+    problems = production_problems(settings)
+    if problems:
+        raise RuntimeError("Production settings are incomplete:\n" + "\n".join(problems))
+    configure_logging(json_logs=settings.log_json)
+    yield
+
+
+_imported = load_settings()
+app = FastAPI(
+    title="VOYA",
+    version="0.2.0",
+    docs_url=None if _imported.production else "/api/docs",
+    openapi_url=None if _imported.production else "/api/openapi.json",
+    lifespan=_lifespan,
+)
 _state: dict = {}
 
 
@@ -53,11 +77,12 @@ def store() -> Store:
 
 def magic_link() -> MagicLinkService:
     if "magic" not in _state:
-        _state["magic"] = MagicLinkService(
-            store(),
-            _state.get("mailer") or FakeMailer(),
-            base_url=os.environ.get("VOYA_PUBLIC_URL", "http://localhost:8000"),
-        )
+        settings = load_settings()
+        mailer = _state.get("mailer")
+        if mailer is None:
+            mailer = mailer_from_settings(settings)
+            _state["mailer"] = mailer
+        _state["magic"] = MagicLinkService(store(), mailer, base_url=settings.public_url)
     return _state["magic"]
 
 
@@ -124,31 +149,77 @@ _hits: dict[str, deque] = defaultdict(deque)
 RATE_PER_MIN = int(os.environ.get("VOYA_RATE_PER_MIN", "60"))
 
 
+def _error_body(status: int, code: str, message: str, hint: str = "") -> JSONResponse:
+    return JSONResponse(
+        status_code=status,
+        content={
+            "error": {
+                "code": code,
+                "message": message,
+                "hint": hint,
+                "trace_id": obs.current_trace(),
+            }
+        },
+    )
+
+
+def _apply_safety(response: Response, started: float, request: Request) -> Response:
+    settings = load_settings()
+    for key, value in security_headers(production=settings.production).items():
+        response.headers.setdefault(key, value)
+    response.headers["X-Trace-Id"] = obs.current_trace() or ""
+    access_log(
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        trace_id=obs.current_trace() or "",
+        duration_ms=int((time.perf_counter() - started) * 1000),
+    )
+    return response
+
+
 @app.middleware("http")
 async def _trace_and_limit(request: Request, call_next):
+    started = time.perf_counter()
     obs.new_trace()
+    settings = load_settings()
+    if request.method == "POST" and not origin_allowed(
+        request.headers.get("origin"), request.headers.get("host", "")
+    ):
+        return _apply_safety(
+            _error_body(403, "BAD_ORIGIN", "That request came from another site."),
+            started,
+            request,
+        )
+    if (
+        settings.invite_required
+        and not is_exempt(request.url.path)
+        and not cookie_matches(settings.invite_code, request.cookies.get(COOKIE))
+    ):
+        if request.method == "GET" and request.url.path == "/":
+            response = FileResponse(STATIC / "invite.html")
+            return _apply_safety(response, started, request)
+        return _apply_safety(
+            _error_body(401, "INVITE_REQUIRED", "Enter the preview invite code."),
+            started,
+            request,
+        )
     if request.url.path.startswith("/v1/") and request.method == "POST":
         key = request.client.host if request.client else "anon"
         q, now = _hits[key], time.monotonic()
         while q and now - q[0] > 60:
             q.popleft()
         if len(q) >= RATE_PER_MIN:
-            return JSONResponse(
-                status_code=429,
-                content={
-                    "error": {
-                        "code": "RATE_LIMIT",
-                        "message": "Too many requests. Try again in a minute.",
-                        "hint": "",
-                    }
-                },
+            return _apply_safety(
+                _error_body(429, "RATE_LIMIT", "Too many requests. Try again in a minute."),
+                started,
+                request,
             )
         q.append(now)
     with obs.span("http", method=request.method, path=request.url.path) as sp:
         response = await call_next(request)
         sp.update(status_code=response.status_code)
-    response.headers["X-Trace-Id"] = obs.current_trace() or ""
-    return response
+    return _apply_safety(response, started, request)
 
 
 # ------------------------------------------------------------------ helpers ---
@@ -218,6 +289,7 @@ def meta() -> dict:
         "interests": INTERESTS,
         "spend_categories": CATEGORIES,
         "demo_data": cat.synthetic,
+        "preview": load_settings().preview_label,
         "data_notice": cat.notice if cat.synthetic else None,
         "ai_helper": "model" if harness() else "built-in",
     }
@@ -306,12 +378,76 @@ def auth_start(a: AuthIn) -> dict:
     return out
 
 
-@app.get("/v1/auth/verify")
-def auth_verify(token: str) -> dict:
+def _auth_done_page(token: str) -> HTMLResponse:
+    safe = html.escape(token, quote=True)
+    body = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="voya-token" content="{safe}">
+<title>Signed in · VOYA</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<main class="card">
+  <h1>Signed in</h1>
+  <p>Taking you back to VOYA.</p>
+</main>
+<script src="/static/auth-done.js"></script>
+</body>
+</html>
+"""
+    return HTMLResponse(body)
+
+
+@app.get("/v1/auth/verify", response_model=None)
+def auth_verify(token: str, request: Request) -> dict | HTMLResponse:
     result = magic_link().verify(token)
     if not result:
         raise ApiError(400, "INVALID_LINK", "This sign-in link is invalid or expired.")
+    session = str(result["token"])
+    if "text/html" in request.headers.get("accept", ""):
+        return _auth_done_page(session)
     return result
+
+
+class InviteIn(BaseModel):
+    code: str = Field(min_length=1, max_length=200)
+
+
+@app.post("/v1/preview/unlock")
+def preview_unlock(body: InviteIn) -> JSONResponse:
+    settings = load_settings()
+    expected = settings.invite_code or ""
+    if not code_matches(expected, body.code):
+        raise ApiError(401, "INVITE_REQUIRED", "That invite code is not valid.")
+    response = JSONResponse({"ok": True})
+    response.set_cookie(
+        COOKIE,
+        cookie_for(expected),
+        httponly=True,
+        secure=settings.production,
+        samesite="lax",
+        max_age=60 * 60 * 24 * 30,
+        path="/",
+    )
+    return response
+
+
+class FeedbackIn(BaseModel):
+    message: str = Field(min_length=1, max_length=2000)
+    contact: str | None = Field(None, max_length=200)
+
+
+@app.post("/v1/feedback", status_code=201)
+def feedback(body: FeedbackIn) -> dict:
+    message = body.message.strip()
+    if not message:
+        raise ApiError(422, "INVALID_INPUT", "Write a short note before sending.")
+    contact = body.contact.strip() if body.contact else None
+    store().add_feedback(message[:2000], contact or None)
+    return {"ok": True}
 
 
 @app.post("/v1/plans/{plan_id}/save")
@@ -524,7 +660,26 @@ def ops(x_ops_token: str | None = Header(None)) -> dict:
 
 @app.get("/healthz")
 def healthz() -> dict:
-    return {"ok": True}
+    return {"ok": True, "status": "ok"}
+
+
+@app.get("/readyz", response_model=None)
+def readyz() -> dict | JSONResponse:
+    try:
+        store().ping()
+    except Exception:
+        return JSONResponse(status_code=503, content={"status": "not_ready"})
+    return {"status": "ready"}
+
+
+@app.get("/privacy")
+def privacy() -> FileResponse:
+    return FileResponse(STATIC / "privacy.html")
+
+
+@app.get("/terms")
+def terms() -> FileResponse:
+    return FileResponse(STATIC / "terms.html")
 
 
 @app.get("/")

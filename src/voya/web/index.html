@@ -9,7 +9,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="logo">VOYA</span><span class="tag">Trips that fit your budget</span></div>
+  <div class="brand"><span class="logo">VOYA</span><span class="preview-badge" id="preview-badge">Preview</span><span class="tag">Trips that fit your budget</span></div>
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="plan" aria-selected="true">Plan</button>
     <button role="tab" data-tab="discover">Discover</button>
@@ -155,11 +155,30 @@
       <label class="check"><input type="checkbox" id="si-adult" required> I'm 18 or older</label>
       <p class="hint">Trips with kids are planned from an adult's account. We never ask about income.</p>
       <p class="error" id="si-error" hidden></p>
+      <p class="hint" id="si-sent" hidden>Check your email for a sign-in link. It expires in 30 minutes.</p>
       <button class="primary" type="submit">Continue</button>
     </form>
   </div>
 </div>
 
+<div id="feedback" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="feedback-title">
+  <div class="sheet-body">
+    <div class="sheet-head"><h2 id="feedback-title">Feedback</h2><button class="ghost" id="feedback-close" type="button" aria-label="Close">✕</button></div>
+    <form id="feedback-form">
+      <label>What happened? <textarea id="fb-message" required maxlength="2000" rows="4"></textarea></label>
+      <label>Email (optional) <input type="email" id="fb-contact" autocomplete="email"></label>
+      <p class="error" id="fb-error" hidden></p>
+      <p class="hint" id="fb-sent" hidden>Thanks. The note is saved with this preview.</p>
+      <button class="primary" type="submit">Send</button>
+    </form>
+  </div>
+</div>
+
+<footer class="foot">
+  <button type="button" id="feedback-open">Feedback</button>
+  <a href="/privacy">Privacy</a>
+  <a href="/terms">Terms</a>
+</footer>
 <div id="toast" class="toast" hidden role="status"></div>
 <script src="/static/app.js"></script>
 </body>
