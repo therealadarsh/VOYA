@@ -247,3 +247,25 @@ testable steps for the next sessions.
 2. Continue CI step (Makefile `RUN`, GitHub Actions on `dev`).
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-27 · Cursor Agent · branch dev · ef0d247
+
+**Goal:** merge open PRs #6–#8 into `dev` in creation order.
+
+**Done:**
+- Merged PR #6 (agentic register + doc index), #7 (`docs/REVIEW_GUIDE.md`), #8
+  (`.github/workflows/ci.yml`); all merge commits, branches deleted.
+- Checked out `dev`, pulled `origin/dev` at `ef0d247`.
+- Updated `docs/AGENTIC_ENGINEERING.md` CI row to Built; `docs/PROGRESS.md` last
+  updated + CI bullet.
+
+**Decisions:** none.
+
+**Not done / known issues:** none from merges (all `mergeStateStatus: CLEAN`).
+
+**Next:**
+1. Continue build steps from private brief (Makefile `RUN`, widen lint/mypy).
+
+**Questions for the owner:** none.

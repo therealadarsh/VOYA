@@ -3,8 +3,8 @@
 **Status:** **123 tests** — private preview plus the NYC slice: Postgres when
 `DATABASE_URL` is set, a Foursquare client that stays off until a key and a
 budget are set, a rotating first-week idea bank, and `/metrics`. The demo
-banner stays while any cost is still a guess. No CI yet; next up is CI on PRs
-into `dev`, then cited place data. Not deployed. See
+banner stays while any cost is still a guess. CI runs on PRs and pushes to
+`dev` (see `.github/workflows/ci.yml`). Not deployed. See
 [`docs/README.md`](docs/README.md) (doc index) ·
 [`docs/AGENTIC_ENGINEERING.md`](docs/AGENTIC_ENGINEERING.md) (AI/agent register)
 · [`docs/DEPLOY.md`](docs/DEPLOY.md) · [`docs/PROGRESS.md`](docs/PROGRESS.md).

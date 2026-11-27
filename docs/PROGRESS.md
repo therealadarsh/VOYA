@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-27 · branch **`docs/agentic-and-logs`** (`9b24eaf`) · agentic doc register + branch alignment
+**Last updated:** 2026-11-27 · branch **`dev`** (`ef0d247`) · merged PRs #6–#8 (docs + CI)
 
 ## Done
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
@@ -55,8 +55,10 @@ The living status of the build. Update it at the end of every session (see
 - **Tests:** 84 tests, no network, no tokens. Mutation-checked: budget fit,
   sales tax, hard-limit rule.
 - **Docs:** `docs/AGENTIC_ENGINEERING.md` (living AI/agent register),
-  `docs/README.md` (documentation index), `docs/CONCEPT_MAP.md`,
-  `docs/MVP_TEST_GUIDE.md`, `DECISIONS.md`.
+  `docs/README.md` (documentation index), `docs/REVIEW_GUIDE.md`,
+  `docs/CONCEPT_MAP.md`, `docs/MVP_TEST_GUIDE.md`, `DECISIONS.md`.
+- **CI:** GitHub Actions on `dev` (`.github/workflows/ci.yml`: `make verify`,
+  Docker image build).
 
 ## Known limits
 - **Synthetic demo catalog still drives plans:** 3 cities + 2 parks, made-up
