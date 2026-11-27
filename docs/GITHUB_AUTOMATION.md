@@ -31,13 +31,14 @@ without CI:
 | `verify` | `make verify` |
 | `postgres` | `tests/test_p1_nyc.py` against Postgres 16 |
 | `docker` | `docker build` |
+| `e2e` | `make e2e` (Playwright). **Add this as a required check** on `dev` when you next edit the ruleset. |
 
 **Steps (rulesets UI):**
 
 1. **Settings → Rules → Rulesets → New ruleset → New branch ruleset**
 2. **Target:** branch `dev` (repeat later for `uat` / `prod` if you want the same bar).
 3. **Require pull request before merging** — on.
-4. **Require status checks to pass** — add **`verify`**, **`postgres`**, and **`docker`** (exact names from the CI workflow job `name:` / check run title).
+4. **Require status checks to pass** — add **`verify`**, **`postgres`**, **`docker`**, and **`e2e`** (exact names from the CI workflow job `name:` / check run title). The owner should add `e2e` as a required check; agents do not change the ruleset.
 5. **Block force pushes** — on for `dev`.
 6. Save. Open a test PR and confirm the checks appear as “required”.
 
@@ -53,7 +54,7 @@ CI to finish the merge.
 
 1. Open the PR (same-repo branch only — **fork PRs are ignored** by the workflow).
 2. Confirm base branch is **`dev`**.
-3. Wait until **verify**, **postgres**, and **docker** are green (or let the workflow wait).
+3. Wait until **verify**, **postgres**, **docker**, and **`e2e`** are green (or let the workflow wait).
 4. Add label **`auto-merge`** (repo **collaborators** can add labels; external contributors cannot).
 5. The **Auto merge** workflow runs, waits for required checks, then runs  
    `gh pr merge --merge --delete-branch`.
