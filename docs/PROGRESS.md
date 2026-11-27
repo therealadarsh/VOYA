@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-13 · branch **`cursor/phase-1b-nyc-mvp-3eef`** (`fc6838f`) · NYC public slice
+**Last updated:** 2026-11-27 · branch **`docs/agentic-and-logs`** (`9b24eaf`) · agentic doc register + branch alignment
 
 ## Done
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
@@ -54,7 +54,9 @@ The living status of the build. Update it at the end of every session (see
 - **Web app** (`src/voya/web/`): mobile-first, light/dark, no build step.
 - **Tests:** 84 tests, no network, no tokens. Mutation-checked: budget fit,
   sales tax, hard-limit rule.
-- **Docs:** `docs/CONCEPT_MAP.md`, `docs/MVP_TEST_GUIDE.md`, `DECISIONS.md`.
+- **Docs:** `docs/AGENTIC_ENGINEERING.md` (living AI/agent register),
+  `docs/README.md` (documentation index), `docs/CONCEPT_MAP.md`,
+  `docs/MVP_TEST_GUIDE.md`, `DECISIONS.md`.
 
 ## Known limits
 - **Synthetic demo catalog still drives plans:** 3 cities + 2 parks, made-up

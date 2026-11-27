@@ -180,3 +180,70 @@ from usage should feed back.
 - What monthly hosting budget should the AWS cost alarm use? BUILD_PLAN recorded $20; confirm or replace it before any alarm is created.
 - What wording should the Privacy page and the Terms page use?
 - What is the Foursquare API key, the monthly budget in USD, and the USD to count per search?
+
+---
+
+## 2026-11-27 · Claude Code (desktop) · branch ci/pr-checks · ccd1791
+
+**Goal:** check the current state and lay out the remaining build as small,
+testable steps for the next sessions.
+
+**Done:**
+- No code changes. Installed the project into the local `snakeenv` conda
+  environment and ran the suite: 123 passed, 2 skipped (browser flow and
+  Postgres, both opt-in).
+- Checked API behaviour for the step specs: `/healthz` ok; `/v1/meta` shows 5
+  destinations, all demo; `examples/plans/chicago_weekend.json` returns
+  `status: infeasible` at its own $350 budget; unknown destination and
+  `days: 31` return 422.
+- Wrote the step-by-step build brief in the gitignored private folder.
+
+**Decisions:** none in tracked files. Proposed changes wait for the owner.
+
+**Not done / known issues:**
+- No CI workflow yet (`.github/workflows/` is missing); `ci/pr-checks` has
+  no commits beyond `main`.
+- `make lint` / `make typecheck` cover only part of `src/voya`
+  (`planner.py`, `api.py`, `agent.py`, `store.py` and others are outside).
+- Every `make` target calls `uv run`; there is no switch for running in an
+  existing environment.
+- The Chicago example does not fit its own budget.
+
+**Next:**
+1. S01: `RUN ?= uv run` in the Makefile so targets work with or without uv.
+2. S02: GitHub Actions running `make verify` on PRs into `dev`, plus a
+   Postgres service job for `tests/test_p1_nyc.py`.
+3. S03: widen ruff and mypy to all of `src/voya`, no behaviour change.
+
+**Questions for the owner:**
+- Should `docs/SESSION_LOG.md` and `docs/PROGRESS.md` stay tracked (AGENTS.md)
+  or move to the gitignored folder?
+
+---
+
+## 2026-11-27 · Cursor Agent · branch dev (docs, uncommitted) · ccd1791
+
+**Goal:** add committed living documentation for agentic/LLM build and runtime stack.
+
+**Done:**
+- Added `docs/AGENTIC_ENGINEERING.md`: runtime + build-time register with per-row
+  "update when" guidance, build vs runtime diagram, policy/MCP/subagent rows,
+  changelog.
+- Added `docs/README.md`: index of root + `docs/` markdown; marks `.voya-private/`
+  and `reference/`; links agentic doc prominently.
+- Replaced `docs/AI_TECHNOLOGIES.md` body with redirect to the new canonical doc.
+- Updated `README.md`, `docs/PROGRESS.md`, `AGENTS.md` (read order + session logging
+  target). No `src/` changes; `make verify` not run (docs-only).
+
+**Decisions:** none in `DECISIONS.md` (documentation only).
+
+**Not done / known issues:**
+- `VERIFY.md` still partially stale vs `PROGRESS.md` (left as historical log;
+  noted in docs index).
+- CI and `make eval` golden trips still planned.
+
+**Next:**
+1. Owner reviews doc structure; commit when ready.
+2. Continue CI step (Makefile `RUN`, GitHub Actions on `dev`).
+
+**Questions for the owner:** none.
