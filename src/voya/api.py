@@ -9,9 +9,11 @@ import html
 import os
 import time
 from collections import defaultdict, deque
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 from fastapi import Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
@@ -51,7 +53,7 @@ INTERESTS = [
 
 
 @asynccontextmanager
-async def _lifespan(_app: FastAPI):
+async def _lifespan(_app: FastAPI) -> AsyncIterator[None]:
     settings = load_settings()
     problems = production_problems(settings)
     if problems:
@@ -68,31 +70,40 @@ app = FastAPI(
     openapi_url=None if _imported.production else "/api/openapi.json",
     lifespan=_lifespan,
 )
-_state: dict = {}
+_state: dict[str, Any] = {}
 
 
 def store() -> Store:
-    if "store" not in _state:
-        _state["store"] = Store()
-    return _state["store"]
+    found = _state.get("store")
+    if isinstance(found, Store):
+        return found
+    created = Store()
+    _state["store"] = created
+    return created
 
 
 def magic_link() -> MagicLinkService:
-    if "magic" not in _state:
-        settings = load_settings()
-        mailer = _state.get("mailer")
-        if mailer is None:
-            mailer = mailer_from_settings(settings)
-            _state["mailer"] = mailer
-        _state["magic"] = MagicLinkService(store(), mailer, base_url=settings.public_url)
-    return _state["magic"]
+    found = _state.get("magic")
+    if isinstance(found, MagicLinkService):
+        return found
+    settings = load_settings()
+    mailer = _state.get("mailer")
+    if mailer is None:
+        mailer = mailer_from_settings(settings)
+        _state["mailer"] = mailer
+    created = MagicLinkService(store(), mailer, base_url=settings.public_url)
+    _state["magic"] = created
+    return created
 
 
 def harness() -> Harness | None:
     if "harness" not in _state:
         client = client_from_env()
         _state["harness"] = Harness(client, store()) if client else None
-    return _state["harness"]
+    found = _state["harness"]
+    if found is None or isinstance(found, Harness):
+        return found
+    return None
 
 
 class ApiError(Exception):
@@ -147,7 +158,7 @@ async def _plan_error(_: Request, e: PlanError) -> JSONResponse:
     )
 
 
-_hits: dict[str, deque] = defaultdict(deque)
+_hits: dict[str, deque[float]] = defaultdict(deque)
 RATE_PER_MIN = int(os.environ.get("VOYA_RATE_PER_MIN", "60"))
 
 
@@ -183,7 +194,9 @@ def _apply_safety(response: Response, started: float, request: Request) -> Respo
 
 
 @app.middleware("http")
-async def _trace_and_limit(request: Request, call_next):
+async def _trace_and_limit(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     started = time.perf_counter()
     obs.new_trace()
     settings = load_settings()
@@ -201,8 +214,8 @@ async def _trace_and_limit(request: Request, call_next):
         and not cookie_matches(settings.invite_code, request.cookies.get(COOKIE))
     ):
         if request.method == "GET" and request.url.path == "/":
-            response = FileResponse(STATIC / "invite.html")
-            return _apply_safety(response, started, request)
+            invite = FileResponse(STATIC / "invite.html")
+            return _apply_safety(invite, started, request)
         return _apply_safety(
             _error_body(401, "INVITE_REQUIRED", "Enter the preview invite code."),
             started,
@@ -239,21 +252,23 @@ def require_owner(o: str | None = Depends(owner)) -> str:
     return o
 
 
-def load_plan(plan_id: str) -> tuple[dict, PlanRequest]:
+def load_plan(plan_id: str) -> tuple[dict[str, Any], PlanRequest]:
     rec = store().plan(plan_id)
     if not rec:
         raise ApiError(404, "NOT_FOUND", "That plan doesn't exist.")
     return rec, PlanRequest.model_validate_json(rec["request_json"])
 
 
-def own_plan(plan_id: str, o: str) -> tuple[dict, PlanRequest]:
+def own_plan(plan_id: str, o: str) -> tuple[dict[str, Any], PlanRequest]:
     rec, req = load_plan(plan_id)
     if rec["owner"] != o:
         raise ApiError(403, "NOT_YOURS", "Save this trip to your account first.")
     return rec, req
 
 
-def plan_payload(plan_id: str, version: int, req: PlanRequest, owner_id: str | None) -> dict:
+def plan_payload(
+    plan_id: str, version: int, req: PlanRequest, owner_id: str | None
+) -> dict[str, Any]:
     with obs.span("plan.build", destination=req.destination, days=req.days):
         plan = build(req)
     return {
@@ -266,7 +281,9 @@ def plan_payload(plan_id: str, version: int, req: PlanRequest, owner_id: str | N
     }
 
 
-def new_version(plan_id: str, req: PlanRequest, reason: str, must_fit: bool = True) -> dict:
+def new_version(
+    plan_id: str, req: PlanRequest, reason: str, must_fit: bool = True
+) -> dict[str, Any]:
     if must_fit:
         _, _, priced = priced_for(req)
         if not priced.fit.ok:
@@ -285,7 +302,7 @@ def new_version(plan_id: str, req: PlanRequest, reason: str, must_fit: bool = Tr
 
 
 @app.get("/v1/meta")
-def meta() -> dict:
+def meta() -> dict[str, Any]:
     cat = load_catalog()
     return {
         "destinations": [{"id": d.id, "name": d.name, "kind": d.kind} for d in cat.destinations],
@@ -300,13 +317,13 @@ def meta() -> dict:
 
 
 @app.post("/v1/plans")
-def create_plan(req: PlanRequest, o: str | None = Depends(owner)) -> dict:
+def create_plan(req: PlanRequest, o: str | None = Depends(owner)) -> dict[str, Any]:
     pid = store().create_plan(req.model_dump_json(), owner=None)
     return plan_payload(pid, 1, req, None)
 
 
 @app.get("/v1/plans/{plan_id}")
-def get_plan(plan_id: str) -> dict:
+def get_plan(plan_id: str) -> dict[str, Any]:
     rec, req = load_plan(plan_id)
     return plan_payload(plan_id, rec["version"], req, rec["owner"])
 
@@ -320,9 +337,9 @@ class EditIn(BaseModel):
 
 
 @app.post("/v1/plans/{plan_id}/edit")
-def edit_plan(plan_id: str, e: EditIn) -> dict:
+def edit_plan(plan_id: str, e: EditIn) -> dict[str, Any]:
     _, req = load_plan(plan_id)
-    upd: dict = {}
+    upd: dict[str, Any] = {}
     if e.gifts_amount is not None:
         upd["gifts_amount"] = e.gifts_amount
     if e.tip_pct is not None:
@@ -340,13 +357,13 @@ def edit_plan(plan_id: str, e: EditIn) -> dict:
 
 
 @app.post("/v1/plans/{plan_id}/upgrades/{upgrade_id}")
-def take_upgrade(plan_id: str, upgrade_id: str) -> dict:
+def take_upgrade(plan_id: str, upgrade_id: str) -> dict[str, Any]:
     _, req = load_plan(plan_id)
     return new_version(plan_id, apply_upgrade(req, upgrade_id), f"upgrade {upgrade_id}")
 
 
 @app.post("/v1/plans/{plan_id}/undo")
-def undo(plan_id: str) -> dict:
+def undo(plan_id: str) -> dict[str, Any]:
     load_plan(plan_id)
     if not store().undo(plan_id):
         raise ApiError(409, "NOTHING_TO_UNDO", "This is the original plan.")
@@ -355,7 +372,7 @@ def undo(plan_id: str) -> dict:
 
 
 @app.post("/v1/discover")
-def discover_route(req: DiscoverRequest) -> dict:
+def discover_route(req: DiscoverRequest) -> dict[str, Any]:
     with obs.span("discover", from_id=req.from_id, days=req.days):
         return discover(req)
 
@@ -369,7 +386,7 @@ class AuthIn(BaseModel):
 
 
 @app.post("/v1/auth/start")
-def auth_start(a: AuthIn) -> dict:
+def auth_start(a: AuthIn) -> dict[str, Any]:
     if not a.is_adult:
         raise ApiError(
             403,
@@ -378,7 +395,7 @@ def auth_start(a: AuthIn) -> dict:
         )
     out = magic_link().request_sign_in(a.email, a.is_adult)
     if "error" in out:
-        raise ApiError(403, out["error"], out["message"])
+        raise ApiError(403, str(out["error"]), str(out["message"]))
     return out
 
 
@@ -406,7 +423,7 @@ def _auth_done_page(token: str) -> HTMLResponse:
 
 
 @app.get("/v1/auth/verify", response_model=None)
-def auth_verify(token: str, request: Request) -> dict | HTMLResponse:
+def auth_verify(token: str, request: Request) -> dict[str, Any] | HTMLResponse:
     result = magic_link().verify(token)
     if not result:
         raise ApiError(400, "INVALID_LINK", "This sign-in link is invalid or expired.")
@@ -445,7 +462,7 @@ class FeedbackIn(BaseModel):
 
 
 @app.post("/v1/feedback", status_code=201)
-def feedback(body: FeedbackIn) -> dict:
+def feedback(body: FeedbackIn) -> dict[str, Any]:
     message = body.message.strip()
     if not message:
         raise ApiError(422, "INVALID_INPUT", "Write a short note before sending.")
@@ -455,7 +472,7 @@ def feedback(body: FeedbackIn) -> dict:
 
 
 @app.post("/v1/plans/{plan_id}/save")
-def save_plan(plan_id: str, o: str = Depends(require_owner)) -> dict:
+def save_plan(plan_id: str, o: str = Depends(require_owner)) -> dict[str, Any]:
     load_plan(plan_id)
     if not store().claim(plan_id, o):
         raise ApiError(403, "NOT_YOURS", "This trip belongs to someone else.")
@@ -464,7 +481,7 @@ def save_plan(plan_id: str, o: str = Depends(require_owner)) -> dict:
 
 
 @app.get("/v1/me/trips")
-def my_trips(o: str = Depends(require_owner)) -> dict:
+def my_trips(o: str = Depends(require_owner)) -> dict[str, Any]:
     out = []
     for pid in store().plans_for(o):
         _rec, req = load_plan(pid)
@@ -488,12 +505,12 @@ class MemoryIn(BaseModel):
 
 
 @app.get("/v1/me/memory")
-def memory(o: str = Depends(require_owner)) -> dict:
+def memory(o: str = Depends(require_owner)) -> dict[str, Any]:
     return {"remembered": store().prefs(o)}
 
 
 @app.post("/v1/me/memory")
-def remember(m: MemoryIn, o: str = Depends(require_owner)) -> dict:
+def remember(m: MemoryIn, o: str = Depends(require_owner)) -> dict[str, Any]:
     """Only called when the user taps "Remember" (human in the loop for memory)."""
     for k, v in m.values.items():
         if k not in MEMORY_KEYS:
@@ -505,13 +522,13 @@ def remember(m: MemoryIn, o: str = Depends(require_owner)) -> dict:
 
 
 @app.delete("/v1/me/memory/{key}")
-def forget(key: str, o: str = Depends(require_owner)) -> dict:
+def forget(key: str, o: str = Depends(require_owner)) -> dict[str, Any]:
     store().forget_pref(o, key)
     return {"remembered": store().prefs(o)}
 
 
 @app.get("/v1/me/export")
-def export(o: str = Depends(require_owner)) -> dict:
+def export(o: str = Depends(require_owner)) -> dict[str, Any]:
     trips = []
     for pid in store().plans_for(o):
         _rec, req = load_plan(pid)
@@ -522,7 +539,7 @@ def export(o: str = Depends(require_owner)) -> dict:
 
 
 @app.delete("/v1/me")
-def delete_me(o: str = Depends(require_owner)) -> dict:
+def delete_me(o: str = Depends(require_owner)) -> dict[str, Any]:
     store().delete_owner(o)
     return {"deleted": True}
 
@@ -541,7 +558,7 @@ class SpendIn(BaseModel):
 
 
 @app.post("/v1/plans/{plan_id}/spend")
-def add_spend(plan_id: str, s: SpendIn, o: str = Depends(require_owner)) -> dict:
+def add_spend(plan_id: str, s: SpendIn, o: str = Depends(require_owner)) -> dict[str, Any]:
     own_plan(plan_id, o)
     amount, category = s.amount, s.category
     if amount is None and s.text:
@@ -563,14 +580,14 @@ def add_spend(plan_id: str, s: SpendIn, o: str = Depends(require_owner)) -> dict
 
 
 @app.get("/v1/plans/{plan_id}/budget")
-def get_budget(plan_id: str, o: str = Depends(require_owner)) -> dict:
+def get_budget(plan_id: str, o: str = Depends(require_owner)) -> dict[str, Any]:
     _, req = own_plan(plan_id, o)
     spends = store().spends(plan_id)
     return {"spends": spends, "budget": budget_status(req, spends)}
 
 
 @app.delete("/v1/plans/{plan_id}/spend/{spend_id}")
-def delete_spend(plan_id: str, spend_id: str, o: str = Depends(require_owner)) -> dict:
+def delete_spend(plan_id: str, spend_id: str, o: str = Depends(require_owner)) -> dict[str, Any]:
     own_plan(plan_id, o)
     if not store().delete_spend(plan_id, spend_id):
         raise ApiError(404, "NOT_FOUND", "No such entry.")
@@ -584,7 +601,7 @@ class RecoveryIn(BaseModel):
 
 
 @app.post("/v1/plans/{plan_id}/recovery")
-def take_recovery(plan_id: str, r: RecoveryIn, o: str = Depends(require_owner)) -> dict:
+def take_recovery(plan_id: str, r: RecoveryIn, o: str = Depends(require_owner)) -> dict[str, Any]:
     _, req = own_plan(plan_id, o)
     return new_version(
         plan_id,
@@ -600,7 +617,7 @@ def take_recovery(plan_id: str, r: RecoveryIn, o: str = Depends(require_owner)) 
 @app.post("/v1/plans/{plan_id}/helper")
 def helper(
     plan_id: str, h: HelperRequest, request: Request, o: str | None = Depends(owner)
-) -> dict:
+) -> dict[str, Any]:
     rec, req = load_plan(plan_id)
     scope = o or (request.client.host if request.client else "anon")
     return respond(store(), plan_id, rec["version"], req, h, harness(), scope)
@@ -611,7 +628,7 @@ class ApplyIn(BaseModel):
 
 
 @app.post("/v1/plans/{plan_id}/proposals/{proposal_id}/apply")
-def apply_proposal(plan_id: str, proposal_id: str, a: ApplyIn) -> dict:
+def apply_proposal(plan_id: str, proposal_id: str, a: ApplyIn) -> dict[str, Any]:
     rec, _ = load_plan(plan_id)
     prop = store().take_proposal(plan_id, proposal_id, a.token)
     if not prop:
@@ -628,7 +645,7 @@ def apply_proposal(plan_id: str, proposal_id: str, a: ApplyIn) -> dict:
 
 
 @app.get("/v1/ops")
-def ops(x_ops_token: str | None = Header(None)) -> dict:
+def ops(x_ops_token: str | None = Header(None)) -> dict[str, Any]:
     expected = os.environ.get("VOYA_OPS_TOKEN")
     if not expected or x_ops_token != expected:
         raise ApiError(401, "OPS_ONLY", "Operator token required.")
@@ -668,7 +685,7 @@ class IdeaNext(BaseModel):
 
 
 @app.get("/v1/ideas")
-def idea_route(city: str = "nyc", seed: str = "voya", days: int = 1) -> dict:
+def idea_route(city: str = "nyc", seed: str = "voya", days: int = 1) -> dict[str, Any]:
     if city != "nyc":
         raise ApiError(404, "NO_IDEAS", "Idea sets for that city are not ready.")
     if not seed or len(seed) > 80:
@@ -677,7 +694,7 @@ def idea_route(city: str = "nyc", seed: str = "voya", days: int = 1) -> dict:
 
 
 @app.post("/v1/ideas/next")
-def idea_next(body: IdeaNext) -> dict:
+def idea_next(body: IdeaNext) -> dict[str, Any]:
     return ideas_after(body.current_id, body.days)
 
 
@@ -690,12 +707,12 @@ def metrics(x_metrics_token: str | None = Header(None)) -> Response:
 
 
 @app.get("/healthz")
-def healthz() -> dict:
+def healthz() -> dict[str, Any]:
     return {"ok": True, "status": "ok"}
 
 
 @app.get("/readyz", response_model=None)
-def readyz() -> dict | JSONResponse:
+def readyz() -> dict[str, Any] | JSONResponse:
     try:
         store().ping()
     except OSError:

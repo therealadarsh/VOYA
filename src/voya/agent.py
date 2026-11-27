@@ -30,6 +30,7 @@ from voya import obs
 from voya.catalog import haversine_km
 from voya.llm import BudgetExceeded, Harness, LLMError
 from voya.planner import (
+    Pick,
     PlanRequest,
     Priced,
     _is_open,
@@ -39,6 +40,7 @@ from voya.planner import (
     slot_alternatives,
     worth_it,
 )
+from voya.store import Store
 
 D = Decimal
 MAX_STEPS = 4
@@ -103,7 +105,7 @@ class ToolError(Exception):
     message: str
     hint: str
 
-    def envelope(self) -> dict:
+    def envelope(self) -> dict[str, Any]:
         return {
             "ok": False,
             "error": {
@@ -140,12 +142,12 @@ def _next_slot(ctx: Ctx, food: bool) -> str | None:
     return None
 
 
-def tool_nearby(ctx: Ctx, args: NearbyArgs) -> list[dict]:
+def tool_nearby(ctx: Ctx, args: NearbyArgs) -> list[dict[str, Any]]:
     """Places open now near the traveller that fit the remaining budget."""
     here = _here(ctx)
     now = ctx.helper.local_time or "12:00"
     used = {p.place.id for p in ctx.priced.picks if p.place and p.day == ctx.helper.day}
-    out = []
+    out: list[dict[str, Any]] = []
     for p in ctx.dest.places:
         if p.id in used or p.id in ctx.req.exclude or not _is_open(p, now):
             continue
@@ -161,9 +163,9 @@ def tool_nearby(ctx: Ctx, args: NearbyArgs) -> list[dict]:
     return out
 
 
-def tool_cheaper(ctx: Ctx, args: CheaperArgs) -> list[dict]:
+def tool_cheaper(ctx: Ctx, args: CheaperArgs) -> list[dict[str, Any]]:
     """Swaps or skips on upcoming stops, biggest savings first."""
-    out = []
+    out: list[dict[str, Any]] = []
     size = ctx.req.party.size
     for pick in ctx.priced.picks:
         if pick.locked or not pick.place or pick.place.price.point == 0:
@@ -190,21 +192,23 @@ def tool_cheaper(ctx: Ctx, args: CheaperArgs) -> list[dict]:
     return out[:6]
 
 
-def _find_pick(ctx: Ctx, hint: str):
+def _find_pick(ctx: Ctx, hint: str) -> Pick | None:
     hint = hint.lower().strip()
     cands = [p for p in ctx.priced.picks if p.place and not p.locked]
     if hint:
         for p in cands:
+            place = p.place
+            if place is None:
+                continue
             words = [w for w in re.findall(r"[a-z]+", hint) if len(w) > 3]
             if any(
-                w in p.place.name.lower() or w in " ".join(p.place.tags) or w == p.kind
-                for w in words
+                w in place.name.lower() or w in " ".join(place.tags) or w == p.kind for w in words
             ):
                 return p
     return None
 
 
-def tool_swap(ctx: Ctx, args: SwapArgs) -> list[dict]:
+def tool_swap(ctx: Ctx, args: SwapArgs) -> list[dict[str, Any]]:
     pick = _find_pick(ctx, args.stop_hint) or next(
         (
             p
@@ -224,11 +228,11 @@ def tool_swap(ctx: Ctx, args: SwapArgs) -> list[dict]:
     return [{"slot_id": pick.slot_id, "place_id": a.id} for a in alts[:4]]
 
 
-def tool_worth_it(ctx: Ctx, args: NoArgs) -> list[dict]:
+def tool_worth_it(ctx: Ctx, args: NoArgs) -> list[dict[str, Any]]:
     return worth_it(ctx.req, ctx.priced, ctx.dest, ctx.cat)
 
 
-def tool_explain(ctx: Ctx, args: ExplainArgs) -> dict:
+def tool_explain(ctx: Ctx, args: ExplainArgs) -> dict[str, Any]:
     pick = _find_pick(ctx, args.stop_hint)
     if pick is None:
         priced_picks = [p for p in ctx.priced.picks if p.place]
@@ -236,13 +240,15 @@ def tool_explain(ctx: Ctx, args: ExplainArgs) -> dict:
             raise ToolError(
                 "NO_STOP", "fix_input", "No stop matches that.", "Name a stop from the plan."
             )
-        pick = max(priced_picks, key=lambda p: p.place.price.point)
+        pick = max(priced_picks, key=lambda p: p.place.price.point if p.place else D(0))
+    place = pick.place
+    assert place is not None
     lines = [
         ln for ln in ctx.priced.lines if ln.line_id == pick.slot_id or ln.parent_id == pick.slot_id
     ]
     return {
         "slot_id": pick.slot_id,
-        "title": pick.place.name,
+        "title": place.name,
         "lines": [
             {
                 "label": ln.cost.label,
@@ -276,7 +282,7 @@ TOOLS: dict[str, tuple[type[BaseModel], Callable[[Ctx, Any], Any], str]] = {
 @dataclass
 class Action:
     tool: str
-    args: dict
+    args: dict[str, Any]
 
 
 def route_intent(message: str, raining: bool | None) -> Action:
@@ -320,7 +326,7 @@ SYSTEM = (
 SCHEMA = '{"tool": one of ' + json.dumps(list(TOOLS)) + ', "args": object matching the tool}'
 
 
-def build_context(ctx: Ctx) -> tuple[str, dict]:
+def build_context(ctx: Ctx) -> tuple[str, dict[str, Any]]:
     """A small digest for the model + a manifest of what went in."""
     h = ctx.priced.fit
     now = ctx.helper.local_time or "--:--"
@@ -368,14 +374,14 @@ class LoopResult:
     steps: int
     cost_usd: Decimal
     used_model: bool
-    errors: list[dict] = field(default_factory=list)
+    errors: list[dict[str, Any]] = field(default_factory=list)
 
 
 def run_loop(ctx: Ctx, harness: Harness | None, user_scope: str) -> LoopResult:
     """Pick a tool (model or router), validate, run. Bounded and repeat-safe."""
     seen: set[str] = set()
     spent = D(0)
-    errors: list[dict] = []
+    errors: list[dict[str, Any]] = []
     used_model = False
     calls = 0
     for step in range(1, MAX_STEPS + 1):
@@ -466,14 +472,14 @@ def _candidate(ctx: Ctx, new_req: PlanRequest) -> tuple[bool, Decimal, Priced]:
 
 
 def respond(
-    store,
+    store: Store,
     plan_id: str,
     version: int,
     req: PlanRequest,
     helper: HelperRequest,
     harness: Harness | None,
     user_scope: str,
-) -> dict:
+) -> dict[str, Any]:
     dest, cat, priced = priced_for(req)
     ctx = Ctx(req, helper, priced, dest, cat)
     loop = run_loop(ctx, harness, user_scope)
@@ -485,13 +491,14 @@ def respond(
         used_model=loop.used_model,
         cost_usd=str(loop.cost_usd),
     )
-    options: list[dict] = []
-    info: dict | None = None
-    tool = loop.action.tool if loop.action else None
+    options: list[dict[str, Any]] = []
+    info: dict[str, Any] | None = None
+    action = loop.action
+    tool = action.tool if action else None
     results = loop.result or []
 
     def propose(
-        new_req: PlanRequest, title: str, why: str, slot_id: str | None, extra: dict
+        new_req: PlanRequest, title: str, why: str, slot_id: str | None, extra: dict[str, Any]
     ) -> None:
         ok, delta, new_priced = _candidate(ctx, new_req)
         if not ok:
@@ -521,6 +528,8 @@ def respond(
             if len(options) == 3:
                 break
             place = dest.place(r["place_id"])
+            if place is None:
+                continue
             new_req = req.model_copy(
                 update={"overrides": {**req.overrides, r["slot_id"]: r["place_id"]}}
             )
@@ -558,7 +567,8 @@ def respond(
                     "free_option": {"title": p.name, "why": "Free and open now", "place_id": p.id}
                 }
     elif tool == "find_cheaper":
-        target = D(str(loop.action.args.get("target_saving", 20)))
+        assert action is not None
+        target = D(str(action.args.get("target_saving", 20)))
         overrides, skips, saved, names = dict(req.overrides), set(req.skips), D(0), []
         for r in results:
             if saved >= target:
@@ -591,24 +601,32 @@ def respond(
             pick = next(p for p in priced.picks if p.slot_id == r["slot_id"])
             if r["place_id"]:
                 alt = dest.place(r["place_id"])
+                current = pick.place
+                if alt is None or current is None:
+                    continue
                 new_req = req.model_copy(
                     update={"overrides": {**req.overrides, r["slot_id"]: r["place_id"]}}
                 )
                 propose(
                     new_req,
-                    f"Swap {pick.place.name} for {alt.name}",
+                    f"Swap {current.name} for {alt.name}",
                     f"rated {alt.rating}",
                     r["slot_id"],
                     {},
                 )
             else:
+                current = pick.place
+                if current is None:
+                    continue
                 new_req = req.model_copy(update={"skips": sorted({*req.skips, r["slot_id"]})})
-                propose(new_req, f"Skip {pick.place.name}", "Frees up time and money", None, {})
+                propose(new_req, f"Skip {current.name}", "Frees up time and money", None, {})
     elif tool == "swap_stop":
         for r in results:
             if len(options) == 3:
                 break
             alt = dest.place(r["place_id"])
+            if alt is None:
+                continue
             pick = next(p for p in priced.picks if p.slot_id == r["slot_id"])
             new_req = req.model_copy(
                 update={"overrides": {**req.overrides, r["slot_id"]: r["place_id"]}}

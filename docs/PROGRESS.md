@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-27 · branch **`feat/github-auto-merge`** (PR pending) · base `dev` (`bd8146b`)
+**Last updated:** 2026-11-27 · branch **`feat/cursor-prompt-s03c`** · base `dev` (`21a4c10`)
 
 ## Done
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
@@ -58,9 +58,9 @@ The living status of the build. Update it at the end of every session (see
   `docs/README.md` (documentation index), `docs/REVIEW_GUIDE.md`,
   `docs/CONCEPT_MAP.md`, `docs/MVP_TEST_GUIDE.md`, `DECISIONS.md`.
 - **CI / local verify (P0):** `Makefile` `RUN ?= uv run` (use `make verify RUN=`
-  in `snakeenv` without touching `.venv`); `make help`. Ruff + mypy on all of
-  `src/voya`, scripts, and tests (`api` / `agent` / `planner` mypy deferred in
-  `pyproject.toml` until S03c). GitHub Actions: `verify`, Postgres service job
+  in `snakeenv` without touching `.venv`); `make help`. Ruff + strict mypy on
+  all of `src/voya` (39 modules, including `api`, `agent`, and `planner`),
+  scripts, and tests. GitHub Actions: `verify`, Postgres service job
   for `tests/test_p1_nyc.py`, Docker build; PR triggers include `uat` and `prod`.
   Label `auto-merge` workflow for same-repo PRs into `dev` (`docs/GITHUB_AUTOMATION.md`).
 
@@ -76,7 +76,6 @@ The living status of the build. Update it at the end of every session (see
 ## Next (suggested order)
 1. **P0 finish:** owner enables ruleset checks `verify` + `postgres` + `docker` and
    **Automatically delete head branches** (see `docs/GITHUB_AUTOMATION.md`).
-   **S03c:** strict mypy on `api.py`, `agent.py`, `planner.py`.
 2. **P1 real data:** S04 demo banner per area, then cited place catalog (S05+).
 3. Owner answers for hosting, SMTP, invite code, public URL, alarm amount, legal
    wording, and Foursquare key plus budget before live places or deploy.
