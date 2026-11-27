@@ -224,6 +224,10 @@ def test_hsts_when_production(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
     _production_env(monkeypatch, tmp_path)
     api_mod._state.clear()
     api_mod._hits.clear()
+    monkeypatch.setenv("VOYA_DB", str(tmp_path / "t.db"))
+    from voya.schema import upgrade_to_head
+
+    upgrade_to_head()
     api_mod._state["store"] = Store(str(tmp_path / "t.db"))
     with TestClient(api_mod.app) as prod:
         response = prod.get("/healthz")

@@ -6,6 +6,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY src ./src
 COPY data ./data
+COPY alembic.ini ./
+COPY migrations ./migrations
 COPY README.md ./
 
 RUN pip install --no-cache-dir uv \

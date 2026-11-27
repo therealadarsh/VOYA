@@ -47,10 +47,15 @@ jobs:
           python-version: "3.12"
       - name: Sync dependencies
         run: uv sync --frozen
+      - name: Migrate
+        env:
+          DATABASE_URL: postgresql://postgres@localhost:5432/postgres
+        run: uv run alembic upgrade head
       - name: Postgres integration tests
         env:
+          DATABASE_URL: postgresql://postgres@localhost:5432/postgres
           VOYA_TEST_DATABASE_URL: postgresql://postgres@localhost:5432/postgres
-        run: uv run pytest -q -p no:warnings tests/test_p1_nyc.py
+        run: uv run pytest -q -p no:warnings tests/test_p1_nyc.py tests/test_f11_migrations.py
 
   e2e:
     timeout-minutes: 20

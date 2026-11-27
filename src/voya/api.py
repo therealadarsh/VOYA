@@ -43,8 +43,9 @@ from voya.preview import (
     secret_matches,
 )
 from voya.safety import origin_allowed, security_headers
+from voya.schema import current_revision, head_revision
 from voya.settings import Settings, load_settings, production_problems
-from voya.store import Store
+from voya.store import Store, default_db_path
 from voya.tracking import CATEGORIES, apply_recovery, budget_status, parse_spend_text
 
 STATIC = Path(__file__).with_name("web")
@@ -67,6 +68,13 @@ async def _lifespan(_app: FastAPI) -> AsyncIterator[None]:
     problems = production_problems(settings)
     if problems:
         raise RuntimeError("Production settings are incomplete:\n" + "\n".join(problems))
+    if settings.production:
+        target = default_db_path()
+        found = _state.get("store")
+        if isinstance(found, Store):
+            target = found.path
+        if current_revision(target) != head_revision():
+            raise RuntimeError("The database is not at the latest migration. Run make migrate.")
     configure_logging(json_logs=settings.log_json)
     yield
 

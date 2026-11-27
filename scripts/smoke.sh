@@ -22,6 +22,14 @@ trap cleanup EXIT
 docker volume create "$VOL" >/dev/null
 docker build -t "$IMAGE" "$ROOT"
 
+docker run --rm \
+  -v "${VOL}:/data" \
+  -e VOYA_DATA_DIR=/data \
+  -e VOYA_DB= \
+  -e DATABASE_URL= \
+  --entrypoint .venv/bin/alembic \
+  "$IMAGE" upgrade head
+
 docker run -d --name "$NAME" \
   -p "127.0.0.1:${PORT}:8000" \
   -v "${VOL}:/data" \

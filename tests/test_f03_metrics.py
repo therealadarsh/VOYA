@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from voya import api as api_mod
 from voya.preview import COOKIE, cookie_for, secret_matches
+from voya.schema import upgrade_to_head
 from voya.settings import load_settings, production_problems
 from voya.store import Store
 
@@ -42,6 +43,8 @@ def test_wrong_token_is_rejected_and_the_right_token_is_accepted(
 ) -> None:
     _production(monkeypatch, tmp_path)
     monkeypatch.setenv("VOYA_METRICS_TOKEN", "metrics-test-token")
+    monkeypatch.setenv("VOYA_DB", str(tmp_path / "t.db"))
+    upgrade_to_head()
     api_mod._state.clear()
     api_mod._hits.clear()
     api_mod._state["store"] = Store(str(tmp_path / "t.db"))
@@ -64,6 +67,8 @@ def test_valid_token_skips_the_invite_gate_and_a_wrong_one_does_not(
 ) -> None:
     _production(monkeypatch, tmp_path)
     monkeypatch.setenv("VOYA_METRICS_TOKEN", "metrics-test-token")
+    monkeypatch.setenv("VOYA_DB", str(tmp_path / "t.db"))
+    upgrade_to_head()
     api_mod._state.clear()
     api_mod._state["store"] = Store(str(tmp_path / "t.db"))
     client = TestClient(api_mod.app)
