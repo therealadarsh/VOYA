@@ -42,6 +42,8 @@ session strategy notes, prompt templates. **Cursor rule:** `.cursor/rules/voya.m
 | [`DATA_SOURCES.md`](DATA_SOURCES.md) | Provider terms, caching, attribution (incl. OpenRouter) |
 | [`DEPLOY.md`](DEPLOY.md) | Private preview: Docker, env, AWS notes |
 | [`MVP_TEST_GUIDE.md`](MVP_TEST_GUIDE.md) | Manual MVP checks; intentional gaps |
+| [`GITHUB_AUTOMATION.md`](GITHUB_AUTOMATION.md) | Owner: rulesets, delete-branch setting, `auto-merge` label workflow |
+| [`REVIEW_GUIDE.md`](REVIEW_GUIDE.md) | How to review PRs; points at label-gated merge |
 | [`BUILD_PLAN.md`](BUILD_PLAN.md) | Milestone-oriented build outline |
 | [`daytrip-notes.md`](daytrip-notes.md) | Notes from read-only Daytrip reference (not `reference/` itself) |
 

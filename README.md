@@ -5,7 +5,9 @@
 budget are set, a rotating first-week idea bank, and `/metrics`. The demo
 banner stays while any cost is still a guess. CI runs `make verify`, a Postgres
 integration job, and a Docker build on PRs to `dev`/`uat`/`prod` (see
-`.github/workflows/ci.yml`). Local Mac: `make verify RUN=` in conda `snakeenv`.
+`.github/workflows/ci.yml`). Owners may merge into `dev` with the `auto-merge`
+label after required checks pass (`docs/GITHUB_AUTOMATION.md`). Local Mac:
+`make verify RUN=` in conda `snakeenv`.
 Not deployed. See
 [`docs/README.md`](docs/README.md) (doc index) ·
 [`docs/AGENTIC_ENGINEERING.md`](docs/AGENTIC_ENGINEERING.md) (AI/agent register)

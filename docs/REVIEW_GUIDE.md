@@ -125,6 +125,14 @@ Work through the diff in this order. Stop and ask when one item is unclear.
 8. **Docs.** If behaviour, state or the next steps changed, the docs in
    section 7 changed in the same PR.
 
+### Merge into `dev` (label gate)
+
+After items 1–8 look good, the **owner** (not an agent) may merge by adding the
+**`auto-merge`** label on the PR. A GitHub Actions workflow waits for **required**
+CI checks (`verify`, `postgres`, `docker` once configured in a ruleset), then
+merges and deletes the head branch. Fork PRs never auto-merge. Full setup:
+[`GITHUB_AUTOMATION.md`](GITHUB_AUTOMATION.md).
+
 ## 6. Known review gaps (observed)
 
 - **The gate does not cover the core.** `make lint` and `make typecheck` use a
@@ -135,9 +143,10 @@ Work through the diff in this order. Stop and ask when one item is unclear.
   `planner.py` would not fail `make verify`. Review those files by eye.
 - **Traceability is thin.** `check_traceability.py` only looks for three
   snippets (`S-01`, `S-23`, `MVP-PLAN`) in test text.
-- **No CI and no hooks.** `.github/` does not exist, `core.hooksPath` is unset
-  and `.git/hooks` holds no active hooks. `make verify` runs only when a person
-  or tool runs it.
+- **CI is remote-only.** `.github/workflows/ci.yml` runs on PRs; local
+  `core.hooksPath` is still unset. `make verify` runs when a person or tool runs it.
+  Label-based auto-merge is documented in `GITHUB_AUTOMATION.md` (not a substitute
+  for reading the diff).
 - **Not exercised here.** The browser flow, the Postgres round trip and the
   Docker image build. `docs/PROGRESS.md` says the image was never built in the
   authoring environment.

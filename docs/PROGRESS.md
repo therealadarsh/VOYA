@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-27 · branch **`feat/cursor-prompt-next`** (`19a13f4`, PR #10) · base `dev` (`ef0d247`)
+**Last updated:** 2026-11-27 · branch **`feat/github-auto-merge`** (PR pending) · base `dev` (`bd8146b`)
 
 ## Done
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
@@ -62,6 +62,7 @@ The living status of the build. Update it at the end of every session (see
   `src/voya`, scripts, and tests (`api` / `agent` / `planner` mypy deferred in
   `pyproject.toml` until S03c). GitHub Actions: `verify`, Postgres service job
   for `tests/test_p1_nyc.py`, Docker build; PR triggers include `uat` and `prod`.
+  Label `auto-merge` workflow for same-repo PRs into `dev` (`docs/GITHUB_AUTOMATION.md`).
 
 ## Known limits
 - **Synthetic demo catalog still drives plans:** 3 cities + 2 parks, made-up
@@ -73,8 +74,9 @@ The living status of the build. Update it at the end of every session (see
   not built in this environment (no Docker daemon).
 
 ## Next (suggested order)
-1. **P0 finish:** ruleset requires `verify` + `postgres` status checks (owner, in
-   GitHub). **S03c:** strict mypy on `api.py`, `agent.py`, `planner.py`.
+1. **P0 finish:** owner enables ruleset checks `verify` + `postgres` + `docker` and
+   **Automatically delete head branches** (see `docs/GITHUB_AUTOMATION.md`).
+   **S03c:** strict mypy on `api.py`, `agent.py`, `planner.py`.
 2. **P1 real data:** S04 demo banner per area, then cited place catalog (S05+).
 3. Owner answers for hosting, SMTP, invite code, public URL, alarm amount, legal
    wording, and Foursquare key plus budget before live places or deploy.
