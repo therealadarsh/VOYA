@@ -9,7 +9,7 @@ Read automatically by many AI coding tools. `CLAUDE.md`, `GEMINI.md` and
 3. `.voya-private/PLAN.md` and `.voya-private/CURSOR_PROMPT.md`, if present:
    the owner's plan and build brief. This folder is **gitignored and local
    only**.
-4. `DECISIONS.md`, `docs/CONCEPT_MAP.md`, `README.md`.
+4. `DECISIONS.md`, `docs/AGENTIC_ENGINEERING.md`, `docs/CONCEPT_MAP.md`, `README.md`.
 
 ## The private folder (`.voya-private/`)
 - It holds the owner's plan, business decisions, prompts and private notes.
@@ -34,6 +34,8 @@ off to another tool):
 2. **Update `docs/PROGRESS.md`:** Done / Known limits / Next / Blocked, plus
    the "Last updated" line (date, branch, commit).
 3. **Update the "Status" line in `README.md`** so it matches PROGRESS.md.
+   If the session added or changed an AI feature or AI build tool, update
+   its entry and the changelog in `docs/AGENTIC_ENGINEERING.md`.
 4. **Optional:** a private session summary (strategy, the owner's ideas) in
    `.voya-private/SESSION_NOTES.md`.
 5. Commit with the message `log: session summary <date>` and push.
