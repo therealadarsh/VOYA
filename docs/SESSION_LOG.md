@@ -382,3 +382,44 @@ rulesets and branch cleanup; no org settings changed here.
 2. S04 demo banner per area.
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-27 · Claude Code (desktop) · branch fix/blank-db-settings · ae5efdb..c4d4cbe
+
+**Goal:** connect magic-link email to Amazon SES and fix the local-run defaults
+that broke on the way.
+
+**Done:**
+- Owner set up Amazon SES in `us-east-1`: domain identity with Easy DKIM
+  (RSA 2048) verified, one sandbox test inbox verified, and an IAM SMTP user
+  limited to `ses:SendRawEmail`. Credentials live only in the owner's
+  gitignored `.env`. No code change was needed for SMTP.
+- Live check: the app ran with `--env-file .env` (`VOYA_ENV=development`,
+  `VOYA_DEV_SIGNIN=0`); `POST /v1/auth/start` returned `email_sent` and SES
+  counted one send.
+- `src/voya/store.py`: `default_db_path()` treats a blank or whitespace
+  `VOYA_DB`, `DATABASE_URL` or `VOYA_DATA_DIR` as unset. Before, a blank
+  `VOYA_DATA_DIR` put `voya.db` in the working directory.
+- `.env.example`: `DATABASE_URL` is blank (it pointed at a local Postgres
+  database that does not exist), so a fresh copy runs on SQLite.
+- `.gitignore`: `*.db` and SQLite journal/WAL files.
+- `tests/test_db_path.py`: 7 tests (blank, whitespace, explicit path,
+  Postgres URL, `.env.example` stays on SQLite). Lint, mypy (39 files),
+  secrets and policy checks green. **130 passed, 2 skipped.**
+
+**Decisions:** none.
+
+**Not done / known issues:**
+- `make run` does not load `.env`; use
+  `uvicorn voya.api:app --reload --port 8000 --env-file .env`.
+- SES is still in the sandbox (only verified recipients, 200 a day).
+  Production access is an owner request in the SES console.
+- Production SMTP values belong in SSM, not a file. Not deployed.
+
+**Next:**
+1. Merge this branch into `dev`.
+2. S04 demo banner per area.
+3. Owner: request SES production access before inviting testers (S17).
+
+**Questions for the owner:** none.
