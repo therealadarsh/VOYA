@@ -10,6 +10,13 @@ from voya.pricing.rules import assert_all_cited
 def main() -> int:
     n = assert_all_cited()
     print(f"check_data_citations: {n} cited file(s)")
+    from voya.ideas import check_idea_files
+
+    problems = check_idea_files()
+    if problems:
+        print("\n".join(problems))
+        return 1
+    print("ideas: OK")
     return 0
 
 

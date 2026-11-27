@@ -1,89 +1,652 @@
 {
-  "synthetic": false,
-  "source": "VOYA editorial list of public place names. This file contains no prices, fares, hours, or statistics.",
-  "observed_at": "2026-11-13T05:00:00+00:00",
-  "quote": "Place names only. Costs are attached in code only from cited fare files.",
-  "city": "nyc",
-  "sets": [
-    {
-      "id": "harbor",
-      "days": [
-        {"day": 1, "slots": [
-          {"part": "morning", "title": "Battery Park", "note": "Start at the harbor. No admission is shown until a source is on file."},
-          {"part": "afternoon", "title": "Statue of Liberty ferry terminal", "note": "The ferry fare is not shown until a source is on file."},
-          {"part": "evening", "title": "Walk through the financial district", "note": "An evening walk. No price is attached."}
-        ]},
-        {"day": 2, "slots": [
-          {"part": "morning", "title": "Central Park, south end", "note": "A morning in the park. No price is attached."},
-          {"part": "afternoon", "title": "The Metropolitan Museum of Art", "note": "Admission is not shown until a source is on file."},
-          {"part": "evening", "title": "Grand Army Plaza at 59th Street", "note": "An evening pause at the park edge. No price is attached."}
-        ]},
-        {"day": 3, "slots": [
-          {"part": "morning", "title": "New York Public Library, Stephen A. Schwarzman Building", "note": "See the building. No ticket price is shown."},
-          {"part": "afternoon", "title": "Bryant Park", "note": "An afternoon outside. No price is attached."},
-          {"part": "evening", "title": "Times Square", "note": "Walk through. No price is attached."}
-        ]},
-        {"day": 4, "slots": [
-          {"part": "morning", "title": "Brooklyn Bridge, Manhattan side", "note": "Walk the bridge. No price is attached."},
-          {"part": "afternoon", "title": "Brooklyn Bridge Park", "note": "Time by the water. No price is attached."},
-          {"part": "evening", "title": "DUMBO streets", "note": "An evening walk. No price is attached."}
-        ]},
-        {"day": 5, "slots": [
-          {"part": "morning", "title": "The High Line, south end", "note": "Walk the park. No price is attached."},
-          {"part": "afternoon", "title": "Chelsea Market", "note": "Look around. Meal prices are not shown until a source is on file."},
-          {"part": "evening", "title": "Hudson River Park", "note": "An evening walk. No price is attached."}
-        ]},
-        {"day": 6, "slots": [
-          {"part": "morning", "title": "Chinatown", "note": "Wander and choose a meal. Prices are not shown until a source is on file."},
-          {"part": "afternoon", "title": "Little Italy", "note": "A short walk north. Prices are not shown until a source is on file."},
-          {"part": "evening", "title": "SoHo", "note": "An evening walk. No price is attached."}
-        ]},
-        {"day": 7, "slots": [
-          {"part": "morning", "title": "The Cloisters", "note": "Admission is not shown until a source is on file."},
-          {"part": "afternoon", "title": "Fort Tryon Park", "note": "An afternoon outside. No price is attached."},
-          {"part": "evening", "title": "Upper West Side", "note": "Head back downtown when you are ready. No price is attached."}
-        ]}
-      ]
+  "synthetic": true,
+  "source": "Sample list of public place names for a first-week idea bank. Not the owner's picks.",
+  "observed_at": "2026-11-27T18:00:00+00:00",
+  "quote": "Sample place names only. This file has no prices, hours, or statistics.",
+  "area": "nyc",
+  "note": "Sample; owner replaces with their own picks",
+  "days": {
+    "1": {
+      "morning": {
+        "options": [
+          {
+            "id": "nyc-d1-mo-bridge",
+            "title": "Brooklyn Bridge walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 90,
+            "why": "A walk across the Brooklyn Bridge.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d1-mo-park",
+            "title": "Central Park walk",
+            "place_ref": null,
+            "tags": [
+              "park",
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 90,
+            "why": "A morning walk in Central Park.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d1-mo-harbor",
+            "title": "Harbor cruise toward Liberty Island",
+            "place_ref": null,
+            "tags": [
+              "harbor"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "A boat ride toward Liberty Island.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "afternoon": {
+        "options": [
+          {
+            "id": "nyc-d1-af-park",
+            "title": "Battery Park walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "A lighter afternoon by the harbor.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d1-af-meal",
+            "title": "A sit-down meal in Lower Manhattan",
+            "place_ref": null,
+            "tags": [
+              "food"
+            ],
+            "indoor": true,
+            "duration_min": 90,
+            "why": "A sit-down meal in Lower Manhattan.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d1-af-museum",
+            "title": "A museum afternoon",
+            "place_ref": null,
+            "tags": [
+              "museum"
+            ],
+            "indoor": true,
+            "duration_min": 120,
+            "why": "An indoor afternoon in a museum.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "evening": {
+        "options": [
+          {
+            "id": "nyc-d1-ev-view",
+            "title": "A high-rise view",
+            "place_ref": null,
+            "tags": [
+              "view"
+            ],
+            "indoor": true,
+            "duration_min": 60,
+            "why": "An evening look out over the city.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d1-ev-walk",
+            "title": "An evening walk downtown",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "A walk through downtown streets.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d1-ev-show",
+            "title": "A Broadway show",
+            "place_ref": null,
+            "tags": [
+              "show"
+            ],
+            "indoor": true,
+            "duration_min": 150,
+            "why": "An evening at a Broadway theater.",
+            "curated_by": "sample"
+          }
+        ]
+      }
     },
-    {
-      "id": "brooklyn",
-      "days": [
-        {"day": 1, "slots": [
-          {"part": "morning", "title": "Prospect Park", "note": "Start in Brooklyn. No price is attached."},
-          {"part": "afternoon", "title": "Brooklyn Museum", "note": "Admission is not shown until a source is on file."},
-          {"part": "evening", "title": "Grand Army Plaza, Brooklyn", "note": "An evening walk. No price is attached."}
-        ]},
-        {"day": 2, "slots": [
-          {"part": "morning", "title": "Brooklyn Botanic Garden", "note": "Admission is not shown until a source is on file."},
-          {"part": "afternoon", "title": "Prospect Park boathouse area", "note": "An afternoon outside. No price is attached."},
-          {"part": "evening", "title": "Park Slope", "note": "An evening walk. Meal prices are not shown until a source is on file."}
-        ]},
-        {"day": 3, "slots": [
-          {"part": "morning", "title": "Brooklyn Bridge Park", "note": "Morning by the water. No price is attached."},
-          {"part": "afternoon", "title": "Brooklyn Heights Promenade", "note": "A walk with a view. No price is attached."},
-          {"part": "evening", "title": "Brooklyn Bridge", "note": "Walk toward Manhattan. No price is attached."}
-        ]},
-        {"day": 4, "slots": [
-          {"part": "morning", "title": "Central Park, north end", "note": "A morning in the park. No price is attached."},
-          {"part": "afternoon", "title": "American Museum of Natural History", "note": "Admission is not shown until a source is on file."},
-          {"part": "evening", "title": "Columbus Avenue", "note": "An evening walk. No price is attached."}
-        ]},
-        {"day": 5, "slots": [
-          {"part": "morning", "title": "The High Line, north end", "note": "Walk south. No price is attached."},
-          {"part": "afternoon", "title": "Whitney Museum of American Art", "note": "Admission is not shown until a source is on file."},
-          {"part": "evening", "title": "Meatpacking District", "note": "An evening walk. No price is attached."}
-        ]},
-        {"day": 6, "slots": [
-          {"part": "morning", "title": "Williamsburg waterfront", "note": "A morning walk. Meal prices are not shown until a source is on file."},
-          {"part": "afternoon", "title": "Domino Park", "note": "An afternoon outside. No price is attached."},
-          {"part": "evening", "title": "Williamsburg", "note": "An evening walk. No price is attached."}
-        ]},
-        {"day": 7, "slots": [
-          {"part": "morning", "title": "Governors Island ferry terminal", "note": "The ferry fare is not shown until a source is on file."},
-          {"part": "afternoon", "title": "The island's paths", "note": "Walk. No price is attached."},
-          {"part": "evening", "title": "Battery Park", "note": "Come back to the harbor. No price is attached."}
-        ]}
-      ]
+    "2": {
+      "morning": {
+        "options": [
+          {
+            "id": "nyc-d2-mo-met",
+            "title": "The Metropolitan Museum of Art",
+            "place_ref": null,
+            "tags": [
+              "museum"
+            ],
+            "indoor": true,
+            "duration_min": 150,
+            "why": "A morning inside the museum.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d2-mo-south",
+            "title": "Central Park, south end",
+            "place_ref": null,
+            "tags": [
+              "park"
+            ],
+            "indoor": false,
+            "duration_min": 90,
+            "why": "A morning at the south end of the park.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "afternoon": {
+        "options": [
+          {
+            "id": "nyc-d2-af-plaza",
+            "title": "Grand Army Plaza at 59th Street",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 45,
+            "why": "An afternoon pause at the park edge.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d2-af-lib",
+            "title": "New York Public Library, Stephen A. Schwarzman Building",
+            "place_ref": null,
+            "tags": [
+              "indoors"
+            ],
+            "indoor": true,
+            "duration_min": 60,
+            "why": "A look around the library building.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "evening": {
+        "options": [
+          {
+            "id": "nyc-d2-ev-bryant",
+            "title": "Bryant Park",
+            "place_ref": null,
+            "tags": [
+              "park"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "An evening outside at Bryant Park.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d2-ev-times",
+            "title": "Times Square walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 45,
+            "why": "A walk through Times Square.",
+            "curated_by": "sample"
+          }
+        ]
+      }
+    },
+    "3": {
+      "morning": {
+        "options": [
+          {
+            "id": "nyc-d3-mo-bridge",
+            "title": "Brooklyn Bridge, Manhattan side",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 90,
+            "why": "A morning start on the Manhattan side of the bridge.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d3-mo-heights",
+            "title": "Brooklyn Heights Promenade",
+            "place_ref": null,
+            "tags": [
+              "walk",
+              "view"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "A morning walk with a wide view.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "afternoon": {
+        "options": [
+          {
+            "id": "nyc-d3-af-bbp",
+            "title": "Brooklyn Bridge Park",
+            "place_ref": null,
+            "tags": [
+              "park"
+            ],
+            "indoor": false,
+            "duration_min": 90,
+            "why": "An afternoon by the water.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d3-af-dumbo",
+            "title": "DUMBO streets",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "An afternoon walk through DUMBO.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "evening": {
+        "options": [
+          {
+            "id": "nyc-d3-ev-prospect",
+            "title": "Prospect Park",
+            "place_ref": null,
+            "tags": [
+              "park"
+            ],
+            "indoor": false,
+            "duration_min": 90,
+            "why": "An evening in Prospect Park.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d3-ev-gap",
+            "title": "Grand Army Plaza, Brooklyn",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 45,
+            "why": "An evening walk at the plaza.",
+            "curated_by": "sample"
+          }
+        ]
+      }
+    },
+    "4": {
+      "morning": {
+        "options": [
+          {
+            "id": "nyc-d4-mo-highline",
+            "title": "The High Line, south end",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 75,
+            "why": "A morning walk on the High Line.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d4-mo-chelsea",
+            "title": "Chelsea Market look-around",
+            "place_ref": null,
+            "tags": [
+              "food",
+              "indoors"
+            ],
+            "indoor": true,
+            "duration_min": 60,
+            "why": "A look around Chelsea Market.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "afternoon": {
+        "options": [
+          {
+            "id": "nyc-d4-af-hudson",
+            "title": "Hudson River Park",
+            "place_ref": null,
+            "tags": [
+              "park"
+            ],
+            "indoor": false,
+            "duration_min": 75,
+            "why": "An afternoon along the river.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d4-af-whitney",
+            "title": "Whitney Museum of American Art",
+            "place_ref": null,
+            "tags": [
+              "museum"
+            ],
+            "indoor": true,
+            "duration_min": 120,
+            "why": "An indoor afternoon at the museum.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "evening": {
+        "options": [
+          {
+            "id": "nyc-d4-ev-meat",
+            "title": "Meatpacking District walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "An evening walk through the neighborhood.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d4-ev-pier",
+            "title": "A pier at sunset",
+            "place_ref": null,
+            "tags": [
+              "view"
+            ],
+            "indoor": false,
+            "duration_min": 45,
+            "why": "An evening stop by the water.",
+            "curated_by": "sample"
+          }
+        ]
+      }
+    },
+    "5": {
+      "morning": {
+        "options": [
+          {
+            "id": "nyc-d5-mo-china",
+            "title": "Chinatown walk",
+            "place_ref": null,
+            "tags": [
+              "walk",
+              "food"
+            ],
+            "indoor": false,
+            "duration_min": 75,
+            "why": "A morning walk through Chinatown.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d5-mo-italy",
+            "title": "Little Italy walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 45,
+            "why": "A short walk through Little Italy.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "afternoon": {
+        "options": [
+          {
+            "id": "nyc-d5-af-soho",
+            "title": "SoHo walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 75,
+            "why": "An afternoon walk through SoHo.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d5-af-gallery",
+            "title": "A downtown gallery",
+            "place_ref": null,
+            "tags": [
+              "art"
+            ],
+            "indoor": true,
+            "duration_min": 60,
+            "why": "An indoor stop in a gallery.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "evening": {
+        "options": [
+          {
+            "id": "nyc-d5-ev-village",
+            "title": "Greenwich Village walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 75,
+            "why": "An evening walk through the Village.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d5-ev-jazz",
+            "title": "A small music room",
+            "place_ref": null,
+            "tags": [
+              "music"
+            ],
+            "indoor": true,
+            "duration_min": 90,
+            "why": "An evening indoors for live music.",
+            "curated_by": "sample"
+          }
+        ]
+      }
+    },
+    "6": {
+      "morning": {
+        "options": [
+          {
+            "id": "nyc-d6-mo-cloisters",
+            "title": "The Cloisters",
+            "place_ref": null,
+            "tags": [
+              "museum"
+            ],
+            "indoor": true,
+            "duration_min": 120,
+            "why": "A morning inside The Cloisters.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d6-mo-tryon",
+            "title": "Fort Tryon Park",
+            "place_ref": null,
+            "tags": [
+              "park"
+            ],
+            "indoor": false,
+            "duration_min": 75,
+            "why": "A morning outside at Fort Tryon Park.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "afternoon": {
+        "options": [
+          {
+            "id": "nyc-d6-af-uws",
+            "title": "Upper West Side walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "An afternoon walk on the Upper West Side.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d6-af-amnh",
+            "title": "American Museum of Natural History",
+            "place_ref": null,
+            "tags": [
+              "museum"
+            ],
+            "indoor": true,
+            "duration_min": 150,
+            "why": "An indoor afternoon at the museum.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "evening": {
+        "options": [
+          {
+            "id": "nyc-d6-ev-columbus",
+            "title": "Columbus Avenue walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "An evening walk along Columbus Avenue.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d6-ev-lincoln",
+            "title": "Lincoln Center plaza",
+            "place_ref": null,
+            "tags": [
+              "view"
+            ],
+            "indoor": false,
+            "duration_min": 45,
+            "why": "An evening stop at the plaza.",
+            "curated_by": "sample"
+          }
+        ]
+      }
+    },
+    "7": {
+      "morning": {
+        "options": [
+          {
+            "id": "nyc-d7-mo-domino",
+            "title": "Domino Park",
+            "place_ref": null,
+            "tags": [
+              "park"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "A morning at Domino Park.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d7-mo-will",
+            "title": "Williamsburg waterfront",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 75,
+            "why": "A morning walk on the waterfront.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "afternoon": {
+        "options": [
+          {
+            "id": "nyc-d7-af-botanic",
+            "title": "Brooklyn Botanic Garden",
+            "place_ref": null,
+            "tags": [
+              "garden"
+            ],
+            "indoor": true,
+            "duration_min": 90,
+            "why": "An afternoon in the botanic garden.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d7-af-museum",
+            "title": "Brooklyn Museum",
+            "place_ref": null,
+            "tags": [
+              "museum"
+            ],
+            "indoor": true,
+            "duration_min": 120,
+            "why": "An indoor afternoon at the museum.",
+            "curated_by": "sample"
+          }
+        ]
+      },
+      "evening": {
+        "options": [
+          {
+            "id": "nyc-d7-ev-slope",
+            "title": "Park Slope walk",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 60,
+            "why": "An evening walk through Park Slope.",
+            "curated_by": "sample"
+          },
+          {
+            "id": "nyc-d7-ev-bridge",
+            "title": "Walk back toward Manhattan",
+            "place_ref": null,
+            "tags": [
+              "walk"
+            ],
+            "indoor": false,
+            "duration_min": 75,
+            "why": "An evening walk back toward Manhattan.",
+            "curated_by": "sample"
+          }
+        ]
+      }
     }
-  ]
+  }
 }

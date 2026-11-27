@@ -29,7 +29,7 @@ from voya.agent import HelperRequest, respond
 from voya.catalog import destination_is_demo, load_catalog, show_demo_banner
 from voya.client_ip import client_address
 from voya.discover import DiscoverRequest, discover
-from voya.ideas import ideas_after, ideas_for
+from voya.ideas import public_view, rotate
 from voya.llm import Harness, client_from_env
 from voya.log import access_log, configure_logging
 from voya.metrics import METRICS
@@ -299,12 +299,15 @@ def plan_payload(
 ) -> dict[str, Any]:
     with obs.span("plan.build", destination=req.destination, days=req.days):
         plan = build(req)
+    saved = store().plan(plan_id)
+    ideas_json = saved["ideas_json"] if saved else None
     return {
         "plan_id": plan_id,
         "version": version,
         "saved": owner_id is not None,
         "request": req.model_dump(mode="json"),
         "plan": plan,
+        "ideas": public_view(str(ideas_json) if ideas_json else None),
         "trace_id": obs.current_trace(),
     }
 
@@ -526,6 +529,7 @@ def save_plan(plan_id: str, o: str = Depends(require_owner)) -> dict[str, Any]:
     load_plan(plan_id)
     if not store().claim(plan_id, o):
         raise ApiError(403, "NOT_YOURS", "This trip belongs to someone else.")
+    store().mark_ideas_kept(plan_id)
     rec, req = load_plan(plan_id)
     return plan_payload(plan_id, rec["version"], req, o)
 
@@ -726,26 +730,45 @@ def ops(x_ops_token: str | None = Header(None)) -> dict[str, Any]:
         "ai_helper": "model" if harness() else "built-in",
         "owner_price_checks_approved": len(approved_for_city("Chicago")),
         "owner_check_coverage_chicago_est": cov,
+        "idea_stats": store().idea_stat_rows(),
     }
 
 
-class IdeaNext(BaseModel):
-    current_id: str = Field(min_length=1, max_length=40)
-    days: int = Field(1, ge=1, le=7)
+@app.api_route("/v1/ideas", methods=["GET", "POST"])
+@app.api_route("/v1/ideas/next", methods=["GET", "POST"])
+def ideas_retired() -> None:
+    raise ApiError(
+        410,
+        "IDEAS_MOVED",
+        "Classic picks now travel with the plan.",
+        "Use Another on a morning, afternoon, or evening pick.",
+    )
 
 
-@app.get("/v1/ideas")
-def idea_route(city: str = "nyc", seed: str = "voya", days: int = 1) -> dict[str, Any]:
-    if city != "nyc":
-        raise ApiError(404, "NO_IDEAS", "Idea sets for that city are not ready.")
-    if not seed or len(seed) > 80:
-        raise ApiError(422, "INVALID_INPUT", "Use a short seed.")
-    return ideas_for(seed, days)
-
-
-@app.post("/v1/ideas/next")
-def idea_next(body: IdeaNext) -> dict[str, Any]:
-    return ideas_after(body.current_id, body.days)
+@app.post("/v1/plans/{plan_id}/ideas/{day}/{slot}/another")
+def idea_another(plan_id: str, day: int, slot: str) -> dict[str, Any]:
+    if day < 1 or day > 7 or slot not in {"morning", "afternoon", "evening"}:
+        raise ApiError(
+            422,
+            "INVALID_INPUT",
+            "Pick a day and a morning, afternoon, or evening slot.",
+        )
+    rec, req = load_plan(plan_id)
+    try:
+        new_json, left_id, arrived_id = rotate(str(rec["ideas_json"] or ""), day, slot)
+    except ValueError as exc:
+        raise ApiError(404, "NO_IDEAS", str(exc)) from exc
+    if left_id != arrived_id:
+        store().add_version(
+            plan_id,
+            req.model_dump_json(),
+            f"idea {day} {slot}",
+            ideas_json=new_json,
+            left_id=left_id,
+            arrived_id=arrived_id,
+        )
+    rec, req = load_plan(plan_id)
+    return plan_payload(plan_id, rec["version"], req, rec["owner"])
 
 
 @app.get("/metrics")

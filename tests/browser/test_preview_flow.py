@@ -90,13 +90,16 @@ def test_preview_flow(tmp_path: Path) -> None:
             page.get_by_role("button", name="Some wiggle room").click()
             page.get_by_role("button", name="Plan my trip").click()
             page.get_by_text("Demo prices").wait_for()
-            page.get_by_role("button", name="Show me another").wait_for()
-            first_idea = page.locator("#ideas h3").first.inner_text()
-            page.get_by_role("button", name="Show me another").click()
+            page.get_by_role("heading", name="Classic picks").wait_for()
+            morning = page.locator("[data-idea='1:morning']")
+            before = morning.inner_text()
+            afternoon = page.locator("[data-idea='1:afternoon']").inner_text()
+            page.get_by_role("button", name="Another morning idea for day 1").click()
             page.wait_for_function(
-                "(first) => document.querySelector('#ideas h3').textContent !== first",
-                arg=first_idea,
+                "(first) => document.querySelector(\"[data-idea='1:morning']\").textContent !== first",
+                arg=before,
             )
+            assert page.locator("[data-idea='1:afternoon']").inner_text() == afternoon
             page.locator(".headline .big").wait_for()
             assert "est." in page.locator(".headline .big").inner_text()
             page.get_by_role("button", name="Feedback").click()
