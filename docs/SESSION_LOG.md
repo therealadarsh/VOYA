@@ -272,7 +272,7 @@ testable steps for the next sessions.
 
 ---
 
-## 2026-11-27 · Cursor Agent (subagent) · branch feat/cursor-prompt-next · ef0d247..pending
+## 2026-11-27 · Cursor Agent (subagent) · branch feat/cursor-prompt-next · ef0d247..19a13f4
 
 **Goal:** execute P0 safety-net steps S01–S03 from the private build brief (Makefile,
 CI, lint/mypy coverage).
