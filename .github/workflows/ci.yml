@@ -55,7 +55,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres@localhost:5432/postgres
           VOYA_TEST_DATABASE_URL: postgresql://postgres@localhost:5432/postgres
-        run: uv run pytest -q -p no:warnings tests/test_p1_nyc.py tests/test_f11_migrations.py
+        run: uv run pytest -q -p no:warnings tests/test_p1_nyc.py tests/test_f11_migrations.py tests/test_f12_copy_db.py
 
   e2e:
     timeout-minutes: 20
