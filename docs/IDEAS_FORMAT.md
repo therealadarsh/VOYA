@@ -47,7 +47,7 @@ Each day has `morning`, `afternoon`, and `evening`. Each of those has
 |---|---|
 | `id` | Stable, unique in the file. Do not reuse an id for a different place. |
 | `title` | The name a traveler sees. |
-| `place_ref` | A catalog or places id, or `null`. The same place is not scheduled twice on one trip. |
+| `place_ref` | A catalog id, a `places` table id such as `fake:fake-1`, or `null`. The same place is not scheduled twice on one trip. |
 | `tags` | Short words, a list. |
 | `indoor` | `true` or `false`. |
 | `duration_min` | A positive whole number of minutes for the sample length. |

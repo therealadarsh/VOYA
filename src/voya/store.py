@@ -66,6 +66,19 @@ CREATE TABLE IF NOT EXISTS idea_stats (
   kept INTEGER NOT NULL DEFAULT 0,
   swapped INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS places (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  tags TEXT NOT NULL,
+  lat TEXT NOT NULL,
+  lng TEXT NOT NULL,
+  hours TEXT,
+  provider_ids TEXT NOT NULL,
+  source TEXT NOT NULL,
+  observed_at TEXT NOT NULL,
+  cache_until TEXT NOT NULL
+);
 """
 
 
@@ -140,6 +153,39 @@ class Store:
     def feedback_all(self) -> list[dict[str, Any]]:
         with self.tx() as c:
             return [dict(r) for r in c.execute("SELECT * FROM feedback ORDER BY created_at")]
+
+    def upsert_place(self, place: dict[str, Any]) -> None:
+        with self.tx() as cursor:
+            cursor.execute(
+                "INSERT INTO places (id, name, category, tags, lat, lng, hours, provider_ids, "
+                "source, observed_at, cache_until) VALUES (?,?,?,?,?,?,?,?,?,?,?) "
+                "ON CONFLICT (id) DO UPDATE SET "
+                "name=excluded.name, category=excluded.category, tags=excluded.tags, "
+                "lat=excluded.lat, lng=excluded.lng, hours=excluded.hours, "
+                "provider_ids=excluded.provider_ids, source=excluded.source, "
+                "observed_at=excluded.observed_at, cache_until=excluded.cache_until",
+                (
+                    place["id"],
+                    place["name"],
+                    place["category"],
+                    place["tags"],
+                    place["lat"],
+                    place["lng"],
+                    place["hours"],
+                    place["provider_ids"],
+                    place["source"],
+                    place["observed_at"],
+                    place["cache_until"],
+                ),
+            )
+
+    def places(self) -> list[dict[str, Any]]:
+        with self.tx() as cursor:
+            return [dict(row) for row in cursor.execute("SELECT * FROM places ORDER BY id")]
+
+    def delete_place(self, place_id: str) -> None:
+        with self.tx() as cursor:
+            cursor.execute("DELETE FROM places WHERE id=?", (place_id,))
 
     def signin_attempt_rows(self) -> list[dict[str, Any]]:
         """Counter rows. Each row holds a hash, never the address."""
