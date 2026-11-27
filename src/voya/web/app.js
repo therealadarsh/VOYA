@@ -85,6 +85,10 @@
     $("#feedback-open").onclick = () => { $("#fb-sent").hidden = true; $("#fb-error").hidden = true; $("#feedback").hidden = false; $("#fb-message").focus(); };
     $("#feedback-close").onclick = () => ($("#feedback").hidden = true);
     $("#feedback-form").onsubmit = sendFeedback;
+    const fbMessage = $("#fb-message");
+    const fbCount = $("#fb-count");
+    const updateFbCount = () => { if (fbCount && fbMessage) fbCount.textContent = `${fbMessage.value.length} / 1000`; };
+    if (fbMessage) fbMessage.addEventListener("input", updateFbCount);
     const quick = ["It's raining, what now?", "Make it $20 cheaper", "Swap a stop for something outdoorsy", "Find something I'd like", "Why is dinner so expensive?"];
     $("#helper-chips").innerHTML = quick.map((q) => `<button type="button" class="chip">${esc(q)}</button>`).join("");
     $$("#helper-chips .chip").forEach((c) => (c.onclick = () => { $("#helper-msg").value = c.textContent; if (/rain/i.test(c.textContent)) $("#helper-rain").checked = true; ask(c.textContent); }));

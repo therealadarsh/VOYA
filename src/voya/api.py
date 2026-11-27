@@ -507,7 +507,7 @@ def preview_unlock(body: InviteIn) -> JSONResponse:
 
 
 class FeedbackIn(BaseModel):
-    message: str = Field(min_length=1, max_length=2000)
+    message: str = Field(min_length=1, max_length=1000)
     contact: str | None = Field(None, max_length=200)
 
 
@@ -517,7 +517,7 @@ def feedback(body: FeedbackIn) -> dict[str, Any]:
     if not message:
         raise ApiError(422, "INVALID_INPUT", "Write a short note before sending.")
     contact = body.contact.strip() if body.contact else None
-    store().add_feedback(message[:2000], contact or None)
+    store().add_feedback(message[:1000], contact or None)
     return {"ok": True}
 
 

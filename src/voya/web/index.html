@@ -166,7 +166,8 @@
   <div class="sheet-body">
     <div class="sheet-head"><h2 id="feedback-title">Feedback</h2><button class="ghost" id="feedback-close" type="button" aria-label="Close">✕</button></div>
     <form id="feedback-form">
-      <label>What happened? <textarea id="fb-message" required maxlength="2000" rows="4"></textarea></label>
+      <label>What happened? <textarea id="fb-message" required maxlength="1000" rows="4" aria-describedby="fb-count"></textarea></label>
+      <p class="hint" id="fb-count">0 / 1000</p>
       <label>Email (optional) <input type="email" id="fb-contact" autocomplete="email"></label>
       <p class="error" id="fb-error" hidden></p>
       <p class="hint" id="fb-sent" hidden>Thanks. The note is saved with this preview.</p>
