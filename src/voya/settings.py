@@ -65,6 +65,7 @@ class Settings:
     signin_max_per_15min: int
     signin_max_per_day: int
     trusted_proxy_ips: frozenset[str]
+    metrics_token: str | None
 
     @property
     def production(self) -> bool:
@@ -101,6 +102,7 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
         signin_max_per_15min=_int(_raw(env, "VOYA_SIGNIN_MAX_PER_15MIN"), default=3),
         signin_max_per_day=_int(_raw(env, "VOYA_SIGNIN_MAX_PER_DAY"), default=10),
         trusted_proxy_ips=parse_trusted_proxies(_raw(env, "VOYA_TRUSTED_PROXY_IPS")),
+        metrics_token=_raw(env, "VOYA_METRICS_TOKEN"),
     )
 
 
@@ -139,4 +141,6 @@ def production_problems(settings: Settings) -> list[str]:
             "email use? Set VOYA_SMTP_HOST, VOYA_SMTP_PORT, VOYA_SMTP_USERNAME, "
             "VOYA_SMTP_PASSWORD, and VOYA_SMTP_FROM."
         )
+    if not settings.metrics_token:
+        problems.append("What token should scrape /metrics? Set VOYA_METRICS_TOKEN.")
     return problems

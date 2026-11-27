@@ -31,6 +31,7 @@ def _production_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setenv("VOYA_SMTP_USERNAME", "voya")
     monkeypatch.setenv("VOYA_SMTP_PASSWORD", "secret")
     monkeypatch.setenv("VOYA_SMTP_FROM", "sign-in@example.com")
+    monkeypatch.setenv("VOYA_METRICS_TOKEN", "metrics-test-token")
 
 
 def test_development_settings_do_not_require_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -53,6 +54,7 @@ def test_production_settings_name_each_missing_decision(monkeypatch: pytest.Monk
     monkeypatch.delenv("VOYA_DATA_DIR", raising=False)
     monkeypatch.delenv("VOYA_SMTP_HOST", raising=False)
     monkeypatch.delenv("VOYA_SMTP_FROM", raising=False)
+    monkeypatch.delenv("VOYA_METRICS_TOKEN", raising=False)
     text = "\n".join(production_problems(load_settings()))
     assert "VOYA_INVITE_CODE" in text
     assert "VOYA_PUBLIC_URL" in text
@@ -60,6 +62,7 @@ def test_production_settings_name_each_missing_decision(monkeypatch: pytest.Monk
     assert "VOYA_DATA_DIR" in text
     assert "VOYA_SMTP_HOST" in text
     assert "VOYA_SMTP_FROM" in text
+    assert "VOYA_METRICS_TOKEN" in text
 
 
 def test_production_settings_accept_a_complete_config(

@@ -34,9 +34,16 @@ from voya.llm import Harness, client_from_env
 from voya.log import access_log, configure_logging
 from voya.metrics import METRICS
 from voya.planner import PlanError, PlanRequest, apply_upgrade, build, priced_for
-from voya.preview import COOKIE, code_matches, cookie_for, cookie_matches, is_exempt
+from voya.preview import (
+    COOKIE,
+    code_matches,
+    cookie_for,
+    cookie_matches,
+    is_exempt,
+    secret_matches,
+)
 from voya.safety import origin_allowed, security_headers
-from voya.settings import load_settings, production_problems
+from voya.settings import Settings, load_settings, production_problems
 from voya.store import Store
 from voya.tracking import CATEGORIES, apply_recovery, budget_status, parse_spend_text
 
@@ -164,6 +171,13 @@ _hits: dict[str, deque[float]] = defaultdict(deque)
 RATE_PER_MIN = int(os.environ.get("VOYA_RATE_PER_MIN", "60"))
 
 
+def _metrics_invite_exempt(request: Request, settings: Settings) -> bool:
+    """A valid metrics token is the only way /metrics skips the invite gate."""
+    if request.url.path != "/metrics":
+        return False
+    return secret_matches(settings.metrics_token, request.headers.get("x-metrics-token"))
+
+
 def _client_address(request: Request) -> str:
     """One helper for every place that needs the caller's address."""
     settings = load_settings()
@@ -224,6 +238,7 @@ async def _trace_and_limit(
     if (
         settings.invite_required
         and not is_exempt(request.url.path)
+        and not _metrics_invite_exempt(request, settings)
         and not cookie_matches(settings.invite_code, request.cookies.get(COOKIE))
     ):
         if request.method == "GET" and request.url.path == "/":
@@ -735,9 +750,10 @@ def idea_next(body: IdeaNext) -> dict[str, Any]:
 
 @app.get("/metrics")
 def metrics(x_metrics_token: str | None = Header(None)) -> Response:
-    expected = os.environ.get("VOYA_METRICS_TOKEN")
-    if expected and x_metrics_token != expected:
-        raise ApiError(401, "METRICS_ONLY", "Metrics token required.")
+    settings = load_settings()
+    if settings.production or settings.metrics_token:
+        if not secret_matches(settings.metrics_token, x_metrics_token):
+            raise ApiError(401, "METRICS_ONLY", "Metrics token required.")
     return Response(METRICS.render(), media_type="text/plain; version=0.0.4")
 
 

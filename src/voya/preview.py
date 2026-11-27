@@ -13,7 +13,6 @@ _EXEMPT = {
     "/terms",
     "/v1/preview/unlock",
     "/v1/auth/verify",
-    "/metrics",
 }
 
 
@@ -25,6 +24,15 @@ def code_matches(expected: str, provided: str) -> bool:
     if not expected or not provided:
         return False
     return hmac.compare_digest(cookie_for(expected), cookie_for(provided))
+
+
+def secret_matches(expected: str | None, provided: str | None) -> bool:
+    """Constant-time compare. Hashing first keeps different lengths from short-circuiting."""
+    if not expected or provided is None:
+        return False
+    return hmac.compare_digest(
+        sha256(expected.encode()).digest(), sha256(provided.encode()).digest()
+    )
 
 
 def cookie_matches(expected: str | None, cookie: str | None) -> bool:
