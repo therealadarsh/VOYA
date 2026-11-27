@@ -13,7 +13,7 @@ import os
 import secrets
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -55,6 +55,9 @@ CREATE TABLE IF NOT EXISTS magic_links (
 );
 CREATE TABLE IF NOT EXISTS feedback (
   id TEXT PRIMARY KEY, message TEXT NOT NULL, contact TEXT, created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS signin_attempts (
+  email_hash TEXT NOT NULL, attempted_at TEXT NOT NULL
 );
 """
 
@@ -106,6 +109,45 @@ class Store:
     def feedback_all(self) -> list[dict[str, Any]]:
         with self.tx() as c:
             return [dict(r) for r in c.execute("SELECT * FROM feedback ORDER BY created_at")]
+
+    def signin_attempt_rows(self) -> list[dict[str, Any]]:
+        """Counter rows. Each row holds a hash, never the address."""
+        with self.tx() as c:
+            return [
+                dict(r) for r in c.execute("SELECT email_hash, attempted_at FROM signin_attempts")
+            ]
+
+    def record_signin_attempt(
+        self, email: str, *, now: datetime, max_per_15min: int, max_per_day: int
+    ) -> bool:
+        """Record one sign-in email if both limits allow it.
+
+        The key is a hash of the lower-cased address. Over the limit, nothing
+        is inserted and the caller must not send mail.
+        """
+        digest = _hash(email.strip().lower())
+        moment = now.astimezone(UTC)
+        stamp = moment.isoformat(timespec="seconds")
+        cutoff_15 = (moment - timedelta(minutes=15)).isoformat(timespec="seconds")
+        cutoff_day = (moment - timedelta(days=1)).isoformat(timespec="seconds")
+        with self.tx() as c:
+            recent = c.execute(
+                "SELECT COUNT(*) AS n FROM signin_attempts WHERE email_hash=? AND attempted_at>=?",
+                (digest, cutoff_15),
+            ).fetchone()
+            today = c.execute(
+                "SELECT COUNT(*) AS n FROM signin_attempts WHERE email_hash=? AND attempted_at>=?",
+                (digest, cutoff_day),
+            ).fetchone()
+            per_15 = int(recent["n"]) if recent else 0
+            per_day = int(today["n"]) if today else 0
+            if per_15 >= max_per_15min or per_day >= max_per_day:
+                return False
+            c.execute(
+                "INSERT INTO signin_attempts (email_hash, attempted_at) VALUES (?,?)",
+                (digest, stamp),
+            )
+        return True
 
     @contextmanager
     def tx(self) -> Iterator[ResultCursor]:

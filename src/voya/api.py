@@ -11,6 +11,7 @@ import time
 from collections import defaultdict, deque
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -400,6 +401,20 @@ def auth_start(a: AuthIn) -> dict[str, Any]:
             403,
             "ADULTS_ONLY",
             "Accounts are for adults (18+). Trips with kids are planned from an adult's account.",
+        )
+    settings = load_settings()
+    allowed = store().record_signin_attempt(
+        a.email,
+        now=datetime.now(UTC),
+        max_per_15min=settings.signin_max_per_15min,
+        max_per_day=settings.signin_max_per_day,
+    )
+    if not allowed:
+        raise ApiError(
+            429,
+            "SIGNIN_LIMIT",
+            "Too many sign-in emails for this address. Try again later.",
+            "Wait and use the latest link if one already arrived.",
         )
     out = magic_link().request_sign_in(a.email, a.is_adult)
     if "error" in out:

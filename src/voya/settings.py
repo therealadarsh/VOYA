@@ -23,6 +23,18 @@ def _raw(env: Mapping[str, str], key: str) -> str | None:
     return stripped or None
 
 
+def _int(value: str | None, *, default: int) -> int:
+    if value is None:
+        return default
+    try:
+        parsed = int(value)
+    except ValueError:
+        return default
+    if parsed < 0:
+        return default
+    return parsed
+
+
 def _bool(value: str | None, *, default: bool) -> bool:
     if value is None:
         return default
@@ -48,6 +60,8 @@ class Settings:
     smtp_from: str | None
     preview_label: bool
     log_json: bool
+    signin_max_per_15min: int
+    signin_max_per_day: int
 
     @property
     def production(self) -> bool:
@@ -81,6 +95,8 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
         smtp_from=_raw(env, "VOYA_SMTP_FROM"),
         preview_label=_bool(_raw(env, "VOYA_PREVIEW_LABEL"), default=True),
         log_json=log_format == "json",
+        signin_max_per_15min=_int(_raw(env, "VOYA_SIGNIN_MAX_PER_15MIN"), default=3),
+        signin_max_per_day=_int(_raw(env, "VOYA_SIGNIN_MAX_PER_DAY"), default=10),
     )
 
 
