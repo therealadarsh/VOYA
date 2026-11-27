@@ -1,8 +1,9 @@
 # VOYA
 
-**Status:** **123 tests** — private preview plus the NYC slice: Postgres when
+**Status:** **130 tests** — private preview plus the NYC slice: Postgres when
 `DATABASE_URL` is set, a Foursquare client that stays off until a key and a
-budget are set, a rotating first-week idea bank, and `/metrics`. The demo
+budget are set, a rotating first-week idea bank, `/metrics`, and magic-link
+email through Amazon SES (tested locally, SES sandbox). The demo
 banner stays while any cost is still a guess. Strict mypy covers all of
 `src/voya`. CI runs `make verify`, a Postgres
 integration job, and a Docker build on PRs to `dev`/`uat`/`prod` (see

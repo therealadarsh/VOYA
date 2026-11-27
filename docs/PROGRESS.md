@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-27 · branch **`feat/cursor-prompt-s03c`** · commit `2be2c41` (base `dev` `21a4c10`)
+**Last updated:** 2026-11-27 · branch **`fix/blank-db-settings`** · commit `c4d4cbe` (base `dev` `ae5efdb`)
 
 ## Done
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
@@ -14,7 +14,7 @@ The living status of the build. Update it at the end of every session (see
   and "Show me another"; the only dollar amount is the cited MTA fare.
   Demo banner stays up when the catalog is synthetic or any cost is a type
   guess or a price-bucket mapping. `/metrics` counters. Static accessibility
-  checks (labels, language, contrast, focus). Default suite: 123 passed,
+  checks (labels, language, contrast, focus). Default suite: 130 passed,
   2 skipped (browser flow and Postgres, both opt-in). Browser flow passed
   with `VOYA_BROWSER=1`, including the idea rotation.
 - **Private preview (phase 1a):** production settings that refuse to start
@@ -27,6 +27,10 @@ The living status of the build. Update it at the end of every session (see
   deployment guide for a single Docker host and for AWS.
   Browser flow (plan, feedback, dev sign-in, save) passes when
   `VOYA_BROWSER=1`. Default suite: 112 passed, browser test skipped.
+- **Magic-link email through Amazon SES (local):** a real sign-in email was
+  sent with `VOYA_DEV_SIGNIN=0` and the owner's SES SMTP credentials in a
+  gitignored `.env`. Blank database settings now count as unset, and
+  `.env.example` runs on SQLite out of the box.
 - **M1 foundations** (`build/mvp`): cited `data/` for 3 cities + 2 parks, `make verify`,
   CostLine extensions, pricing freshness + rules loaders, 88 tests.
 - **Cost model** (`src/voya/cost/`): ranged, sourced, timestamped cost
@@ -68,8 +72,10 @@ The living status of the build. Update it at the end of every session (see
 - **Synthetic demo catalog still drives plans:** 3 cities + 2 parks, made-up
   names and prices. The demo banner stays because those costs are not cited.
   The idea bank does not replace plan prices.
-- **Dev sign-in still returns a token.** Production sends email only when
-  SMTP settings are present. No SMTP account is configured here.
+- **Dev sign-in still returns a token** unless `VOYA_DEV_SIGNIN=0`. SES is in
+  the sandbox: only verified recipients, 200 emails a day.
+- **`make run` does not load `.env`.** Use `uvicorn voya.api:app --reload
+  --port 8000 --env-file .env`.
 - **Not deployed.** SQLite on a volume is the preview store. The image was
   not built in this environment (no Docker daemon).
 
@@ -77,14 +83,14 @@ The living status of the build. Update it at the end of every session (see
 1. **P0 finish:** owner enables ruleset checks `verify` + `postgres` + `docker` and
    **Automatically delete head branches** (see `docs/GITHUB_AUTOMATION.md`).
 2. **P1 real data:** S04 demo banner per area, then cited place catalog (S05+).
-3. Owner answers for hosting, SMTP, invite code, public URL, alarm amount, legal
+3. Owner answers for hosting, invite code, public URL, alarm amount, legal
    wording, and Foursquare key plus budget before live places or deploy.
 4. UX redesign (React + Vite) stays later. Vectors, rituals, the learner,
    extra regions, Europe, and climate stay out of scope.
 
 ## Blocked / needs the owner
 - Which hosting account should the private preview be deployed to?
-- What SMTP host, port, username, password, and From address should magic-link email use?
+- Request SES production access before the first tester (sandbox only sends to verified addresses).
 - What invite code should the private preview require?
 - What public https URL should magic links use?
 - What monthly hosting budget should the AWS cost alarm use? BUILD_PLAN recorded $20; confirm or replace it before any alarm is created.

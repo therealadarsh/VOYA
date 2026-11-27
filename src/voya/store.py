@@ -60,13 +60,16 @@ CREATE TABLE IF NOT EXISTS feedback (
 
 
 def default_db_path() -> str:
-    explicit = os.environ.get("VOYA_DB")
+    # A blank line copied from .env.example counts as unset, so the database
+    # never lands in the working directory by accident.
+    explicit = os.environ.get("VOYA_DB", "").strip()
     if explicit:
         return explicit
     url = os.environ.get("DATABASE_URL", "").strip()
     if url.startswith("postgres"):
         return url
-    return str(Path(os.environ.get("VOYA_DATA_DIR", "var")) / "voya.db")
+    data_dir = os.environ.get("VOYA_DATA_DIR", "").strip() or "var"
+    return str(Path(data_dir) / "voya.db")
 
 
 def _now() -> str:
