@@ -359,7 +359,7 @@ rulesets and branch cleanup; no org settings changed here.
 
 ---
 
-## 2026-11-27 · Cursor Agent (subagent) · branch feat/cursor-prompt-s03c · 21a4c10..
+## 2026-11-27 · Cursor Agent (subagent) · branch feat/cursor-prompt-s03c · 21a4c10..2be2c41
 
 **Goal:** strict mypy on `voya.api`, `voya.agent`, and `voya.planner`.
 

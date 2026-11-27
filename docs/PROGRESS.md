@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-27 · branch **`feat/cursor-prompt-s03c`** · base `dev` (`21a4c10`)
+**Last updated:** 2026-11-27 · branch **`feat/cursor-prompt-s03c`** · commit `2be2c41` (base `dev` `21a4c10`)
 
 ## Done
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
