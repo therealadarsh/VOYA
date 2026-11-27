@@ -151,7 +151,7 @@ logging in `AGENTS.md` points here.
 | **`check_traceability.py`** | Requirements ↔ tests map | `make traceability` | Agent features stay tied to tests | Traceability matrix changes | Built |
 | **`check_secrets.sh`** | Secret scan | `make secrets` | Extra guard beyond policy regexes | Patterns or paths change | Built |
 | **`validate_examples.py`** | Example JSON plans | `make examples` | Public examples stay valid | Example format changes | Built |
-| **CI (GitHub Actions)** | Remote `make verify` | Planned on PRs to `dev` (`docs/PROGRESS.md`) | Catches regressions before merge | `.github/workflows` added or changes | Planned |
+| **CI (GitHub Actions)** | Remote `make verify` | `.github/workflows/ci.yml` on PRs and pushes to `dev` (`verify`, `docker` jobs) | Catches regressions before merge | Workflow jobs, triggers, or runner image change | Built |
 
 ### L. MCP and external assistant tools
 
@@ -181,3 +181,4 @@ logging in `AGENTS.md` points here.
 Newest at the bottom.
 
 - 2026-11-27: Created as canonical agentic register (`docs/AGENTIC_ENGINEERING.md`). Consolidated narrative from `docs/AI_TECHNOLOGIES.md`, added per-row "update when" guidance, build/runtime split, subagents, and `make verify` policy scripts. Added `docs/README.md` documentation index.
+- 2026-11-27: Marked **CI (GitHub Actions)** Built after `.github/workflows/ci.yml` merged to `dev`.
