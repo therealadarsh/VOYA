@@ -152,6 +152,7 @@ logging in `AGENTS.md` points here.
 | **`check_secrets.sh`** | Secret scan | `make secrets` | Extra guard beyond policy regexes | Patterns or paths change | Built |
 | **`validate_examples.py`** | Example JSON plans | `make examples` | Public examples stay valid | Example format changes | Built |
 | **CI (GitHub Actions)** | Remote `make verify` | `.github/workflows/ci.yml`: `verify` (`make verify`), `postgres` (`tests/test_p1_nyc.py`), `docker` build; PRs to `dev`/`uat`/`prod` | Catches regressions before merge | Workflow jobs, triggers, or runner image change | Built |
+| **Auto merge (label)** | Owner intent → merge `dev` | `.github/workflows/auto-merge.yml`: on label `auto-merge` + same-repo PR; `gh pr checks --required --watch` then `gh pr merge --merge --delete-branch`; see `docs/GITHUB_AUTOMATION.md` | Merge after CI without giving agents merge tokens | Label name, base branches, or check wait logic change | Built |
 
 ### L. MCP and external assistant tools
 
@@ -183,3 +184,4 @@ Newest at the bottom.
 - 2026-11-27: Created as canonical agentic register (`docs/AGENTIC_ENGINEERING.md`). Consolidated narrative from `docs/AI_TECHNOLOGIES.md`, added per-row "update when" guidance, build/runtime split, subagents, and `make verify` policy scripts. Added `docs/README.md` documentation index.
 - 2026-11-27: Marked **CI (GitHub Actions)** Built after `.github/workflows/ci.yml` merged to `dev`.
 - 2026-11-27: CI row updated: Postgres service job, PR triggers on `uat`/`prod`; Makefile `RUN` for local `snakeenv`.
+- 2026-11-27: **Auto merge (label)** row + `docs/GITHUB_AUTOMATION.md` and `.github/workflows/auto-merge.yml` (`dev` only; fork-safe).

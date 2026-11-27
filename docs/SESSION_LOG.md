@@ -302,3 +302,32 @@ CI, lint/mypy coverage).
 2. S03c then S04 demo banner per area.
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-27 · Cursor Agent (subagent) · branch feat/github-auto-merge · bd8146b+
+
+**Goal:** safe label-gated auto-merge into `dev` (option B); owner docs for
+rulesets and branch cleanup; no org settings changed here.
+
+**Done:**
+- `.github/workflows/auto-merge.yml`: `labeled` / `synchronize` on PRs to `dev`;
+  same-repo only; requires label `auto-merge`; `gh pr checks --required --watch`;
+  `gh pr merge --merge --delete-branch`.
+- `docs/GITHUB_AUTOMATION.md`: delete-branch setting, ruleset steps, owner
+  checklist, security (no agent merge token).
+- `docs/REVIEW_GUIDE.md`, `docs/README.md`, `docs/AGENTIC_ENGINEERING.md` updated.
+- PR #10 verified **MERGED**; branch created from current `origin/dev` (`bd8146b`).
+- `make verify RUN=` (snakeenv): green.
+
+**Decisions:** none.
+
+**Not done / known issues:**
+- GitHub ruleset and “auto-merge” label still owner actions in UI.
+- Workflow not exercised on a real PR until this feature PR lands.
+
+**Next:**
+1. Merge auto-merge PR; owner completes checklist in `GITHUB_AUTOMATION.md`.
+2. P0 S03c / ruleset verification on a test PR.
+
+**Questions for the owner:** none.

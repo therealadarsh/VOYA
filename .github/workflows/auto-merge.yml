@@ -1,0 +1,51 @@
+# Merge PRs into `dev` when a collaborator adds the `auto-merge` label and required CI passes.
+# See docs/GITHUB_AUTOMATION.md. Does not approve or merge without that label.
+
+name: Auto merge
+
+on:
+  pull_request:
+    types: [labeled, synchronize]
+    branches: [dev]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  merge-when-ready:
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'auto-merge') &&
+      (
+        github.event.action == 'synchronize' ||
+        (github.event.action == 'labeled' && github.event.label.name == 'auto-merge')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Wait for required checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pr="${{ github.event.pull_request.number }}"
+          echo "Waiting for required checks on PR #${pr}…"
+          gh pr checks "$pr" --required --watch --interval 20
+
+      - name: Merge and delete branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pr="${{ github.event.pull_request.number }}"
+          if gh pr view "$pr" --json state -q .state | grep -qv OPEN; then
+            echo "PR #${pr} is no longer open; nothing to do."
+            exit 0
+          fi
+          gh pr merge "$pr" --merge --delete-branch
+          echo "Merged PR #${pr} and deleted the head branch (if the repo allows it)."
