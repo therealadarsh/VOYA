@@ -17,7 +17,7 @@ import math
 from dataclasses import dataclass, field, replace
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -30,7 +30,7 @@ from voya.catalog import (
     load_catalog,
     show_demo_banner,
 )
-from voya.cost.model import CostLine, CostSource, summarize
+from voya.cost.model import Category, CostLine, CostSource, summarize
 from voya.uncertainty import SimLine, p_under, quantile, seed_from, simulate
 
 D = Decimal
@@ -159,7 +159,7 @@ class Priced:
     picks: list[Pick]
     lines: list[PlanLine]
     fit: Fit
-    getting_there: dict | None = None
+    getting_there: dict[str, Any] | None = None
     notes: list[str] = field(default_factory=list)
 
 
@@ -184,7 +184,9 @@ def _value(p: Place) -> float:
     return (p.rating or QUALITY_FLOOR) / max(float(p.price.point), 5.0)
 
 
-def _rank_key(p: Place, interests: set[str], prev: tuple[float, float]) -> tuple:
+def _rank_key(
+    p: Place, interests: set[str], prev: tuple[float, float]
+) -> tuple[int, float, float, str]:
     dist = haversine_km(prev, (p.lat, p.lng))
     return (-_interest(p, interests), -round(_value(p), 1), round(dist, 1), p.id)
 
@@ -326,7 +328,7 @@ def _place_line(pick: Pick, size: int, obs: datetime) -> CostLine:
     cat = "food" if p.category == "food" else p.category
     return CostLine(
         label=p.name,
-        category=cat,  # type: ignore[arg-type]  # narrowed by Place.category
+        category=cat,
         amount=p.price.point * qty,
         low=p.price.low * qty,
         high=p.price.high * qty,
@@ -337,10 +339,12 @@ def _place_line(pick: Pick, size: int, obs: datetime) -> CostLine:
     )
 
 
-def _derived(parent: CostLine, rate: Decimal, label: str, cat: str, src: CostSource) -> CostLine:
+def _derived(
+    parent: CostLine, rate: Decimal, label: str, cat: Category, src: CostSource
+) -> CostLine:
     return CostLine(
         label=label,
-        category=cat,  # type: ignore[arg-type]
+        category=cat,
         amount=parent.amount * rate,
         low=parent.low * rate,
         high=parent.high * rate,
@@ -352,16 +356,16 @@ def _derived(parent: CostLine, rate: Decimal, label: str, cat: str, src: CostSou
 
 
 def _exact(
-    label: str, cat: str, amount: Decimal, src: CostSource, obs: datetime, conf: float = 1.0
+    label: str, cat: Category, amount: Decimal, src: CostSource, obs: datetime, conf: float = 1.0
 ) -> CostLine:
     if src is CostSource.USER_ACTUAL:
-        return CostLine.actual(label, cat, amount, "USD", obs)  # type: ignore[arg-type]
+        return CostLine.actual(label, cat, amount, "USD", obs)
     return CostLine(
         label=label,
         category=cat,
         amount=amount,
         low=amount,
-        high=amount,  # type: ignore[arg-type]
+        high=amount,
         currency="USD",
         source=src,
         observed_at=obs,
@@ -371,7 +375,7 @@ def _exact(
 
 def getting_there(
     req: PlanRequest, cat: Catalog, dest: Destination
-) -> tuple[dict | None, CostLine | None]:
+) -> tuple[dict[str, Any] | None, CostLine | None]:
     g = req.getting_there
     if not g.from_id:
         return None, None
@@ -677,16 +681,18 @@ def repair(req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog) ->
     return priced
 
 
-def worth_it(req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog) -> list[dict]:
+def worth_it(
+    req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog
+) -> list[dict[str, Any]]:
     if not priced.fit.ok:
         return []
     interests = set(req.interests)
-    found: list[tuple[tuple, dict]] = []
+    found: list[tuple[tuple[float, Decimal], dict[str, Any]]] = []
     for i, pk in enumerate(priced.picks):
         if pk.locked or not pk.place:
             continue
         cur = pk.place
-        best: tuple[tuple, dict] | None = None
+        best: tuple[tuple[float, Decimal], dict[str, Any]] | None = None
         for alt in dest.places:
             if alt.id in req.exclude or alt.price.point <= cur.price.point:
                 continue
@@ -717,7 +723,7 @@ def worth_it(req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog) 
                 + math.log10(max(alt.reviews or 1, 1)) / 2
             )
             key = (-round(score, 3), delta)
-            item = {
+            item: dict[str, Any] = {
                 "upgrade_id": f"{pk.slot_id}:{alt.id}",
                 "slot_id": pk.slot_id,
                 "slot_kind": pk.kind,
@@ -733,7 +739,7 @@ def worth_it(req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog) 
         if best:
             found.append(best)
     found.sort(key=lambda kv: kv[0])
-    out: list[dict] = []
+    out: list[dict[str, Any]] = []
     food = 0
     for _, item in found:
         is_food = item["slot_kind"] in ("lunch", "dinner")
@@ -753,7 +759,7 @@ class PlanError(ValueError):
     pass
 
 
-def build(req: PlanRequest, cat: Catalog | None = None) -> dict:
+def build(req: PlanRequest, cat: Catalog | None = None) -> dict[str, Any]:
     cat = cat or load_catalog()
     dest = cat.destination(req.destination)
     if dest is None:
@@ -763,7 +769,7 @@ def build(req: PlanRequest, cat: Catalog | None = None) -> dict:
     return render(req, priced, dest, cat, worth_it(req, priced, dest, cat))
 
 
-def _line_dict(ln: PlanLine) -> dict:
+def _line_dict(ln: PlanLine) -> dict[str, Any]:
     c = ln.cost
     return {
         "line_id": ln.line_id,
@@ -800,21 +806,25 @@ def _why(pick: Pick, req: PlanRequest, prev: tuple[float, float] | None) -> str:
 
 
 def render(
-    req: PlanRequest, priced: Priced, dest: Destination, cat: Catalog, upgrades: list[dict]
-) -> dict:
+    req: PlanRequest,
+    priced: Priced,
+    dest: Destination,
+    cat: Catalog,
+    upgrades: list[dict[str, Any]],
+) -> dict[str, Any]:
     fit = priced.fit
     by_parent: dict[str, list[PlanLine]] = {}
     for ln in priced.lines:
         if ln.parent_id:
             by_parent.setdefault(ln.parent_id, []).append(ln)
     line_by_id = {ln.line_id: ln for ln in priced.lines}
-    days = []
+    days: list[dict[str, Any]] = []
     for d in range(req.days):
-        items = []
+        items: list[dict[str, Any]] = []
         prev = None
         for pick in [p for p in priced.picks if p.day == d]:
-            ln = line_by_id.get(pick.slot_id)
-            if pick.kind == "anchor" and req.anchor and ln:
+            slot_line = line_by_id.get(pick.slot_id)
+            if pick.kind == "anchor" and req.anchor and slot_line:
                 items.append(
                     {
                         "line_id": pick.slot_id,
@@ -823,14 +833,14 @@ def render(
                         "title": req.anchor.title,
                         "category": "activity",
                         "why": "Your fixed plan",
-                        "cost": _line_dict(ln),
+                        "cost": _line_dict(slot_line),
                         "children": [],
-                        "item_total": str(ln.cost.amount),
+                        "item_total": str(slot_line.cost.amount),
                     }
                 )
                 prev = _anchor_loc(req, dest)
                 continue
-            if not pick.place or not ln:
+            if not pick.place or not slot_line:
                 if pick.slot_id in req.skips:
                     items.append(
                         {
@@ -847,7 +857,7 @@ def render(
                     )
                 continue
             kids = by_parent.get(pick.slot_id, [])
-            total = ln.cost.amount + sum((k.cost.amount for k in kids), D(0))
+            total = slot_line.cost.amount + sum((k.cost.amount for k in kids), D(0))
             p = pick.place
             items.append(
                 {
@@ -863,7 +873,7 @@ def render(
                     "lng": p.lng,
                     "duration_min": p.duration_min,
                     "why": _why(pick, req, prev),
-                    "cost": _line_dict(ln),
+                    "cost": _line_dict(slot_line),
                     "children": [_line_dict(k) for k in kids],
                     "item_total": str(_money(total)),
                 }

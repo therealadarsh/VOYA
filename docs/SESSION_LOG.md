@@ -331,3 +331,54 @@ rulesets and branch cleanup; no org settings changed here.
 2. P0 S03c / ruleset verification on a test PR.
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-27 · Cursor Agent (subagent) · branch dev · bd8146b..21a4c10
+
+**Goal:** merge PR #11 (auto-merge workflow); report SMTP readiness and finish roadmap.
+
+**Done:**
+- PR #11 merged (`gh pr merge --merge --delete-branch`); CI green (verify,
+  postgres, docker). `origin/dev` at `21a4c10`.
+- No open PRs after merge. `make verify RUN=` (snakeenv): green on `dev`.
+- SMTP/code review: implementation complete; credentials and provider are owner-only.
+
+**Decisions:** none.
+
+**Not done / known issues:**
+- P0 S03c (strict mypy on `api`, `agent`, `planner`) not started this session.
+- GitHub ruleset + `auto-merge` label creation still owner UI actions.
+- Owner-blocked: SMTP account, invite code, public URL, hosting, legal, Foursquare.
+
+**Next:**
+1. Owner: `docs/GITHUB_AUTOMATION.md` checklist (ruleset, delete head branches, label).
+2. Branch `feat/cursor-prompt-s03c` for S03c; then S04 demo banner per area.
+
+**Questions for the owner:** none (SMTP/hosting questions unchanged in PROGRESS).
+
+---
+
+## 2026-11-27 · Cursor Agent (subagent) · branch feat/cursor-prompt-s03c · 21a4c10..2be2c41
+
+**Goal:** strict mypy on `voya.api`, `voya.agent`, and `voya.planner`.
+
+**Done:**
+- Removed the `[[tool.mypy.overrides]]` ignore for those three modules in
+  `pyproject.toml`.
+- Added annotations (`dict[str, Any]` at JSON boundaries, `Category` on cost
+  helpers) and a few `None` checks where a place or action was optional.
+- `make verify RUN=` and `make verify`: green. **123 passed, 2 skipped.**
+  mypy: 39 source files, no issues.
+
+**Decisions:** none.
+
+**Not done / known issues:**
+- GitHub ruleset and the `auto-merge` label are still owner UI actions.
+- Owner-blocked: SMTP account, invite code, public URL, hosting, legal, Foursquare.
+
+**Next:**
+1. Merge this PR into `dev`.
+2. S04 demo banner per area.
+
+**Questions for the owner:** none.
