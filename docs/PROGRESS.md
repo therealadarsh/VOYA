@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-27 · branch **`dev`** (`ef0d247`) · merged PRs #6–#8 (docs + CI)
+**Last updated:** 2026-11-27 · branch **`feat/cursor-prompt-next`** (`19a13f4`, PR #10) · base `dev` (`ef0d247`)
 
 ## Done
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
@@ -57,8 +57,11 @@ The living status of the build. Update it at the end of every session (see
 - **Docs:** `docs/AGENTIC_ENGINEERING.md` (living AI/agent register),
   `docs/README.md` (documentation index), `docs/REVIEW_GUIDE.md`,
   `docs/CONCEPT_MAP.md`, `docs/MVP_TEST_GUIDE.md`, `DECISIONS.md`.
-- **CI:** GitHub Actions on `dev` (`.github/workflows/ci.yml`: `make verify`,
-  Docker image build).
+- **CI / local verify (P0):** `Makefile` `RUN ?= uv run` (use `make verify RUN=`
+  in `snakeenv` without touching `.venv`); `make help`. Ruff + mypy on all of
+  `src/voya`, scripts, and tests (`api` / `agent` / `planner` mypy deferred in
+  `pyproject.toml` until S03c). GitHub Actions: `verify`, Postgres service job
+  for `tests/test_p1_nyc.py`, Docker build; PR triggers include `uat` and `prod`.
 
 ## Known limits
 - **Synthetic demo catalog still drives plans:** 3 cities + 2 parks, made-up
@@ -70,10 +73,12 @@ The living status of the build. Update it at the end of every session (see
   not built in this environment (no Docker daemon).
 
 ## Next (suggested order)
-1. Owner answers for hosting, SMTP, the invite code, the public URL, the
-   alarm amount, legal wording, and the Foursquare key plus budget. Then
-   real NYC place prices can replace the demo catalog and the banner can drop.
-2. UX redesign (React + Vite) stays later. Vectors, rituals, the learner,
+1. **P0 finish:** ruleset requires `verify` + `postgres` status checks (owner, in
+   GitHub). **S03c:** strict mypy on `api.py`, `agent.py`, `planner.py`.
+2. **P1 real data:** S04 demo banner per area, then cited place catalog (S05+).
+3. Owner answers for hosting, SMTP, invite code, public URL, alarm amount, legal
+   wording, and Foursquare key plus budget before live places or deploy.
+4. UX redesign (React + Vite) stays later. Vectors, rituals, the learner,
    extra regions, Europe, and climate stay out of scope.
 
 ## Blocked / needs the owner

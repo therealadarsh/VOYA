@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import re
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
-from voya.catalog import Catalog
+from voya.catalog import Catalog, Destination
 from voya.planner import (
-    WIGGLE_QUANTILE,
     HARD_QUANTILE,
+    WIGGLE_QUANTILE,
     PlanLine,
     PlanRequest,
     Priced,
@@ -70,7 +71,7 @@ def _metric(lines: list[PlanLine], req: PlanRequest, cat: Catalog) -> tuple[Deci
     return point, quantile(totals, WIGGLE_QUANTILE)
 
 
-def budget_status(req: PlanRequest, spends: list[dict]) -> dict:
+def budget_status(req: PlanRequest, spends: list[dict[str, Any]]) -> dict[str, Any]:
     dest, cat, priced = priced_for(req)
     spent = sum((D(s["amount"]) for s in spends), D(0))
     done = {s["line_id"] for s in spends if s.get("line_id")}
@@ -113,7 +114,9 @@ def budget_status(req: PlanRequest, spends: list[dict]) -> dict:
     return out
 
 
-def recovery_options(req: PlanRequest, priced: Priced, dest, done: set[str]) -> list[dict]:
+def recovery_options(
+    req: PlanRequest, priced: Priced, dest: Destination, done: set[str]
+) -> list[dict[str, Any]]:
     """Up to 3 changes to remaining stops that save the most money."""
     opts = []
     for pick in priced.picks:
@@ -124,37 +127,34 @@ def recovery_options(req: PlanRequest, priced: Priced, dest, done: set[str]) -> 
         if alts:
             alt = min(alts, key=lambda p: (p.price.point, -(p.rating or 0)))
             saving = (pick.place.price.point - alt.price.point) * size
-            opts.append(
-                {
-                    "slot_id": pick.slot_id,
-                    "action": "swap",
-                    "to_place_id": alt.id,
-                    "summary": f"Swap {pick.place.name} for {alt.name}",
-                    "saving_est": str(saving.quantize(D("0.01"))),
-                }
-            )
+            entry: dict[str, Any] = {
+                "slot_id": pick.slot_id,
+                "action": "swap",
+                "to_place_id": alt.id,
+                "summary": f"Swap {pick.place.name} for {alt.name}",
+                "saving_est": str(saving.quantize(D("0.01"))),
+            }
+            opts.append(entry)
         elif pick.kind in ("sight", "evening"):
             saving = pick.place.price.point * size
-            opts.append(
-                {
-                    "slot_id": pick.slot_id,
-                    "action": "skip",
-                    "to_place_id": None,
-                    "summary": f"Skip {pick.place.name}",
-                    "saving_est": str(saving.quantize(D("0.01"))),
-                }
-            )
+            skip: dict[str, Any] = {
+                "slot_id": pick.slot_id,
+                "action": "skip",
+                "to_place_id": None,
+                "summary": f"Skip {pick.place.name}",
+                "saving_est": str(saving.quantize(D("0.01"))),
+            }
+            opts.append(skip)
     gifts = next((ln.cost.amount for ln in priced.lines if ln.line_id == "gifts"), D(0))
     if gifts > 0:
-        opts.append(
-            {
-                "slot_id": "gifts",
-                "action": "gifts",
-                "to_place_id": None,
-                "summary": "Drop the gifts & souvenirs allowance",
-                "saving_est": str(gifts.quantize(D("0.01"))),
-            }
-        )
+        gift_opt: dict[str, Any] = {
+            "slot_id": "gifts",
+            "action": "gifts",
+            "to_place_id": None,
+            "summary": "Drop the gifts & souvenirs allowance",
+            "saving_est": str(gifts.quantize(D("0.01"))),
+        }
+        opts.append(gift_opt)
     opts.sort(key=lambda o: -D(o["saving_est"]))
     return opts[:3]
 

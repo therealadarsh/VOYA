@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -72,7 +72,7 @@ def approve_price_check(entry_id: str) -> bool:
     path = _store_path()
     if not path.exists():
         return False
-    rows: list[dict] = []
+    rows: list[dict[str, Any]] = []
     found = False
     for raw in path.read_text(encoding="utf-8").splitlines():
         if not raw.strip():
@@ -109,5 +109,7 @@ def coverage_ratio(*, city: str, planned_place_names: list[str]) -> float | None
     if not approved:
         return 0.0
     names = {a.place_name.lower() for a in approved}
-    hits = sum(1 for p in planned_place_names if any(p.lower() in n or n in p.lower() for n in names))
+    hits = sum(
+        1 for p in planned_place_names if any(p.lower() in n or n in p.lower() for n in names)
+    )
     return hits / len(planned_place_names)

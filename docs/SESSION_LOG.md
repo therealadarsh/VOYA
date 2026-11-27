@@ -269,3 +269,36 @@ testable steps for the next sessions.
 1. Continue build steps from private brief (Makefile `RUN`, widen lint/mypy).
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-27 · Cursor Agent (subagent) · branch feat/cursor-prompt-next · ef0d247..19a13f4
+
+**Goal:** execute P0 safety-net steps S01–S03 from the private build brief (Makefile,
+CI, lint/mypy coverage).
+
+**Done:**
+- `Makefile`: `RUN ?= uv run`, shared `LINT_PATHS` / `TYPE_PATHS`, conditional
+  `sync` on `verify`, `make help`.
+- `.github/workflows/ci.yml`: `postgres` job (PG 16, `VOYA_TEST_DATABASE_URL`),
+  PR triggers for `uat`/`prod`, 15m timeouts.
+- `pyproject.toml`: ruff on full tree; pydantic mypy plugin; `[[tool.mypy.overrides]]`
+  for `api`/`agent`/`planner` (S03c).
+- Ruff fixes across `src/voya` and tests; mypy clean on 39 modules; small typing
+  fixes in `store`, `tracking`, `discover`, `obs`, `llm`, `cli`.
+- Docs: `docs/PROGRESS.md`, `docs/AGENTIC_ENGINEERING.md` CI row + changelog.
+- `make verify` and `make verify RUN=` (snakeenv): green; **123 passed, 2 skipped**.
+
+**Decisions:** none in `DECISIONS.md` (tooling only).
+
+**Not done / known issues:**
+- S03c: strict mypy on `api.py`, `agent.py`, `planner.py` still deferred.
+- GitHub ruleset not updated here to require `postgres` check (owner action).
+- P1–P4 steps (real data, evals, deploy, ops) unchanged; owner-blocked items
+  still block catalog and deploy.
+
+**Next:**
+1. Merge P0 PR; owner enables required status checks `verify` + `postgres`.
+2. S03c then S04 demo banner per area.
+
+**Questions for the owner:** none.

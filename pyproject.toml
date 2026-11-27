@@ -23,12 +23,21 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-ignore = ["SIM102"]
+ignore = ["SIM102", "FURB157"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["C408", "DTZ001", "BLE001"]
+"tests/browser/**" = ["BLE001"]
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
-plugins = []
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["voya.api", "voya.agent", "voya.planner"]
+ignore_errors = true
+# S03c: finish strict typing for api, agent, and planner (large modules).
 
 [build-system]
 requires = ["hatchling"]
