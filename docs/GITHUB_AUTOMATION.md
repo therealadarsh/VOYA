@@ -71,7 +71,7 @@ CI to finish the merge.
 |---|---|
 | **Owner approval** | No automatic merge without the **`auto-merge`** label. There is no “auto-approve” step. |
 | **Forks** | Workflow runs only when `head.repo` is the same repository (no merge from untrusted forks). |
-| **Token scope** | Workflow uses `GITHUB_TOKEN` with `pull-requests: write` and `contents: read` only inside Actions. |
+| **Token scope** | Workflow uses `GITHUB_TOKEN` with `contents: write` (merge and delete the branch), `pull-requests: write`, and `checks`/`statuses: read`, only inside Actions. |
 | **Grok / cloud agents** | Do **not** give Grok, Cursor Cloud, or other agents a PAT or app token with `contents: write` or merge rights. They may open PRs and push branches; **only you** add `auto-merge` in the GitHub UI (or via `gh` on your machine). |
 | **prod / uat** | Auto-merge targets **`dev` only** by default. Enable stricter human review before extending the workflow to `uat` or `prod`. |
 
