@@ -26,9 +26,9 @@ from voya.catalog import (
     Destination,
     Place,
     Route,
+    destination_is_demo,
     haversine_km,
     load_catalog,
-    show_demo_banner,
 )
 from voya.cost.model import Category, CostLine, CostSource, summarize
 from voya.uncertainty import SimLine, p_under, quantile, seed_from, simulate
@@ -906,7 +906,7 @@ def render(
     out = {
         "status": status,
         "destination": {"id": dest.id, "name": dest.name, "kind": dest.kind},
-        "demo_data": show_demo_banner(cat, tuple(ln.cost.source for ln in priced.lines)),
+        "demo_data": destination_is_demo(cat, dest, tuple(ln.cost.source for ln in priced.lines)),
         "data_notice": cat.notice if cat.synthetic else None,
         "headline": {
             "label": "Estimated total",

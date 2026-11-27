@@ -25,7 +25,7 @@ from voya import obs
 from voya.accounts import MagicLinkService
 from voya.accounts.smtp_mailer import mailer_from_settings
 from voya.agent import HelperRequest, respond
-from voya.catalog import load_catalog, show_demo_banner
+from voya.catalog import destination_is_demo, load_catalog, show_demo_banner
 from voya.discover import DiscoverRequest, discover
 from voya.ideas import ideas_after, ideas_for
 from voya.llm import Harness, client_from_env
@@ -305,7 +305,15 @@ def new_version(
 def meta() -> dict[str, Any]:
     cat = load_catalog()
     return {
-        "destinations": [{"id": d.id, "name": d.name, "kind": d.kind} for d in cat.destinations],
+        "destinations": [
+            {
+                "id": d.id,
+                "name": d.name,
+                "kind": d.kind,
+                "data_status": "demo" if destination_is_demo(cat, d) else "cited",
+            }
+            for d in cat.destinations
+        ],
         "routes": [{"from": r.from_id, "to": r.to, "drive_min": r.drive_min} for r in cat.routes],
         "interests": INTERESTS,
         "spend_categories": CATEGORIES,

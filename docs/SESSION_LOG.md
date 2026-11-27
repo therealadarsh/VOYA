@@ -423,3 +423,30 @@ that broke on the way.
 3. Owner: request SES production access before inviting testers (S17).
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-27 · Cursor · branch feat/s04-demo-banner-per-area · base ca838cb
+
+**Goal:** S04, demo banner per destination instead of one catalog-wide switch.
+
+**Done:**
+- `Destination.synthetic` (None inherits the catalog). `destination_is_demo`
+  treats a synthetic catalog as demo for every area, an empty place list as
+  demo, and `type_guess` / `price_bucket` money as demo.
+- `show_demo_banner` is true when any destination is demo.
+- `GET /v1/meta` adds `data_status`. Plan `demo_data` uses only that plan's
+  destination. The picker appends " — Demo prices" on demo options.
+- `tests/test_p1_banner.py` covers the boundary rows and the three input rows.
+  `make verify RUN=` green.
+
+**Decisions:** none. Discover stays catalog-wide; it was outside this step.
+
+**Not done / known issues:**
+- Bundled catalog is still synthetic, so the live picker still tags every area.
+
+**Next:**
+1. Open a PR into `dev`.
+2. S05 cited place catalog.
+
+**Questions for the owner:** none.
