@@ -30,7 +30,7 @@ without CI:
 |---|---|
 | `verify` | `make verify` |
 | `postgres` | `tests/test_p1_nyc.py` against Postgres 16 |
-| `docker` | `docker build` |
+| `docker` | `scripts/smoke.sh` (builds the image, then checks health, the invite gate, and `/metrics`) |
 | `e2e` | `make e2e` (Playwright). **Add this as a required check** on `dev` when you next edit the ruleset. |
 
 **Steps (rulesets UI):**
