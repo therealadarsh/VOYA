@@ -809,4 +809,10 @@ def index() -> FileResponse:
     return FileResponse(STATIC / "index.html")
 
 
+@app.get("/favicon.ico")
+def favicon() -> Response:
+    """Empty icon so browsers do not log a 404 for the default request."""
+    return Response(status_code=204)
+
+
 app.mount("/static", StaticFiles(directory=STATIC), name="static")

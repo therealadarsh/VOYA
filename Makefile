@@ -3,13 +3,14 @@ RUN ?= uv run
 LINT_PATHS := src/voya scripts tests
 TYPE_PATHS := src/voya
 
-.PHONY: help run test verify sync lint typecheck policy citations traceability secrets examples eval trace backup
+.PHONY: help run test verify e2e sync lint typecheck policy citations traceability secrets examples eval trace backup
 
 help:
 	@echo "Targets (use RUN= with snakeenv; default RUN=uv run for CI):"
 	@echo "  run          – dev server on :8000 (needs uv or snakeenv)"
 	@echo "  test         – pytest (123 passed, 2 skipped typical)"
 	@echo "  verify       – lint, typecheck, test, policy, citations, …"
+	@echo "  e2e          – install Chromium if needed, then tests/browser"
 	@echo "  sync         – uv sync --frozen (default RUN only)"
 	@echo "  lint         – ruff check + format --check on LINT_PATHS"
 	@echo "  typecheck    – mypy on TYPE_PATHS"
@@ -22,6 +23,10 @@ run:
 
 test:
 	$(RUN) pytest -q -p no:warnings
+
+e2e:
+	$(RUN) python -m playwright install chromium
+	VOYA_BROWSER=1 $(RUN) pytest -q -p no:warnings tests/browser
 
 ifeq ($(RUN),uv run)
 verify: sync lint typecheck test policy citations traceability secrets examples

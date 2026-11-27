@@ -209,6 +209,7 @@ def test_security_headers_on_health(client: TestClient) -> None:
     assert response.headers["X-Frame-Options"] == "DENY"
     assert response.headers["Referrer-Policy"] == "no-referrer"
     assert "default-src 'self'" in response.headers["Content-Security-Policy"]
+    assert "style-src-attr 'unsafe-inline'" in response.headers["Content-Security-Policy"]
     assert "frame-ancestors 'none'" in response.headers["Content-Security-Policy"]
     assert "Strict-Transport-Security" not in response.headers
 
@@ -244,6 +245,7 @@ def test_invite_gate(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     assert gate.get("/privacy").status_code == 200
     assert gate.get("/terms").status_code == 200
     assert gate.get("/healthz").status_code == 200
+    assert gate.get("/favicon.ico").status_code == 204
     foreign = gate.post(
         "/v1/preview/unlock",
         json={"code": "preview-invite-1"},

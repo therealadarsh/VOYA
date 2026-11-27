@@ -6,15 +6,16 @@
 <title>VOYA · trips that fit your budget</title>
 <meta name="description" content="Plan a trip to your budget, door to door, with honest estimates.">
 <link rel="stylesheet" href="/static/styles.css">
+<link rel="icon" href="data:,">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <div class="brand"><span class="logo">VOYA</span><span class="preview-badge" id="preview-badge">Preview</span><span class="tag">Trips that fit your budget</span></div>
   <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="plan" aria-selected="true">Plan</button>
-    <button role="tab" data-tab="discover">Discover</button>
-    <button role="tab" data-tab="trip">My trip</button>
+    <button role="tab" id="tab-plan-btn" data-tab="plan" aria-selected="true" aria-controls="tab-plan">Plan</button>
+    <button role="tab" id="tab-discover-btn" data-tab="discover" aria-selected="false" aria-controls="tab-discover">Discover</button>
+    <button role="tab" id="tab-trip-btn" data-tab="trip" aria-selected="false" aria-controls="tab-trip">My trip</button>
   </nav>
 </header>
 <div id="demo-banner" class="banner" hidden>Demo prices: places and prices are made up for testing. Every amount is an estimate.</div>
@@ -131,7 +132,7 @@
 
 <!-- helper sheet -->
 <div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-  <div class="sheet-body">
+  <div class="sheet-body" tabindex="0">
     <div class="sheet-head"><h2 id="sheet-title">Ask VOYA</h2><button class="ghost" id="sheet-close" aria-label="Close">✕</button></div>
     <div class="chips" id="helper-chips"></div>
     <form id="helper-form">
@@ -149,7 +150,7 @@
 
 <!-- sign-in -->
 <div id="signin" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="signin-title">
-  <div class="sheet-body">
+  <div class="sheet-body" tabindex="0">
     <div class="sheet-head"><h2 id="signin-title">Sign in to keep this trip</h2><button class="ghost" id="signin-close" aria-label="Close">✕</button></div>
     <form id="signin-form">
       <label>Email <input type="email" id="si-email" required autocomplete="email"></label>
@@ -163,7 +164,7 @@
 </div>
 
 <div id="feedback" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="feedback-title">
-  <div class="sheet-body">
+  <div class="sheet-body" tabindex="0">
     <div class="sheet-head"><h2 id="feedback-title">Feedback</h2><button class="ghost" id="feedback-close" type="button" aria-label="Close">✕</button></div>
     <form id="feedback-form">
       <label>What happened? <textarea id="fb-message" required maxlength="1000" rows="4" aria-describedby="fb-count"></textarea></label>
