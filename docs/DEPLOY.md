@@ -52,6 +52,27 @@ dies with the disk is not a backup. Restore by stopping the app and replacing
 Point the proxy at `127.0.0.1:8000`. The proxy owns the certificate. The
 container sends `Strict-Transport-Security` only when `VOYA_ENV=production`.
 
+## Client address
+
+Rate limits and the anonymous AI-spend scope use one helper,
+`client_address`. It trusts `X-Forwarded-For` only when the direct peer is
+listed in `VOYA_TRUSTED_PROXY_IPS`. The value used is the right-most hop that
+is not itself in that list. An empty setting (the default) ignores the
+header, so a caller cannot pick their own address.
+
+The image starts uvicorn with `--no-proxy-headers` and an empty
+`--forwarded-allow-ips`. Uvicorn therefore leaves `request.client.host` as
+the peer that opened the socket. Do not turn proxy headers on in the command
+or every bucket collapses to one address again.
+
+| Host | What to set |
+|---|---|
+| No proxy (the process is reached directly) | Leave `VOYA_TRUSTED_PROXY_IPS` empty. |
+| Docker Compose reverse proxy on the same machine | The address the app container sees for the proxy (often the compose-network gateway). Read it from the proxy container or from a connection to the app; do not guess a public address. |
+| Render | The proxy addresses Render uses to connect to the service. Leave the setting empty until those addresses are known. |
+| Fly | The edge addresses Fly uses as the peer. Leave the setting empty until those addresses are known. |
+| AWS load balancer (App Runner, Lightsail, or ECS) | The load balancer's private addresses, the only peers the task should accept. Leave the setting empty until those addresses are known. |
+
 Smoke check:
 
 ```sh

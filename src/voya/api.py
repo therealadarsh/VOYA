@@ -27,6 +27,7 @@ from voya.accounts import MagicLinkService
 from voya.accounts.smtp_mailer import mailer_from_settings
 from voya.agent import HelperRequest, respond
 from voya.catalog import destination_is_demo, load_catalog, show_demo_banner
+from voya.client_ip import client_address
 from voya.discover import DiscoverRequest, discover
 from voya.ideas import ideas_after, ideas_for
 from voya.llm import Harness, client_from_env
@@ -163,6 +164,17 @@ _hits: dict[str, deque[float]] = defaultdict(deque)
 RATE_PER_MIN = int(os.environ.get("VOYA_RATE_PER_MIN", "60"))
 
 
+def _client_address(request: Request) -> str:
+    """One helper for every place that needs the caller's address."""
+    settings = load_settings()
+    peer = request.client.host if request.client else None
+    return client_address(
+        peer=peer,
+        forwarded_for=request.headers.get("x-forwarded-for"),
+        trusted=settings.trusted_proxy_ips,
+    )
+
+
 def _error_body(status: int, code: str, message: str, hint: str = "") -> JSONResponse:
     return JSONResponse(
         status_code=status,
@@ -223,7 +235,7 @@ async def _trace_and_limit(
             request,
         )
     if request.url.path.startswith("/v1/") and request.method == "POST":
-        key = request.client.host if request.client else "anon"
+        key = _client_address(request)
         q, now = _hits[key], time.monotonic()
         while q and now - q[0] > 60:
             q.popleft()
@@ -642,7 +654,7 @@ def helper(
     plan_id: str, h: HelperRequest, request: Request, o: str | None = Depends(owner)
 ) -> dict[str, Any]:
     rec, req = load_plan(plan_id)
-    scope = o or (request.client.host if request.client else "anon")
+    scope = o or _client_address(request)
     return respond(store(), plan_id, rec["version"], req, h, harness(), scope)
 
 

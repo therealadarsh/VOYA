@@ -11,6 +11,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from voya.client_ip import parse_trusted_proxies
+
 _TRUE = {"1", "true", "yes"}
 _FALSE = {"0", "false", "no"}
 
@@ -62,6 +64,7 @@ class Settings:
     log_json: bool
     signin_max_per_15min: int
     signin_max_per_day: int
+    trusted_proxy_ips: frozenset[str]
 
     @property
     def production(self) -> bool:
@@ -97,6 +100,7 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
         log_json=log_format == "json",
         signin_max_per_15min=_int(_raw(env, "VOYA_SIGNIN_MAX_PER_15MIN"), default=3),
         signin_max_per_day=_int(_raw(env, "VOYA_SIGNIN_MAX_PER_DAY"), default=10),
+        trusted_proxy_ips=parse_trusted_proxies(_raw(env, "VOYA_TRUSTED_PROXY_IPS")),
     )
 
 

@@ -26,4 +26,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)"
 
-CMD [".venv/bin/uvicorn", "voya.api:app", "--host", "0.0.0.0", "--port", "8000"]
+# The app reads X-Forwarded-For itself. Uvicorn must keep the direct peer
+# so VOYA_TRUSTED_PROXY_IPS can tell a real proxy from a spoofed header.
+CMD [".venv/bin/uvicorn", "voya.api:app", "--host", "0.0.0.0", "--port", "8000", "--no-proxy-headers", "--forwarded-allow-ips", ""]
