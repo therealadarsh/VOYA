@@ -11,11 +11,12 @@ import hashlib
 import json
 import os
 import secrets
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Iterator
+from typing import Any
 
 from voya.db import DB, ResultCursor
 
@@ -99,7 +100,7 @@ class Store:
             )
         return fid
 
-    def feedback_all(self) -> list[dict]:
+    def feedback_all(self) -> list[dict[str, Any]]:
         with self.tx() as c:
             return [dict(r) for r in c.execute("SELECT * FROM feedback ORDER BY created_at")]
 
@@ -119,14 +120,16 @@ class Store:
             )
         return pid
 
-    def plan(self, pid: str) -> dict | None:
+    def plan(self, pid: str) -> dict[str, Any] | None:
         with self.tx() as c:
             row = c.execute("SELECT * FROM plans WHERE id=?", (pid,)).fetchone()
-            if not row:
+            if row is None:
                 return None
             ver = c.execute(
                 "SELECT * FROM plan_versions WHERE plan_id=? ORDER BY version DESC LIMIT 1", (pid,)
             ).fetchone()
+            if ver is None:
+                return None
             c.execute("UPDATE plans SET opened_at=? WHERE id=?", (_now(), pid))
         return {
             "id": pid,
@@ -137,9 +140,12 @@ class Store:
 
     def add_version(self, pid: str, request_json: str, reason: str) -> int:
         with self.tx() as c:
-            v = c.execute(
+            ver_row = c.execute(
                 "SELECT MAX(version) FROM plan_versions WHERE plan_id=?", (pid,)
-            ).fetchone()[0]
+            ).fetchone()
+            if ver_row is None:
+                raise RuntimeError("plan_versions query returned no row")
+            v = int(ver_row[0] or 0)
             c.execute(
                 "INSERT INTO plan_versions VALUES (?,?,?,?,?)",
                 (pid, v + 1, request_json, reason, _now()),
@@ -148,9 +154,12 @@ class Store:
 
     def undo(self, pid: str) -> bool:
         with self.tx() as c:
-            v = c.execute(
+            ver_row = c.execute(
                 "SELECT MAX(version) FROM plan_versions WHERE plan_id=?", (pid,)
-            ).fetchone()[0]
+            ).fetchone()
+            if ver_row is None:
+                return False
+            v = int(ver_row[0] or 0)
             if not v or v <= 1:
                 return False
             c.execute("DELETE FROM plan_versions WHERE plan_id=? AND version=?", (pid, v))
@@ -195,7 +204,7 @@ class Store:
                 return None
             email = row["email"]
             c.execute("DELETE FROM magic_links WHERE token_hash=?", (h,))
-        return email
+        return str(email)
 
     def create_user(self, email: str, adult: bool) -> str:
         token = secrets.token_urlsafe(24)
@@ -232,7 +241,7 @@ class Store:
                 (owner, key, value, source, _now()),
             )
 
-    def prefs(self, owner: str) -> list[dict]:
+    def prefs(self, owner: str) -> list[dict[str, Any]]:
         with self.tx() as c:
             return [
                 dict(r)
@@ -255,12 +264,12 @@ class Store:
         note: str | None,
         day: int | None,
         idem_key: str,
-    ) -> tuple[dict, bool]:
+    ) -> tuple[dict[str, Any], bool]:
         with self.tx() as c:
             row = c.execute(
                 "SELECT * FROM spends WHERE plan_id=? AND idem_key=?", (pid, idem_key)
             ).fetchone()
-            if row:
+            if row is not None:
                 return dict(row), False
             sid = new_id("spd")
             c.execute(
@@ -277,9 +286,12 @@ class Store:
                     _now(),
                 ),
             )
-            return dict(c.execute("SELECT * FROM spends WHERE id=?", (sid,)).fetchone()), True
+            spend_row = c.execute("SELECT * FROM spends WHERE id=?", (sid,)).fetchone()
+            if spend_row is None:
+                raise RuntimeError("inserted spend row missing")
+            return dict(spend_row), True
 
-    def spends(self, pid: str) -> list[dict]:
+    def spends(self, pid: str) -> list[dict[str, Any]]:
         with self.tx() as c:
             return [
                 dict(r)
@@ -323,7 +335,7 @@ class Store:
             )
         return prop_id, token
 
-    def take_proposal(self, pid: str, prop_id: str, token: str) -> dict | None:
+    def take_proposal(self, pid: str, prop_id: str, token: str) -> dict[str, Any] | None:
         """Single-use: returns the proposal once if the token matches its content."""
         with self.tx() as c:
             row = c.execute(

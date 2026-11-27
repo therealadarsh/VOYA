@@ -24,16 +24,16 @@ from voya.accounts import MagicLinkService
 from voya.accounts.smtp_mailer import mailer_from_settings
 from voya.agent import HelperRequest, respond
 from voya.catalog import load_catalog, show_demo_banner
-from voya.ideas import ideas_after, ideas_for
-from voya.metrics import METRICS
 from voya.discover import DiscoverRequest, discover
+from voya.ideas import ideas_after, ideas_for
 from voya.llm import Harness, client_from_env
 from voya.log import access_log, configure_logging
+from voya.metrics import METRICS
 from voya.planner import PlanError, PlanRequest, apply_upgrade, build, priced_for
 from voya.preview import COOKIE, code_matches, cookie_for, cookie_matches, is_exempt
 from voya.safety import origin_allowed, security_headers
 from voya.settings import load_settings, production_problems
-from voya.store import Store, new_id
+from voya.store import Store
 from voya.tracking import CATEGORIES, apply_recovery, budget_status, parse_spend_text
 
 STATIC = Path(__file__).with_name("web")
@@ -467,7 +467,7 @@ def save_plan(plan_id: str, o: str = Depends(require_owner)) -> dict:
 def my_trips(o: str = Depends(require_owner)) -> dict:
     out = []
     for pid in store().plans_for(o):
-        rec, req = load_plan(pid)
+        _rec, req = load_plan(pid)
         out.append(
             {
                 "plan_id": pid,
@@ -514,7 +514,7 @@ def forget(key: str, o: str = Depends(require_owner)) -> dict:
 def export(o: str = Depends(require_owner)) -> dict:
     trips = []
     for pid in store().plans_for(o):
-        rec, req = load_plan(pid)
+        _rec, req = load_plan(pid)
         trips.append(
             {"plan_id": pid, "request": req.model_dump(mode="json"), "spends": store().spends(pid)}
         )
@@ -641,7 +641,7 @@ def ops(x_ops_token: str | None = Header(None)) -> dict:
     sample = PlanRequest(
         destination="chicago",
         start_date=now.date(),
-        budget=Decimal("200"),
+        budget=Decimal(200),
         party={"adults": 2},
     )
     try:
@@ -652,7 +652,7 @@ def ops(x_ops_token: str | None = Header(None)) -> dict:
             if ln.kind == "place" and ln.cost.category in ("food", "attraction", "activity")
         ]
         cov = coverage_ratio(city="Chicago", planned_place_names=names)
-    except Exception:
+    except (OSError, ValueError, TypeError, KeyError):
         cov = None
     return {
         "ai_spend_month_usd": str(store().ai_spent(f"month:{now:%Y-%m}")),
@@ -698,7 +698,7 @@ def healthz() -> dict:
 def readyz() -> dict | JSONResponse:
     try:
         store().ping()
-    except Exception:
+    except OSError:
         return JSONResponse(status_code=503, content={"status": "not_ready"})
     return {"status": "ready"}
 

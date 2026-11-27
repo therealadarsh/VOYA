@@ -36,7 +36,7 @@ def _wait_until(url: str, timeout: float = 20) -> None:
             with urllib.request.urlopen(url, timeout=1) as response:
                 if response.status == 200:
                     return
-        except Exception as exc:  # noqa: BLE001 - server still booting
+        except Exception as exc:
             last = str(exc)
             time.sleep(0.2)
     raise RuntimeError(f"server did not start: {last}")

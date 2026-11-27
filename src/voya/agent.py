@@ -19,9 +19,10 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -34,7 +35,6 @@ from voya.planner import (
     _is_open,
     _minutes,
     apply_upgrade,
-    build,
     priced_for,
     slot_alternatives,
     worth_it,
@@ -641,7 +641,7 @@ def respond(
     allowed.add(_fmt(keep))
     if options:
         text = (
-            f"Here's 1 option that still fits your budget."
+            "Here's 1 option that still fits your budget."
             if len(options) == 1
             else f"Here are {len(options)} options that still fit your budget."
         )

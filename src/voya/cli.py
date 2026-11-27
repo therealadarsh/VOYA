@@ -7,8 +7,15 @@ import secrets
 import sys
 from datetime import UTC, datetime
 from decimal import Decimal
+from typing import cast
 
-from voya.curate.price_check import PriceCheckEntry, approve_price_check, load_pending, submit_price_check
+from voya.curate.price_check import (
+    Method,
+    PriceCheckEntry,
+    approve_price_check,
+    load_pending,
+    submit_price_check,
+)
 
 LAUNCH_CHECKS = [
     ("Chicago", "Art Institute of Illinois", "adult admission"),
@@ -41,7 +48,7 @@ def cmd_submit(
         city=city,
         item=item,
         amount=Decimal(amount),
-        method=method,  # type: ignore[arg-type]
+        method=cast(Method, method),
         source_url=url,
         note=note,
         observed_at=datetime.now(tz=UTC),

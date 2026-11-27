@@ -13,9 +13,10 @@ import os
 import secrets
 import sys
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 _trace_id: contextvars.ContextVar[str | None] = contextvars.ContextVar("trace_id", default=None)
 DROP_KEYS = {"email", "token", "api_key", "authorization", "password", "receipt_text"}
@@ -52,7 +53,7 @@ def current_trace() -> str | None:
     return _trace_id.get()
 
 
-def _write(record: dict) -> None:
+def _write(record: dict[str, Any]) -> None:
     if os.environ.get("VOYA_TRACE", "1") == "0":
         return
     d = trace_dir()
@@ -62,10 +63,10 @@ def _write(record: dict) -> None:
 
 
 @contextmanager
-def span(name: str, **attrs: Any) -> Iterator[dict]:
+def span(name: str, **attrs: Any) -> Iterator[dict[str, Any]]:
     """Record a step. Callers may add result attributes to the yielded dict."""
     tid = current_trace() or new_trace()
-    extra: dict = {}
+    extra: dict[str, Any] = {}
     start = time.perf_counter()
     status = "ok"
     try:
@@ -90,7 +91,7 @@ def event(name: str, **attrs: Any) -> None:
     _write({"trace_id": current_trace(), "span": name, "ms": 0, "status": "ok", **attrs})
 
 
-def load(trace_id: str) -> list[dict]:
+def load(trace_id: str) -> list[dict[str, Any]]:
     path = trace_dir() / "traces.jsonl"
     if not path.exists():
         return []

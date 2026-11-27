@@ -20,7 +20,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Protocol
+from typing import Any, Protocol
 
 import httpx
 
@@ -42,11 +42,11 @@ class BudgetExceeded(Exception):
 
 @dataclass
 class LLMResult:
-    data: dict
+    data: dict[str, Any]
     model: str
     input_tokens: int = 0
     output_tokens: int = 0
-    cost_usd: Decimal = D(0)
+    cost_usd: Decimal = field(default_factory=lambda: D(0))
 
 
 class LLMClient(Protocol):
@@ -121,9 +121,9 @@ class OpenRouterClient:
 class FakeLLM:
     """Scripted replies, in order. An exception in the script is raised instead."""
 
-    script: list[dict | Exception] = field(default_factory=list)
+    script: list[dict[str, Any] | Exception] = field(default_factory=list)
     name: str = "fake"
-    cost_per_call: Decimal = D("0.001")
+    cost_per_call: Decimal = field(default_factory=lambda: D("0.001"))
     calls: list[str] = field(default_factory=list)
 
     def complete_json(
@@ -138,11 +138,19 @@ class FakeLLM:
         return LLMResult(item, "fake-model", 100, 20, self.cost_per_call)
 
 
+def _env_decimal(key: str, default: str) -> Decimal:
+    return D(os.environ.get(key, default))
+
+
 @dataclass
 class Limits:
-    task_usd: Decimal = D(os.environ.get("VOYA_TASK_BUDGET_USD", "0.15"))
-    user_day_usd: Decimal = D(os.environ.get("VOYA_USER_DAILY_BUDGET_USD", "1.50"))
-    month_usd: Decimal = D(os.environ.get("VOYA_MONTHLY_BUDGET_USD", "30"))
+    task_usd: Decimal = field(default_factory=lambda: _env_decimal("VOYA_TASK_BUDGET_USD", "0.15"))
+    user_day_usd: Decimal = field(
+        default_factory=lambda: _env_decimal("VOYA_USER_DAILY_BUDGET_USD", "1.50")
+    )
+    month_usd: Decimal = field(
+        default_factory=lambda: _env_decimal("VOYA_MONTHLY_BUDGET_USD", "30")
+    )
     max_retries: int = 2
     breaker_failures: int = 5
     breaker_open_s: float = 60.0
@@ -178,16 +186,17 @@ class Harness:
         schema_hint: str,
         user_scope: str,
         task_spent: Decimal,
-        estimate_usd: Decimal = D("0.01"),
+        estimate_usd: Decimal | None = None,
     ) -> LLMResult:
+        est = D("0.01") if estimate_usd is None else estimate_usd
         if self.client is None:
             raise LLMError("no model configured", retryable=False)
         if not self.available:
             raise LLMError("circuit open", retryable=False)
-        if task_spent + estimate_usd > self.limits.task_usd:
+        if task_spent + est > self.limits.task_usd:
             raise BudgetExceeded("task budget")
         for scope, cap in self._scopes(user_scope):
-            if self.store.ai_spent(scope) + estimate_usd > cap:
+            if self.store.ai_spent(scope) + est > cap:
                 raise BudgetExceeded(scope.split(":")[0] + " budget")
         attempt = 0
         while True:

@@ -99,11 +99,11 @@ class PlanRequest(BaseModel):
     days: int = Field(1, ge=1, le=30)
     budget: Decimal = Field(gt=0, le=1_000_000)
     firmness: Literal["hard", "wiggle"] = "wiggle"
-    party: PartyIn = Field(default_factory=PartyIn)
+    party: PartyIn = Field(default_factory=lambda: PartyIn())
     interests: list[str] = Field(default_factory=list, max_length=8)
     pace: Literal["relaxed", "balanced", "packed"] = "balanced"
-    lodging: LodgingIn = Field(default_factory=LodgingIn)
-    getting_there: GettingThereIn = Field(default_factory=GettingThereIn)
+    lodging: LodgingIn = Field(default_factory=lambda: LodgingIn())
+    getting_there: GettingThereIn = Field(default_factory=lambda: GettingThereIn())
     anchor: AnchorIn | None = None
     tip_pct: Decimal = Field(D(18), ge=0, le=50)
     gifts_pct: Decimal = Field(D(5), ge=0, le=50)
@@ -424,7 +424,6 @@ def price(req: PlanRequest, picks: list[Pick], dest: Destination, cat: Catalog) 
     rules = dest.rules
     lines: list[PlanLine] = []
     for day in range(req.days):
-        prev: Pick | None = None
         prev_loc: tuple[float, float] | None = None
         legs = 0
         for pick in [p for p in picks if p.day == day]:
@@ -494,7 +493,7 @@ def price(req: PlanRequest, picks: list[Pick], dest: Destination, cat: Catalog) 
                         ),
                     )
                 )
-            prev, prev_loc = pick, loc
+            prev_loc = loc
         if rules.extras_per_person_day > 0:
             lines.append(
                 PlanLine(

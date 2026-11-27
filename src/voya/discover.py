@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
 from voya.catalog import load_catalog, show_demo_banner
-from voya.planner import PartyIn, PlanRequest, build
+from voya.planner import GettingThereIn, PartyIn, PlanRequest, build
 
 MAX_DAY_TRIP_MIN = 180  # one way, door to door
 
@@ -20,12 +20,12 @@ class DiscoverRequest(BaseModel):
     days: int = Field(1, ge=1, le=30)
     budget: Decimal = Field(gt=0, le=1_000_000)
     firmness: Literal["hard", "wiggle"] = "wiggle"
-    party: PartyIn = Field(default_factory=PartyIn)
+    party: PartyIn = Field(default_factory=lambda: PartyIn())
     interests: list[str] = Field(default_factory=list, max_length=8)
     pace: Literal["relaxed", "balanced", "packed"] = "balanced"
 
 
-def discover(req: DiscoverRequest) -> dict:
+def discover(req: DiscoverRequest) -> dict[str, Any]:
     cat = load_catalog()
     options = []
     for dest in cat.destinations:
@@ -49,9 +49,9 @@ def discover(req: DiscoverRequest) -> dict:
             party=req.party,
             interests=req.interests,
             pace=req.pace,
-            getting_there={
-                "from_id": req.from_id if (req.from_id and req.from_id != dest.id) else None
-            },
+            getting_there=GettingThereIn(
+                from_id=req.from_id if (req.from_id and req.from_id != dest.id) else None
+            ),
         )
         plan = build(preq, cat)
         h = plan["headline"]
