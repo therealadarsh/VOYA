@@ -86,9 +86,49 @@ Access lines include the path and status, not the query string, so magic-link
 tokens are not logged.
 
 `/metrics` is Prometheus text: request count, error count, and total duration.
-Set `VOYA_METRICS_TOKEN` and send it as `X-Metrics-Token` so the scrape is not
-public. Point the host's scraper (or CloudWatch agent plus a sidecar) at that
-URL. No monitoring vendor account is created from this repo.
+In production the process refuses to start if `VOYA_METRICS_TOKEN` is missing.
+Send that token as `X-Metrics-Token`. A wrong token is 401. In development,
+with no token set, `/metrics` stays open. Point the host's scraper (or
+CloudWatch agent plus a sidecar) at that URL. No monitoring vendor account is
+created from this repo.
+
+## Migrations
+
+`make migrate` runs `alembic upgrade head` on the database chosen by `VOYA_DB`,
+then `DATABASE_URL`, then `VOYA_DATA_DIR/voya.db`. The same revisions apply to
+SQLite and Postgres. Production refuses to start when that database is not at
+the latest revision. Run `make migrate` before the new process starts,
+including the first boot.
+
+To copy an existing SQLite file into a database that has already been migrated:
+
+```sh
+python -m voya.copy_db --from var/voya.db --to "$DATABASE_URL" --dry-run
+python -m voya.copy_db --from var/voya.db --to "$DATABASE_URL"
+```
+
+The command prints a row count per table and does not print the URL. It stops
+if the target already has rows, unless you pass `--force`.
+
+## Smoke test
+
+`scripts/smoke.sh` builds the image, migrates a temporary volume, and checks
+`/healthz`, `/readyz`, `/privacy`, a plan request without the invite cookie,
+a New York plan after unlock, `/metrics` without a token, and that the process
+is not root. It removes the container and the volume when it finishes. If
+Docker is not running it prints `Docker is not running.` and exits non-zero.
+The `docker` CI job runs this script.
+
+## After deploy
+
+1. `make migrate` finished against the production database.
+2. `/healthz` and `/readyz` return 200.
+3. `/privacy` returns 200.
+4. `POST /v1/plans` without the invite cookie returns 401.
+5. `/metrics` without `X-Metrics-Token` returns 401, and with the token returns 200.
+6. The process user is not root (`id -u` is not 0).
+7. `VOYA_TRUSTED_PROXY_IPS` is still empty unless the proxy's peer addresses are known.
+8. The Demo prices banner is still visible. Place prices are still the synthetic catalog.
 
 ## 2. AWS
 
