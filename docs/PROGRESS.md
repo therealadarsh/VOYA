@@ -12,8 +12,9 @@ The living status of the build. Update it at the end of every session (see
   picks with anonymous counters; `make e2e` (Playwright and axe) and
   `scripts/smoke.sh`; Alembic baseline plus the places table; `python -m
   voya.copy_db`. `make verify RUN=`: 175 passed, 7 skipped. `make e2e RUN=`:
-  4 passed. CI on the e2e PR: `verify`, `postgres`, `e2e`, and `docker` green.
-  Local smoke was not run here because Docker was not running.
+  4 passed. CI on PRs #18 and #19: `verify`, `postgres`, `e2e`, and `docker` green.
+  Local smoke was not run here because Docker was not running. The `docker` job
+  ran `scripts/smoke.sh`, including the migrate-before-boot step.
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
   URL (SQLite otherwise). Round trip passed against local Postgres 16.
   Foursquare place search client; live calls stay off until an API key, a
