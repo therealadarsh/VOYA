@@ -60,9 +60,10 @@
     state.meta = await api("GET", "/v1/meta");
     $("#demo-banner").hidden = !state.meta.demo_data;
     if ($("#preview-badge")) $("#preview-badge").hidden = !state.meta.preview;
-    const opts = (kind) => state.meta.destinations.filter((d) => d.kind === kind).map((d) => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("");
+    const destLabel = (d) => esc(d.name) + (d.data_status === "demo" ? " — Demo prices" : "");
+    const opts = (kind) => state.meta.destinations.filter((d) => d.kind === kind).map((d) => `<option value="${esc(d.id)}">${destLabel(d)}</option>`).join("");
     $("#f-dest").innerHTML = `<optgroup label="Cities">${opts("city")}</optgroup><optgroup label="National parks">${opts("park")}</optgroup>`;
-    const cities = state.meta.destinations.filter((d) => d.kind === "city").map((d) => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("");
+    const cities = state.meta.destinations.filter((d) => d.kind === "city").map((d) => `<option value="${esc(d.id)}">${destLabel(d)}</option>`).join("");
     $("#f-from").insertAdjacentHTML("beforeend", cities);
     $("#d-from").insertAdjacentHTML("beforeend", cities);
     chips($("#interests"), state.meta.interests, state.interests);

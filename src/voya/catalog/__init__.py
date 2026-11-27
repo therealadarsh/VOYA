@@ -1,8 +1,9 @@
 """Place catalog: destinations, places, local rules and routes.
 
 The bundled catalog (`demo.json`) is SYNTHETIC: made-up names and prices for
-demos and tests. `Catalog.synthetic` is True for it, and the API and UI show a
-"Demo prices" banner whenever it is in use. Real, cited data replaces it later.
+demos and tests. `Catalog.synthetic` forces a "Demo prices" banner for every
+area. A destination can also be demo on its own. Real, cited data replaces it
+later.
 """
 
 from __future__ import annotations
@@ -83,6 +84,8 @@ class Destination(BaseModel):
     center: tuple[float, float]
     rules: Rules
     places: tuple[Place, ...]
+    # None inherits the catalog flag. False does not override a synthetic catalog.
+    synthetic: bool | None = None
 
     def place(self, place_id: str) -> Place | None:
         return next((p for p in self.places if p.id == place_id), None)
@@ -120,14 +123,30 @@ class Catalog(BaseModel):
 _UNSOURCED_MONEY = {CostSource.TYPE_GUESS, CostSource.PRICE_BUCKET}
 
 
-def show_demo_banner(cat: Catalog, line_sources: tuple[CostSource, ...] = ()) -> bool:
-    """True until the catalog is non-synthetic and no cost is a guess or a bucket mapping."""
+def destination_is_demo(
+    cat: Catalog, dest: Destination, line_sources: tuple[CostSource, ...] = ()
+) -> bool:
+    """True when this destination should show "Demo prices".
+
+    A synthetic catalog always wins, even if the destination says otherwise.
+    None on the destination inherits the catalog flag.
+    """
     if cat.synthetic:
         return True
-    for dest in cat.destinations:
-        for place in dest.places:
-            if place.price.source in _UNSOURCED_MONEY:
-                return True
+    own = cat.synthetic if dest.synthetic is None else dest.synthetic
+    if own:
+        return True
+    if not dest.places:
+        return True
+    if any(place.price.source in _UNSOURCED_MONEY for place in dest.places):
+        return True
+    return any(source in _UNSOURCED_MONEY for source in line_sources)
+
+
+def show_demo_banner(cat: Catalog, line_sources: tuple[CostSource, ...] = ()) -> bool:
+    """True when any destination is still demo, or a passed-in line is unsourced."""
+    if any(destination_is_demo(cat, dest) for dest in cat.destinations):
+        return True
     return any(source in _UNSOURCED_MONEY for source in line_sources)
 
 

@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-27 · branch **`fix/blank-db-settings`** · commit `c4d4cbe` (base `dev` `ae5efdb`)
+**Last updated:** 2026-11-27 · branch **`feat/s04-demo-banner-per-area`** (base `dev` `ca838cb`)
 
 ## Done
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
@@ -69,9 +69,13 @@ The living status of the build. Update it at the end of every session (see
   Label `auto-merge` workflow for same-repo PRs into `dev` (`docs/GITHUB_AUTOMATION.md`).
 
 ## Known limits
+- **S04 demo banner is per destination:** `Destination.synthetic` (None inherits
+  the catalog). A synthetic catalog still forces demo everywhere. `GET /v1/meta`
+  adds `data_status` (`demo` or `cited`). A plan's `demo_data` follows only that
+  plan's destination. The picker tags demo areas "Demo prices". The bundled
+  catalog is still synthetic, so every area is demo until cited data lands.
 - **Synthetic demo catalog still drives plans:** 3 cities + 2 parks, made-up
-  names and prices. The demo banner stays because those costs are not cited.
-  The idea bank does not replace plan prices.
+  names and prices. The idea bank does not replace plan prices.
 - **Dev sign-in still returns a token** unless `VOYA_DEV_SIGNIN=0`. SES is in
   the sandbox: only verified recipients, 200 emails a day.
 - **`make run` does not load `.env`.** Use `uvicorn voya.api:app --reload
@@ -82,7 +86,7 @@ The living status of the build. Update it at the end of every session (see
 ## Next (suggested order)
 1. **P0 finish:** owner enables ruleset checks `verify` + `postgres` + `docker` and
    **Automatically delete head branches** (see `docs/GITHUB_AUTOMATION.md`).
-2. **P1 real data:** S04 demo banner per area, then cited place catalog (S05+).
+2. **P1 real data:** S05 cited place catalog, then S06–S10.
 3. Owner answers for hosting, invite code, public URL, alarm amount, legal
    wording, and Foursquare key plus budget before live places or deploy.
 4. UX redesign (React + Vite) stays later. Vectors, rituals, the learner,
