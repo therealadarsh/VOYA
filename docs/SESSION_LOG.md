@@ -510,3 +510,37 @@ Open owner questions:
 3. Later, not started: vectors, the preference learner and rituals, regions with specialties, multi-region trips, Europe and currencies, climate matching, the bandit, and the React redesign.
 
 **Questions for the owner:** the numbered list above.
+
+---
+
+## 2026-11-28 · Claude Code · branch feat/migrations-and-places · 2653771..HEAD
+
+**Goal:** Review PR #19 and fix what the review found.
+
+**Done:**
+- `migrations/versions/0003_plan_ideas_column.py`: adds `plan_versions.ideas_json`
+  when missing. Before this, an older database was stamped at head without the
+  column, so the first saved plan would fail. Checked on SQLite (test) and on a
+  throwaway local Postgres database; a second upgrade is a no-op.
+- `python -m voya.copy_db` returns 2 when the `--from` file does not exist,
+  instead of creating an empty file and reporting success.
+- `docs/DEPLOY.md`: Compose deploys run
+  `docker compose run --rm --entrypoint .venv/bin/alembic voya upgrade head`
+  before `docker compose up`, since the database lives in the volume.
+- Tests added: `test_upgrade_adds_ideas_json_to_an_older_database`,
+  `test_a_missing_source_file_is_refused`. `make verify RUN=`: 177 passed, 7 skipped.
+
+**Decisions:** a new revision instead of editing `0001_baseline`, so databases
+already stamped at `0002_places` also get the column.
+
+**Not done / known issues:**
+- Once a Foursquare key is set, `import_search` would make the paid search
+  before `cache_until` refuses to store the rows. Live import is blocked today.
+- The schema is still defined in both `Store` and the migrations.
+- `make e2e` and `scripts/smoke.sh` were not run locally (CI runs both).
+
+**Next:**
+1. CI green on PR #19, then merge #16, #17, #18, #19 in order.
+2. S05 cited place catalog.
+
+**Questions for the owner:** none new.

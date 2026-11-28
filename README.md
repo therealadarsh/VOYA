@@ -1,6 +1,6 @@
 # VOYA
 
-**Status:** **175 passed, 7 skipped** (`make verify`). Private preview plus the
+**Status:** **177 passed, 7 skipped** (`make verify`). Private preview plus the
 NYC slice: sign-in email limits, a trusted-proxy client address, a metrics
 token in production, per-slot classic picks, Alembic migrations, a SQLite copy
 command, and a fake places cache. Foursquare stays off until a key and a budget

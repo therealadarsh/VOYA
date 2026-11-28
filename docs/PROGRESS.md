@@ -3,15 +3,20 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-27 · branch **`feat/migrations-and-places`**
+**Last updated:** 2026-11-28 · branch **`feat/migrations-and-places`**
 
 ## Done
+- **Review fixes on PR #19 (2026-11-28):** migration `0003_plan_ideas_column`
+  adds `plan_versions.ideas_json` to databases made before the idea bank
+  (the baseline's `CREATE TABLE IF NOT EXISTS` skipped it). `copy_db` refuses
+  a source file that does not exist. `docs/DEPLOY.md` migrates inside the
+  Compose image before `docker compose up`. Tested on SQLite and local Postgres.
 - **Phase 1 fixes (F-01–F-14), open as four PRs into `dev`:** sign-in limits
   keyed by an email hash; client address from a trusted proxy only; `/metrics`
   locked in production; feedback capped at 1,000 characters; per-slot classic
   picks with anonymous counters; `make e2e` (Playwright and axe) and
   `scripts/smoke.sh`; Alembic baseline plus the places table; `python -m
-  voya.copy_db`. `make verify RUN=`: 175 passed, 7 skipped. `make e2e RUN=`:
+  voya.copy_db`. `make verify RUN=`: 177 passed, 7 skipped. `make e2e RUN=`:
   4 passed. CI on PRs #18 and #19: `verify`, `postgres`, `e2e`, and `docker` green.
   Local smoke was not run here because Docker was not running. The `docker` job
   ran `scripts/smoke.sh`, including the migrate-before-boot step.
@@ -78,6 +83,9 @@ The living status of the build. Update it at the end of every session (see
   Label `auto-merge` workflow for same-repo PRs into `dev` (`docs/GITHUB_AUTOMATION.md`).
 
 ## Known limits
+- **The schema is defined twice:** `Store` still creates its tables, and the
+  Alembic revisions define the same tables. `tests/test_f11_migrations.py`
+  compares them, but a new column has to go in both places.
 - **Classic picks are a sample.** `data/ideas/nyc.json` is synthetic. Every
   option is `curated_by: "sample"`. They do not add money. The priced lines
   still come from the demo catalog.
