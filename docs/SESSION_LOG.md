@@ -569,3 +569,98 @@ already stamped at `0002_places` also get the column.
 2. S05 cited place catalog.
 
 **Questions for the owner:** none new.
+
+---
+
+## 2026-11-28 · Cursor · branch docs/session-2026-11-28 · cf88bdf
+
+**Goal:** See whether VOYA is running in Docker and ready to start.
+
+**Done:**
+- Docker Desktop is installed. The daemon is not running, and `docker ps` cannot connect. No container is up.
+- A local process is already serving this repo: `uvicorn voya.api:app --port 8000 --env-file .env` (conda `snakeenv`). `GET /healthz` and `GET /readyz` both return 200.
+- `.env` is `VOYA_ENV=development`. The production image would still refuse to start: invite code and metrics token are empty, and the public URL is not `https://`. SMTP values are set. `VOYA_PLACES_LIVE=0`.
+
+**Decisions:** none.
+
+**Not done / known issues:** the production container has not been started.
+
+**Next:**
+1. Add `e2e` as a required check.
+2. S05 cited place catalog.
+
+**Questions for the owner:** none.
+
+---
+
+## 2026-11-28 · Cursor · branch docs/session-2026-11-28 · 6e1e478
+
+**Goal:** See whether the browser UI works on this machine, and whether a public website exists.
+
+**Done:**
+- Confirmed pid 7162 is still listening on `127.0.0.1:8000`. Command is `uvicorn voya.api:app --port 8000 --env-file .env` from conda `snakeenv`, cwd this repo. `GET /healthz` and `GET /readyz` both return 200 (`{"status":"ready"}` on `/readyz`).
+- `GET /` returns 200 and the planner page (`src/voya/web/` via the API). The invite page is not shown: `VOYA_ENV=development` and `VOYA_INVITE_CODE` is empty, so the invite gate is off.
+- Opened `http://127.0.0.1:8000/` in the browser. The page title is "VOYA · trips that fit your budget". A person sees the Preview badge, Plan / Discover / My trip tabs, the form "Where, when, and how much?", five destinations (New York City selected), and the demo-prices banner. No error page.
+- `docs/DEPLOY.md` and `docs/PROGRESS.md` still say nothing is deployed. There is no public host. `VOYA_PUBLIC_URL` is set and is not `https://`. A production start would still stop because the invite code is empty, the public URL is not https, and the metrics token is empty. SMTP values are set. `VOYA_DEV_SIGNIN=0`. `VOYA_PLACES_LIVE=0`. Docker was not started.
+
+**Decisions:** none.
+
+**Not done / known issues:** no public website. The local server is the only way to open the UI.
+
+**Next:**
+1. Add `e2e` as a required check.
+2. S05 cited place catalog.
+
+**Questions for the owner:** none.
+
+---
+
+## 2026-11-28 · Claude Code · branch docs/data-plan-2026-11-28 · no code
+
+**Goal:** Review the stashed S05 work and plan the data work.
+
+**Done:**
+- Reviewed the S05 stash in a throwaway worktree (not applied to any
+  branch). `make verify` passes with it. Open issues: a `"NaN"` price
+  crashes the checker; `"30.005"` is rounded to `30.01` silently; `tags`
+  given as a string splits into letters; a negative `duration_min` and a
+  bare `https://` URL pass; Pydantic errors print over several lines.
+  Reapplying it on `dev` conflicts in README, PROGRESS, SESSION_LOG and
+  `scripts/check_data_citations.py`, where the F-05 ideas check must stay.
+- Planned the data work as three phases: D1 collect (Overture places,
+  official-site hours and prices through structured data, GSA stay rates
+  and meal defaults, NPS fees, NYC inspections), D2 use it in the planner,
+  D3 trip insights and recommendations. No code yet.
+
+**Decisions:** one schema source (Alembic) before new tables; facts are
+append-only observations; prices from a JSON number or a price level are
+never accepted.
+
+**Not done / known issues:** S05 is still in the stash.
+
+**Next:**
+1. D1 starts with one schema source, then S05 with the fixes above.
+
+**Questions for the owner:** none new.
+
+---
+
+## 2026-11-28 · Cursor · branch docs/data-plan-2026-11-28 · 2974623..2f49a3f
+
+**Goal:** Resolve the docs conflicts on PR #21 against `dev`.
+
+**Done:**
+- Fetched `origin/dev` (`81fde0e`) and merged it into `docs/data-plan-2026-11-28` (merge commit `2f49a3f`). History on this repo uses merge commits, so this was a merge.
+- `README.md` had the same test-count edit on both sides (177 passed, 7 skipped). Git merged it with no conflict.
+- `docs/SESSION_LOG.md`: both sides appended the same PR-close entry. This branch also had three later entries. Kept those later entries once.
+- `docs/PROGRESS.md`: the closed-PR status matched. Next step 2 differed. Kept this branch's later wording (data phases D1–D3, then the stashed S05 catalog and its review fixes). The `dev` line still named S05 then S06–S10, which the data-plan entry had already replaced.
+- No code files conflicted. No tests were run.
+
+**Decisions:** none.
+
+**Not done / known issues:** none from this merge.
+
+**Next:**
+1. D1 starts with one schema source, then S05 with the fixes above.
+
+**Questions for the owner:** none.

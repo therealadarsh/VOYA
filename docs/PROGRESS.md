@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-28 · branch **`dev`** (`0d1f2cb`, squash of #19)
+**Last updated:** 2026-11-28 · branch **`docs/data-plan-2026-11-28`** (`2f49a3f`, merged `origin/dev`)
 
 ## Done
 - **PRs #16–#18 closed (2026-11-28):** their commits were already on `dev`
@@ -112,8 +112,11 @@ The living status of the build. Update it at the end of every session (see
 
 ## Next (suggested order)
 1. Add `e2e` as a required check (`docs/GITHUB_AUTOMATION.md`).
-2. **P1 real data:** S05 cited place catalog, then S06–S10. The owner's own
-   NYC picks replace `data/ideas/nyc.json`.
+2. **Data phases D1–D3:** D1 collects places (Overture), hours and prices
+   (official sites, owner-approved), stay rates and meal defaults (GSA), and
+   park fees (NPS); D2 makes the planner read them; D3 adds trip insights and
+   recommendations. D1 starts with one schema source (Alembic only) and the
+   stashed S05 catalog plus its review fixes.
 3. Owner answers for host, proxy addresses, metrics token, invite code, public
    URL, alarm amount, legal wording, and the Foursquare key plus budget.
 4. Later: vectors, the preference learner and rituals, regions with
