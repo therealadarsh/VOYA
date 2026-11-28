@@ -590,3 +590,25 @@ already stamped at `0002_places` also get the column.
 2. S05 cited place catalog.
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-28 · Cursor · branch docs/session-2026-11-28 · 6e1e478
+
+**Goal:** See whether the browser UI works on this machine, and whether a public website exists.
+
+**Done:**
+- Confirmed pid 7162 is still listening on `127.0.0.1:8000`. Command is `uvicorn voya.api:app --port 8000 --env-file .env` from conda `snakeenv`, cwd this repo. `GET /healthz` and `GET /readyz` both return 200 (`{"status":"ready"}` on `/readyz`).
+- `GET /` returns 200 and the planner page (`src/voya/web/` via the API). The invite page is not shown: `VOYA_ENV=development` and `VOYA_INVITE_CODE` is empty, so the invite gate is off.
+- Opened `http://127.0.0.1:8000/` in the browser. The page title is "VOYA · trips that fit your budget". A person sees the Preview badge, Plan / Discover / My trip tabs, the form "Where, when, and how much?", five destinations (New York City selected), and the demo-prices banner. No error page.
+- `docs/DEPLOY.md` and `docs/PROGRESS.md` still say nothing is deployed. There is no public host. `VOYA_PUBLIC_URL` is set and is not `https://`. A production start would still stop because the invite code is empty, the public URL is not https, and the metrics token is empty. SMTP values are set. `VOYA_DEV_SIGNIN=0`. `VOYA_PLACES_LIVE=0`. Docker was not started.
+
+**Decisions:** none.
+
+**Not done / known issues:** no public website. The local server is the only way to open the UI.
+
+**Next:**
+1. Add `e2e` as a required check.
+2. S05 cited place catalog.
+
+**Questions for the owner:** none.
