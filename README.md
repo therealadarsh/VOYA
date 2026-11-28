@@ -29,7 +29,7 @@ back under budget.
 ```sh
 uv sync                                   # Python 3.12 + dependencies
 make run                                  # http://localhost:8000
-make test                                 # 175 passed, 7 skipped; no network, no AI tokens
+make test                                 # 177 passed, 7 skipped; no network, no AI tokens
 ```
 
 Optional: set `OPENROUTER_API_KEY` (and `VOYA_LLM_MODEL_HELPER`) in `.env` to

@@ -3,15 +3,19 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-28 · branch **`feat/migrations-and-places`**
+**Last updated:** 2026-11-28 · branch **`dev`** (`0d1f2cb`, squash of #19)
 
 ## Done
+- **PRs #16–#18 closed (2026-11-28):** their commits were already on `dev`
+  inside the squash of #19 (`0d1f2cb`). GitHub reported conflicts on
+  `api.py`, `preview.py`, `store.py`, and `tests/test_f03_metrics.py`
+  because that squash rewrote the same edits. No open pull requests remain.
 - **Review fixes on PR #19 (2026-11-28):** migration `0003_plan_ideas_column`
   adds `plan_versions.ideas_json` to databases made before the idea bank
   (the baseline's `CREATE TABLE IF NOT EXISTS` skipped it). `copy_db` refuses
   a source file that does not exist. `docs/DEPLOY.md` migrates inside the
   Compose image before `docker compose up`. Tested on SQLite and local Postgres.
-- **Phase 1 fixes (F-01–F-14), open as four PRs into `dev`:** sign-in limits
+- **Phase 1 fixes (F-01–F-14), on `dev` via #19:** sign-in limits
   keyed by an email hash; client address from a trusted proxy only; `/metrics`
   locked in production; feedback capped at 1,000 characters; per-slot classic
   picks with anonymous counters; `make e2e` (Playwright and axe) and
@@ -107,15 +111,14 @@ The living status of the build. Update it at the end of every session (see
   not built in this environment (no Docker daemon).
 
 ## Next (suggested order)
-1. Merge the open PRs into `dev` in order: #16, #17, #18, then the migrations PR.
-   Add `e2e` as a required check (`docs/GITHUB_AUTOMATION.md`).
-2. **P1 real data:** S05 cited place catalog (left aside, not part of these PRs),
-   then S06–S10. The owner's own NYC picks replace `data/ideas/nyc.json`.
+1. Add `e2e` as a required check (`docs/GITHUB_AUTOMATION.md`).
+2. **P1 real data:** S05 cited place catalog, then S06–S10. The owner's own
+   NYC picks replace `data/ideas/nyc.json`.
 3. Owner answers for host, proxy addresses, metrics token, invite code, public
    URL, alarm amount, legal wording, and the Foursquare key plus budget.
-4. Later, not in these PRs: vectors, the preference learner and rituals,
-   regions with specialties, multi-region trips, Europe and currencies,
-   climate matching, the bandit, and the React redesign.
+4. Later: vectors, the preference learner and rituals, regions with
+   specialties, multi-region trips, Europe and currencies, climate matching,
+   the bandit, and the React redesign.
 
 ## Blocked / needs the owner
 - Which host should the private preview use, and which addresses belong in `VOYA_TRUSTED_PROXY_IPS`?
