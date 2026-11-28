@@ -544,3 +544,28 @@ already stamped at `0002_places` also get the column.
 2. S05 cited place catalog.
 
 **Questions for the owner:** none new.
+
+---
+
+## 2026-11-28 · Cursor · branch dev · 0d1f2cb
+
+**Goal:** Check the open pull requests and fix the merge conflicts.
+
+**Done:**
+- PR #19 is already merged. Its squash (`0d1f2cb`) has the same tree as the
+  stack tip. PRs #16, #17, and #18 are ancestors of that stack, so their
+  changes are already on `dev`.
+- Closed #16, #17, and #18. GitHub marked them conflicting on `src/voya/api.py`,
+  `src/voya/preview.py`, `src/voya/store.py`, and `tests/test_f03_metrics.py`
+  because the squash rewrote commits that `dev` already contains. No code
+  change. No open pull requests remain. CI on `dev` after #19 is green.
+
+**Decisions:** close the three PRs instead of replaying their commits onto the squash.
+
+**Not done / known issues:** `e2e` is still not a required check. That setting is on the owner.
+
+**Next:**
+1. Add `e2e` as a required check.
+2. S05 cited place catalog.
+
+**Questions for the owner:** none new.
