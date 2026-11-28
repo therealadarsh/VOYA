@@ -569,3 +569,24 @@ already stamped at `0002_places` also get the column.
 2. S05 cited place catalog.
 
 **Questions for the owner:** none new.
+
+---
+
+## 2026-11-28 · Cursor · branch docs/session-2026-11-28 · cf88bdf
+
+**Goal:** See whether VOYA is running in Docker and ready to start.
+
+**Done:**
+- Docker Desktop is installed. The daemon is not running, and `docker ps` cannot connect. No container is up.
+- A local process is already serving this repo: `uvicorn voya.api:app --port 8000 --env-file .env` (conda `snakeenv`). `GET /healthz` and `GET /readyz` both return 200.
+- `.env` is `VOYA_ENV=development`. The production image would still refuse to start: invite code and metrics token are empty, and the public URL is not `https://`. SMTP values are set. `VOYA_PLACES_LIVE=0`.
+
+**Decisions:** none.
+
+**Not done / known issues:** the production container has not been started.
+
+**Next:**
+1. Add `e2e` as a required check.
+2. S05 cited place catalog.
+
+**Questions for the owner:** none.
