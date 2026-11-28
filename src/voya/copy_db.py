@@ -10,6 +10,7 @@ import re
 import sqlite3
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 
 import psycopg
 
@@ -84,6 +85,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(list(argv) if argv is not None else None)
     if str(args.source).startswith("postgres"):
         print("The source must be a SQLite file.", file=sys.stderr)
+        return 2
+    # SQLite creates any file it is asked to open, so a mistyped path would copy nothing.
+    if not Path(str(args.source)).is_file():
+        print("The source file does not exist.", file=sys.stderr)
         return 2
     source = DB(str(args.source))
     try:

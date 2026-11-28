@@ -31,13 +31,15 @@ A single Linux machine with Docker. HTTPS terminates at a reverse proxy on
 the same machine (Caddy or nginx). The app container speaks HTTP on loopback.
 
 ```sh
-docker build -t voya .
+docker compose build
+docker compose run --rm --entrypoint .venv/bin/alembic voya upgrade head
 docker compose up -d
 ```
 
 `docker-compose.yml` mounts a named volume on `/data`. The database file is
-`/data/voya.db`. Redeploying the container (`docker compose up -d --build`)
-keeps that volume.
+`/data/voya.db`. Redeploying keeps that volume: run `docker compose build`,
+the same migrate line, then `docker compose up -d`. Production refuses to
+start on a database that is not at the latest migration (see Migrations).
 
 Backups use SQLite's backup API and write into the same volume:
 
@@ -99,6 +101,16 @@ then `DATABASE_URL`, then `VOYA_DATA_DIR/voya.db`. The same revisions apply to
 SQLite and Postgres. Production refuses to start when that database is not at
 the latest revision. Run `make migrate` before the new process starts,
 including the first boot.
+
+With Docker Compose the SQLite file lives in the `voya-data` volume, so
+`make migrate` on the host would migrate a different file. Run the migration
+inside the image instead, before `docker compose up`:
+
+```sh
+docker compose run --rm --entrypoint .venv/bin/alembic voya upgrade head
+```
+
+If you skip it, the container refuses to start and Compose keeps restarting it.
 
 To copy an existing SQLite file into a database that has already been migrated:
 

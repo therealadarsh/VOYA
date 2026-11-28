@@ -79,3 +79,37 @@ def test_postgres_migration_is_at_head() -> None:
     if not url.startswith("postgres"):
         pytest.skip("set VOYA_TEST_DATABASE_URL to a Postgres URL")
     assert current_revision(url) == head_revision()
+
+
+def test_upgrade_adds_ideas_json_to_an_older_database(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A database made before the idea bank has plan_versions without ideas_json.
+    older = tmp_path / "older.db"
+    db = DB(str(older))
+    try:
+        with db.tx() as cursor:
+            cursor.execute(
+                "CREATE TABLE plan_versions (plan_id TEXT NOT NULL, version INTEGER NOT NULL, "
+                "request_json TEXT NOT NULL, reason TEXT NOT NULL, created_at TEXT NOT NULL, "
+                "PRIMARY KEY (plan_id, version))"
+            )
+            cursor.execute(
+                "INSERT INTO plan_versions VALUES ('plan_old', 1, '{}', 'created', '2026-11-01')"
+            )
+    finally:
+        db.close()
+    monkeypatch.setenv("VOYA_DB", str(older))
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    upgrade_to_head()
+    columns = _columns(str(older))
+    assert "ideas_json" in {name for name, _type in columns["plan_versions"]}
+    db = DB(str(older))
+    try:
+        with db.tx() as cursor:
+            row = cursor.execute("SELECT ideas_json FROM plan_versions").fetchone()
+    finally:
+        db.close()
+    assert row is not None
+    assert row["ideas_json"] == "null"
+    assert current_revision(str(older)) == head_revision()

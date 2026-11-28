@@ -36,6 +36,17 @@ def test_sqlite_copy_counts_rows_and_refuses_a_full_target(
     assert len(Store(str(target)).feedback_all()) == 1
 
 
+def test_a_missing_source_file_is_refused(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    missing = tmp_path / "typo.db"
+    target = tmp_path / "target.db"
+    Store(str(target))
+    assert main(["--from", str(missing), "--to", str(target)]) == 2
+    assert "does not exist" in capsys.readouterr().err
+    assert not missing.exists()
+
+
 def test_a_failed_open_does_not_print_the_url(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
