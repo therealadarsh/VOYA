@@ -612,3 +612,33 @@ already stamped at `0002_places` also get the column.
 2. S05 cited place catalog.
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-28 · Claude Code · branch docs/data-plan-2026-11-28 · no code
+
+**Goal:** Review the stashed S05 work and plan the data work.
+
+**Done:**
+- Reviewed the S05 stash in a throwaway worktree (not applied to any
+  branch). `make verify` passes with it. Open issues: a `"NaN"` price
+  crashes the checker; `"30.005"` is rounded to `30.01` silently; `tags`
+  given as a string splits into letters; a negative `duration_min` and a
+  bare `https://` URL pass; Pydantic errors print over several lines.
+  Reapplying it on `dev` conflicts in README, PROGRESS, SESSION_LOG and
+  `scripts/check_data_citations.py`, where the F-05 ideas check must stay.
+- Planned the data work as three phases: D1 collect (Overture places,
+  official-site hours and prices through structured data, GSA stay rates
+  and meal defaults, NPS fees, NYC inspections), D2 use it in the planner,
+  D3 trip insights and recommendations. No code yet.
+
+**Decisions:** one schema source (Alembic) before new tables; facts are
+append-only observations; prices from a JSON number or a price level are
+never accepted.
+
+**Not done / known issues:** S05 is still in the stash.
+
+**Next:**
+1. D1 starts with one schema source, then S05 with the fixes above.
+
+**Questions for the owner:** none new.
