@@ -642,3 +642,25 @@ never accepted.
 1. D1 starts with one schema source, then S05 with the fixes above.
 
 **Questions for the owner:** none new.
+
+---
+
+## 2026-11-28 · Cursor · branch docs/data-plan-2026-11-28 · 2974623..2f49a3f
+
+**Goal:** Resolve the docs conflicts on PR #21 against `dev`.
+
+**Done:**
+- Fetched `origin/dev` (`81fde0e`) and merged it into `docs/data-plan-2026-11-28` (merge commit `2f49a3f`). History on this repo uses merge commits, so this was a merge.
+- `README.md` had the same test-count edit on both sides (177 passed, 7 skipped). Git merged it with no conflict.
+- `docs/SESSION_LOG.md`: both sides appended the same PR-close entry. This branch also had three later entries. Kept those later entries once.
+- `docs/PROGRESS.md`: the closed-PR status matched. Next step 2 differed. Kept this branch's later wording (data phases D1–D3, then the stashed S05 catalog and its review fixes). The `dev` line still named S05 then S06–S10, which the data-plan entry had already replaced.
+- No code files conflicted. No tests were run.
+
+**Decisions:** none.
+
+**Not done / known issues:** none from this merge.
+
+**Next:**
+1. D1 starts with one schema source, then S05 with the fixes above.
+
+**Questions for the owner:** none.

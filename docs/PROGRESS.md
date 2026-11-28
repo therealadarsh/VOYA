@@ -3,7 +3,7 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-28 · branch **`dev`** (`0d1f2cb`, squash of #19)
+**Last updated:** 2026-11-28 · branch **`docs/data-plan-2026-11-28`** (`2f49a3f`, merged `origin/dev`)
 
 ## Done
 - **PRs #16–#18 closed (2026-11-28):** their commits were already on `dev`
