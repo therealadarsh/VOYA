@@ -41,6 +41,7 @@ session strategy notes, prompt templates. **Cursor rule:** `.cursor/rules/voya.m
 | [`SESSION_LOG.md`](SESSION_LOG.md) | Append-only technical session history |
 | [`DATA_SOURCES.md`](DATA_SOURCES.md) | Provider terms, caching, attribution (incl. OpenRouter) |
 | [`DEPLOY.md`](DEPLOY.md) | Private preview: Docker, env, AWS notes |
+| [`VOYA_BOT.md`](VOYA_BOT.md) | What the VOYA-bot crawler reads and keeps, and how a site opts out |
 | [`MVP_TEST_GUIDE.md`](MVP_TEST_GUIDE.md) | Manual MVP checks; intentional gaps |
 | [`GITHUB_AUTOMATION.md`](GITHUB_AUTOMATION.md) | Owner: rulesets, delete-branch setting, `auto-merge` label workflow |
 | [`REVIEW_GUIDE.md`](REVIEW_GUIDE.md) | How to review PRs; points at label-gated merge |
