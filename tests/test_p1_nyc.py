@@ -23,7 +23,7 @@ from voya.catalog import (
 )
 from voya.cost.model import CostSource
 from voya.db import prepare_sql
-from voya.ideas import ideas_after, ideas_for, nyc_transit
+from voya.ideas import nyc_transit
 from voya.providers.foursquare import (
     FoursquarePlaces,
     dollars_from_level,
@@ -80,17 +80,17 @@ def test_sqlite_store_still_round_trips(tmp_path: Path) -> None:
     assert store.feedback_all()[0]["message"] == "idea card"
 
 
-def test_same_seed_keeps_the_set_and_another_rotates() -> None:
-    first = ideas_for("alpha", days=7)
-    again = ideas_for("alpha", days=1)
-    assert first["set_id"] == again["set_id"]
-    assert len(first["days"]) == 7
-    assert len(again["days"]) == 1
-    nxt = ideas_after(first["set_id"], days=1)
-    assert nxt["set_id"] != first["set_id"]
-    assert nxt["days"][0]["slots"][0]["title"] != first["days"][0]["slots"][0]["title"]
-    blob = json.dumps(first["days"])
-    assert "$" not in blob
+def test_retired_idea_list_points_at_the_plan(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("VOYA_INVITE_CODE", raising=False)
+    api_mod._state.clear()
+    api_mod._hits.clear()
+    api_mod._state["store"] = Store(str(tmp_path / "t.db"))
+    client = TestClient(api_mod.app)
+    ideas = client.get("/v1/ideas", params={"city": "nyc", "seed": "alpha", "days": 2})
+    assert ideas.status_code == 410
+    assert ideas.json()["error"]["code"] == "IDEAS_MOVED"
 
 
 def test_transit_cost_comes_from_the_cited_fare_file() -> None:
@@ -180,15 +180,7 @@ def test_ideas_and_metrics_http(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     api_mod._state["store"] = Store(str(tmp_path / "t.db"))
     client = TestClient(api_mod.app)
     ideas = client.get("/v1/ideas", params={"city": "nyc", "seed": "alpha", "days": 2})
-    assert ideas.status_code == 200
-    body = ideas.json()
-    assert body["transit"]["amount"] == "2.90"
-    assert len(body["days"]) == 2
-    other = client.post("/v1/ideas/next", json={"current_id": body["set_id"], "days": 1})
-    assert other.status_code == 200
-    assert other.json()["set_id"] != body["set_id"]
-    missing = client.get("/v1/ideas", params={"city": "paris"})
-    assert missing.status_code == 404
+    assert ideas.status_code == 410
     metrics = client.get("/metrics")
     assert metrics.status_code == 200
     assert "voya_http_requests_total" in metrics.text

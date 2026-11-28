@@ -11,6 +11,7 @@ import time
 from collections import defaultdict, deque
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -26,16 +27,25 @@ from voya.accounts import MagicLinkService
 from voya.accounts.smtp_mailer import mailer_from_settings
 from voya.agent import HelperRequest, respond
 from voya.catalog import destination_is_demo, load_catalog, show_demo_banner
+from voya.client_ip import client_address
 from voya.discover import DiscoverRequest, discover
-from voya.ideas import ideas_after, ideas_for
+from voya.ideas import public_view, rotate
 from voya.llm import Harness, client_from_env
 from voya.log import access_log, configure_logging
 from voya.metrics import METRICS
 from voya.planner import PlanError, PlanRequest, apply_upgrade, build, priced_for
-from voya.preview import COOKIE, code_matches, cookie_for, cookie_matches, is_exempt
+from voya.preview import (
+    COOKIE,
+    code_matches,
+    cookie_for,
+    cookie_matches,
+    is_exempt,
+    secret_matches,
+)
 from voya.safety import origin_allowed, security_headers
-from voya.settings import load_settings, production_problems
-from voya.store import Store
+from voya.schema import current_revision, head_revision
+from voya.settings import Settings, load_settings, production_problems
+from voya.store import Store, default_db_path
 from voya.tracking import CATEGORIES, apply_recovery, budget_status, parse_spend_text
 
 STATIC = Path(__file__).with_name("web")
@@ -58,6 +68,13 @@ async def _lifespan(_app: FastAPI) -> AsyncIterator[None]:
     problems = production_problems(settings)
     if problems:
         raise RuntimeError("Production settings are incomplete:\n" + "\n".join(problems))
+    if settings.production:
+        target = default_db_path()
+        found = _state.get("store")
+        if isinstance(found, Store):
+            target = found.path
+        if current_revision(target) != head_revision():
+            raise RuntimeError("The database is not at the latest migration. Run make migrate.")
     configure_logging(json_logs=settings.log_json)
     yield
 
@@ -162,6 +179,24 @@ _hits: dict[str, deque[float]] = defaultdict(deque)
 RATE_PER_MIN = int(os.environ.get("VOYA_RATE_PER_MIN", "60"))
 
 
+def _metrics_invite_exempt(request: Request, settings: Settings) -> bool:
+    """A valid metrics token is the only way /metrics skips the invite gate."""
+    if request.url.path != "/metrics":
+        return False
+    return secret_matches(settings.metrics_token, request.headers.get("x-metrics-token"))
+
+
+def _client_address(request: Request) -> str:
+    """One helper for every place that needs the caller's address."""
+    settings = load_settings()
+    peer = request.client.host if request.client else None
+    return client_address(
+        peer=peer,
+        forwarded_for=request.headers.get("x-forwarded-for"),
+        trusted=settings.trusted_proxy_ips,
+    )
+
+
 def _error_body(status: int, code: str, message: str, hint: str = "") -> JSONResponse:
     return JSONResponse(
         status_code=status,
@@ -211,6 +246,7 @@ async def _trace_and_limit(
     if (
         settings.invite_required
         and not is_exempt(request.url.path)
+        and not _metrics_invite_exempt(request, settings)
         and not cookie_matches(settings.invite_code, request.cookies.get(COOKIE))
     ):
         if request.method == "GET" and request.url.path == "/":
@@ -222,7 +258,7 @@ async def _trace_and_limit(
             request,
         )
     if request.url.path.startswith("/v1/") and request.method == "POST":
-        key = request.client.host if request.client else "anon"
+        key = _client_address(request)
         q, now = _hits[key], time.monotonic()
         while q and now - q[0] > 60:
             q.popleft()
@@ -271,12 +307,15 @@ def plan_payload(
 ) -> dict[str, Any]:
     with obs.span("plan.build", destination=req.destination, days=req.days):
         plan = build(req)
+    saved = store().plan(plan_id)
+    ideas_json = saved["ideas_json"] if saved else None
     return {
         "plan_id": plan_id,
         "version": version,
         "saved": owner_id is not None,
         "request": req.model_dump(mode="json"),
         "plan": plan,
+        "ideas": public_view(str(ideas_json) if ideas_json else None),
         "trace_id": obs.current_trace(),
     }
 
@@ -401,6 +440,20 @@ def auth_start(a: AuthIn) -> dict[str, Any]:
             "ADULTS_ONLY",
             "Accounts are for adults (18+). Trips with kids are planned from an adult's account.",
         )
+    settings = load_settings()
+    allowed = store().record_signin_attempt(
+        a.email,
+        now=datetime.now(UTC),
+        max_per_15min=settings.signin_max_per_15min,
+        max_per_day=settings.signin_max_per_day,
+    )
+    if not allowed:
+        raise ApiError(
+            429,
+            "SIGNIN_LIMIT",
+            "Too many sign-in emails for this address. Try again later.",
+            "Wait and use the latest link if one already arrived.",
+        )
     out = magic_link().request_sign_in(a.email, a.is_adult)
     if "error" in out:
         raise ApiError(403, str(out["error"]), str(out["message"]))
@@ -465,7 +518,7 @@ def preview_unlock(body: InviteIn) -> JSONResponse:
 
 
 class FeedbackIn(BaseModel):
-    message: str = Field(min_length=1, max_length=2000)
+    message: str = Field(min_length=1, max_length=1000)
     contact: str | None = Field(None, max_length=200)
 
 
@@ -475,7 +528,7 @@ def feedback(body: FeedbackIn) -> dict[str, Any]:
     if not message:
         raise ApiError(422, "INVALID_INPUT", "Write a short note before sending.")
     contact = body.contact.strip() if body.contact else None
-    store().add_feedback(message[:2000], contact or None)
+    store().add_feedback(message[:1000], contact or None)
     return {"ok": True}
 
 
@@ -484,6 +537,7 @@ def save_plan(plan_id: str, o: str = Depends(require_owner)) -> dict[str, Any]:
     load_plan(plan_id)
     if not store().claim(plan_id, o):
         raise ApiError(403, "NOT_YOURS", "This trip belongs to someone else.")
+    store().mark_ideas_kept(plan_id)
     rec, req = load_plan(plan_id)
     return plan_payload(plan_id, rec["version"], req, o)
 
@@ -627,7 +681,7 @@ def helper(
     plan_id: str, h: HelperRequest, request: Request, o: str | None = Depends(owner)
 ) -> dict[str, Any]:
     rec, req = load_plan(plan_id)
-    scope = o or (request.client.host if request.client else "anon")
+    scope = o or _client_address(request)
     return respond(store(), plan_id, rec["version"], req, h, harness(), scope)
 
 
@@ -684,33 +738,53 @@ def ops(x_ops_token: str | None = Header(None)) -> dict[str, Any]:
         "ai_helper": "model" if harness() else "built-in",
         "owner_price_checks_approved": len(approved_for_city("Chicago")),
         "owner_check_coverage_chicago_est": cov,
+        "idea_stats": store().idea_stat_rows(),
     }
 
 
-class IdeaNext(BaseModel):
-    current_id: str = Field(min_length=1, max_length=40)
-    days: int = Field(1, ge=1, le=7)
+@app.api_route("/v1/ideas", methods=["GET", "POST"])
+@app.api_route("/v1/ideas/next", methods=["GET", "POST"])
+def ideas_retired() -> None:
+    raise ApiError(
+        410,
+        "IDEAS_MOVED",
+        "Classic picks now travel with the plan.",
+        "Use Another on a morning, afternoon, or evening pick.",
+    )
 
 
-@app.get("/v1/ideas")
-def idea_route(city: str = "nyc", seed: str = "voya", days: int = 1) -> dict[str, Any]:
-    if city != "nyc":
-        raise ApiError(404, "NO_IDEAS", "Idea sets for that city are not ready.")
-    if not seed or len(seed) > 80:
-        raise ApiError(422, "INVALID_INPUT", "Use a short seed.")
-    return ideas_for(seed, days)
-
-
-@app.post("/v1/ideas/next")
-def idea_next(body: IdeaNext) -> dict[str, Any]:
-    return ideas_after(body.current_id, body.days)
+@app.post("/v1/plans/{plan_id}/ideas/{day}/{slot}/another")
+def idea_another(plan_id: str, day: int, slot: str) -> dict[str, Any]:
+    if day < 1 or day > 7 or slot not in {"morning", "afternoon", "evening"}:
+        raise ApiError(
+            422,
+            "INVALID_INPUT",
+            "Pick a day and a morning, afternoon, or evening slot.",
+        )
+    rec, req = load_plan(plan_id)
+    try:
+        new_json, left_id, arrived_id = rotate(str(rec["ideas_json"] or ""), day, slot)
+    except ValueError as exc:
+        raise ApiError(404, "NO_IDEAS", str(exc)) from exc
+    if left_id != arrived_id:
+        store().add_version(
+            plan_id,
+            req.model_dump_json(),
+            f"idea {day} {slot}",
+            ideas_json=new_json,
+            left_id=left_id,
+            arrived_id=arrived_id,
+        )
+    rec, req = load_plan(plan_id)
+    return plan_payload(plan_id, rec["version"], req, rec["owner"])
 
 
 @app.get("/metrics")
 def metrics(x_metrics_token: str | None = Header(None)) -> Response:
-    expected = os.environ.get("VOYA_METRICS_TOKEN")
-    if expected and x_metrics_token != expected:
-        raise ApiError(401, "METRICS_ONLY", "Metrics token required.")
+    settings = load_settings()
+    if settings.production or settings.metrics_token:
+        if not secret_matches(settings.metrics_token, x_metrics_token):
+            raise ApiError(401, "METRICS_ONLY", "Metrics token required.")
     return Response(METRICS.render(), media_type="text/plain; version=0.0.4")
 
 
@@ -741,6 +815,12 @@ def terms() -> FileResponse:
 @app.get("/")
 def index() -> FileResponse:
     return FileResponse(STATIC / "index.html")
+
+
+@app.get("/favicon.ico")
+def favicon() -> Response:
+    """Empty icon so browsers do not log a 404 for the default request."""
+    return Response(status_code=204)
 
 
 app.mount("/static", StaticFiles(directory=STATIC), name="static")

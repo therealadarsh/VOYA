@@ -450,3 +450,97 @@ that broke on the way.
 2. S05 cited place catalog.
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-27 · Cursor · branch feat/migrations-and-places · ef27900..01a68cb
+
+**Goal:** Close the phase 1 review gaps as four PRs into `dev`.
+
+**Done:**
+- F-01–F-04 on `fix/preview-security` (PR #16): sign-in limits keyed by an email hash, client address only from a trusted proxy, production metrics token, feedback length cap and privacy wording.
+- F-05–F-07 on `feat/idea-bank-slots` (PR #17): per-slot NYC sample idea bank, plan-seeded rotation, anonymous `idea_stats`.
+- F-08–F-10 on `test/e2e-and-smoke` (PR #18): `make e2e` at 360px and 1280px with axe, CI `e2e` job, `scripts/smoke.sh`.
+- F-11–F-14 on `feat/migrations-and-places` (PR #19): Alembic on SQLite and Postgres, `python -m voya.copy_db`, fake places cache, deploy and test docs.
+- `make verify RUN=`: 175 passed, 7 skipped. `make e2e RUN=`: 4 passed.
+- CI on PR #19: `verify`, `postgres`, `e2e`, and `docker` green. Local smoke was not run because Docker was not running.
+
+**Decisions:** S05 (cited JSON place catalog) is not F-13. F-13 is the database cache. The uncommitted S05 work stayed in the stash `wip: S05 cited place catalog`. The NYC idea file is a sample, `curated_by: "sample"`. Foursquare live import stays off. No AI feature changed, so `docs/AGENTIC_ENGINEERING.md` was not edited.
+
+### Phase 1 fixes report
+| ID | Status (done / partial / blocked / covered by Sxx) | PR | Commit | Tests added | Notes / owner question |
+|----|---|---|---|---|---|
+| F-00 | done | — | — | — | `make verify` was already green on `dev` |
+| F-01 | done | #16 | ef27900 | tests/test_f01_signin_limit.py | |
+| F-02 | done | #16 | f0767d6 | tests/test_f02_client_ip.py | Which proxy addresses should `VOYA_TRUSTED_PROXY_IPS` list? |
+| F-03 | done | #16 | 8d7586b | tests/test_f03_metrics.py | What token should scrape `/metrics`? |
+| F-04 | done | #16 | 8c5802c | tests/test_f04_feedback.py | What wording should the Privacy page use? |
+| F-05 | done | #17 | e0456ff | tests/test_f05_ideas.py | Sample NYC picks, not the owner's |
+| F-06 | done | #17 | a2ab730 | tests/test_f06_rotation.py | |
+| F-07 | done | #17 | d3e92e9 | tests/test_f07_idea_stats.py | |
+| F-08 | done | #18 | 5df30c7 | tests/browser/test_preview_flow.py | `make e2e`: 4 passed |
+| F-09 | done | #18 | 02a8127 | CI job `e2e` | Owner should add `e2e` as a required check |
+| F-10 | done | #18 | fc27ee0 | scripts/smoke.sh | Local smoke not run (Docker off). CI `docker` green on #18 and #19 |
+| F-11 | done | #19 | cf03cf3 | tests/test_f11_migrations.py | Postgres migrate-then-test is in CI |
+| F-12 | done | #19 | 6fb5ece | tests/test_f12_copy_db.py | Postgres copy runs in CI. The command never prints the URL |
+| F-13 | partial | #19 | 9f4427e | tests/test_f13_places.py | Fake import, refresh, and drop are done. Live Foursquare import is blocked |
+| F-14 | done | #19 | 01a68cb | — | No AI feature change |
+
+make verify: green   make e2e: green   smoke: green in CI (not run locally; Docker is not running)   tests: 175 passed, 7 skipped (verify); 4 passed (e2e)
+
+Open owner questions:
+1. Which host should the preview use, and which addresses belong in `VOYA_TRUSTED_PROXY_IPS`?
+2. What value should `VOYA_METRICS_TOKEN` use?
+3. What wording should the Privacy and Terms pages use?
+4. Which NYC places should replace the sample classic picks?
+5. What is the Foursquare API key, the monthly budget in USD, and the USD to count per search?
+6. What invite code, public https URL, and SES production access should the preview use?
+7. What monthly amount should the hosting cost alarm use?
+8. Please add `e2e` as a required check on `dev`.
+
+**Not done / known issues:**
+- The four PRs are open and not merged. Merge #16, then #17, then #18, then #19.
+- Live Foursquare import is blocked on the owner's key and budget. No cache window is invented.
+- Classic picks are a sample. The owner's own NYC list is not in the file.
+- S05 cited place catalog remains stashed and was not built again.
+
+**Next:**
+1. Owner merges the four PRs in order and adds `e2e` as a required check.
+2. S05 cited place catalog, then the owner's NYC picks in `data/ideas/nyc.json`.
+3. Later, not started: vectors, the preference learner and rituals, regions with specialties, multi-region trips, Europe and currencies, climate matching, the bandit, and the React redesign.
+
+**Questions for the owner:** the numbered list above.
+
+---
+
+## 2026-11-28 · Claude Code · branch feat/migrations-and-places · 2653771..HEAD
+
+**Goal:** Review PR #19 and fix what the review found.
+
+**Done:**
+- `migrations/versions/0003_plan_ideas_column.py`: adds `plan_versions.ideas_json`
+  when missing. Before this, an older database was stamped at head without the
+  column, so the first saved plan would fail. Checked on SQLite (test) and on a
+  throwaway local Postgres database; a second upgrade is a no-op.
+- `python -m voya.copy_db` returns 2 when the `--from` file does not exist,
+  instead of creating an empty file and reporting success.
+- `docs/DEPLOY.md`: Compose deploys run
+  `docker compose run --rm --entrypoint .venv/bin/alembic voya upgrade head`
+  before `docker compose up`, since the database lives in the volume.
+- Tests added: `test_upgrade_adds_ideas_json_to_an_older_database`,
+  `test_a_missing_source_file_is_refused`. `make verify RUN=`: 177 passed, 7 skipped.
+
+**Decisions:** a new revision instead of editing `0001_baseline`, so databases
+already stamped at `0002_places` also get the column.
+
+**Not done / known issues:**
+- Once a Foursquare key is set, `import_search` would make the paid search
+  before `cache_until` refuses to store the rows. Live import is blocked today.
+- The schema is still defined in both `Store` and the migrations.
+- `make e2e` and `scripts/smoke.sh` were not run locally (CI runs both).
+
+**Next:**
+1. CI green on PR #19, then merge #16, #17, #18, #19 in order.
+2. S05 cited place catalog.
+
+**Questions for the owner:** none new.

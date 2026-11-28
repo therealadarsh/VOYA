@@ -3,9 +3,23 @@
 The living status of the build. Update it at the end of every session (see
 `AGENTS.md` → "Session logging"). History lives in `docs/SESSION_LOG.md`.
 
-**Last updated:** 2026-11-27 · branch **`feat/s04-demo-banner-per-area`** (base `dev` `ca838cb`)
+**Last updated:** 2026-11-28 · branch **`feat/migrations-and-places`**
 
 ## Done
+- **Review fixes on PR #19 (2026-11-28):** migration `0003_plan_ideas_column`
+  adds `plan_versions.ideas_json` to databases made before the idea bank
+  (the baseline's `CREATE TABLE IF NOT EXISTS` skipped it). `copy_db` refuses
+  a source file that does not exist. `docs/DEPLOY.md` migrates inside the
+  Compose image before `docker compose up`. Tested on SQLite and local Postgres.
+- **Phase 1 fixes (F-01–F-14), open as four PRs into `dev`:** sign-in limits
+  keyed by an email hash; client address from a trusted proxy only; `/metrics`
+  locked in production; feedback capped at 1,000 characters; per-slot classic
+  picks with anonymous counters; `make e2e` (Playwright and axe) and
+  `scripts/smoke.sh`; Alembic baseline plus the places table; `python -m
+  voya.copy_db`. `make verify RUN=`: 177 passed, 7 skipped. `make e2e RUN=`:
+  4 passed. CI on PRs #18 and #19: `verify`, `postgres`, `e2e`, and `docker` green.
+  Local smoke was not run here because Docker was not running. The `docker` job
+  ran `scripts/smoke.sh`, including the migrate-before-boot step.
 - **NYC public slice (phase 1b):** Postgres when `DATABASE_URL` is a postgres
   URL (SQLite otherwise). Round trip passed against local Postgres 16.
   Foursquare place search client; live calls stay off until an API key, a
@@ -69,6 +83,15 @@ The living status of the build. Update it at the end of every session (see
   Label `auto-merge` workflow for same-repo PRs into `dev` (`docs/GITHUB_AUTOMATION.md`).
 
 ## Known limits
+- **The schema is defined twice:** `Store` still creates its tables, and the
+  Alembic revisions define the same tables. `tests/test_f11_migrations.py`
+  compares them, but a new column has to go in both places.
+- **Classic picks are a sample.** `data/ideas/nyc.json` is synthetic. Every
+  option is `curated_by: "sample"`. They do not add money. The priced lines
+  still come from the demo catalog.
+- **Live Foursquare import is blocked.** The fake provider fills `places`.
+  There is no Foursquare cache window in `docs/DATA_SOURCES.md`, so live rows
+  are not stored.
 - **S04 demo banner is per destination:** `Destination.synthetic` (None inherits
   the catalog). A synthetic catalog still forces demo everywhere. `GET /v1/meta`
   adds `data_status` (`demo` or `cited`). A plan's `demo_data` follows only that
@@ -84,20 +107,24 @@ The living status of the build. Update it at the end of every session (see
   not built in this environment (no Docker daemon).
 
 ## Next (suggested order)
-1. **P0 finish:** owner enables ruleset checks `verify` + `postgres` + `docker` and
-   **Automatically delete head branches** (see `docs/GITHUB_AUTOMATION.md`).
-2. **P1 real data:** S05 cited place catalog, then S06–S10.
-3. Owner answers for hosting, invite code, public URL, alarm amount, legal
-   wording, and Foursquare key plus budget before live places or deploy.
-4. UX redesign (React + Vite) stays later. Vectors, rituals, the learner,
-   extra regions, Europe, and climate stay out of scope.
+1. Merge the open PRs into `dev` in order: #16, #17, #18, then the migrations PR.
+   Add `e2e` as a required check (`docs/GITHUB_AUTOMATION.md`).
+2. **P1 real data:** S05 cited place catalog (left aside, not part of these PRs),
+   then S06–S10. The owner's own NYC picks replace `data/ideas/nyc.json`.
+3. Owner answers for host, proxy addresses, metrics token, invite code, public
+   URL, alarm amount, legal wording, and the Foursquare key plus budget.
+4. Later, not in these PRs: vectors, the preference learner and rituals,
+   regions with specialties, multi-region trips, Europe and currencies,
+   climate matching, the bandit, and the React redesign.
 
 ## Blocked / needs the owner
-- Which hosting account should the private preview be deployed to?
+- Which host should the private preview use, and which addresses belong in `VOYA_TRUSTED_PROXY_IPS`?
 - Request SES production access before the first tester (sandbox only sends to verified addresses).
 - What invite code should the private preview require?
 - What public https URL should magic links use?
+- What token should scrape `/metrics`? Set `VOYA_METRICS_TOKEN`.
 - What monthly hosting budget should the AWS cost alarm use? BUILD_PLAN recorded $20; confirm or replace it before any alarm is created.
 - What wording should the Privacy page and the Terms page use?
-- What is the Foursquare API key, the monthly budget in USD, and the USD to count per search? Live place search stays off until those are set. Real NYC place prices are not in the catalog, so the demo banner stays.
+- What is the Foursquare API key, the monthly budget in USD, and the USD to count per search? Live import stays off until those are set.
+- Which NYC places should replace the sample classic picks?
 - Choosing the map provider (it depends on the data provider's terms).

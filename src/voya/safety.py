@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 _CSP = (
     "default-src 'self'; script-src 'self'; style-src 'self'; "
+    "style-src-attr 'unsafe-inline'; "
     "img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; "
     "base-uri 'self'; form-action 'self'"
 )

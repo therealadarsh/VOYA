@@ -31,6 +31,7 @@ def _production_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setenv("VOYA_SMTP_USERNAME", "voya")
     monkeypatch.setenv("VOYA_SMTP_PASSWORD", "secret")
     monkeypatch.setenv("VOYA_SMTP_FROM", "sign-in@example.com")
+    monkeypatch.setenv("VOYA_METRICS_TOKEN", "metrics-test-token")
 
 
 def test_development_settings_do_not_require_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -53,6 +54,7 @@ def test_production_settings_name_each_missing_decision(monkeypatch: pytest.Monk
     monkeypatch.delenv("VOYA_DATA_DIR", raising=False)
     monkeypatch.delenv("VOYA_SMTP_HOST", raising=False)
     monkeypatch.delenv("VOYA_SMTP_FROM", raising=False)
+    monkeypatch.delenv("VOYA_METRICS_TOKEN", raising=False)
     text = "\n".join(production_problems(load_settings()))
     assert "VOYA_INVITE_CODE" in text
     assert "VOYA_PUBLIC_URL" in text
@@ -60,6 +62,7 @@ def test_production_settings_name_each_missing_decision(monkeypatch: pytest.Monk
     assert "VOYA_DATA_DIR" in text
     assert "VOYA_SMTP_HOST" in text
     assert "VOYA_SMTP_FROM" in text
+    assert "VOYA_METRICS_TOKEN" in text
 
 
 def test_production_settings_accept_a_complete_config(
@@ -206,6 +209,7 @@ def test_security_headers_on_health(client: TestClient) -> None:
     assert response.headers["X-Frame-Options"] == "DENY"
     assert response.headers["Referrer-Policy"] == "no-referrer"
     assert "default-src 'self'" in response.headers["Content-Security-Policy"]
+    assert "style-src-attr 'unsafe-inline'" in response.headers["Content-Security-Policy"]
     assert "frame-ancestors 'none'" in response.headers["Content-Security-Policy"]
     assert "Strict-Transport-Security" not in response.headers
 
@@ -220,6 +224,10 @@ def test_hsts_when_production(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
     _production_env(monkeypatch, tmp_path)
     api_mod._state.clear()
     api_mod._hits.clear()
+    monkeypatch.setenv("VOYA_DB", str(tmp_path / "t.db"))
+    from voya.schema import upgrade_to_head
+
+    upgrade_to_head()
     api_mod._state["store"] = Store(str(tmp_path / "t.db"))
     with TestClient(api_mod.app) as prod:
         response = prod.get("/healthz")
@@ -241,6 +249,7 @@ def test_invite_gate(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     assert gate.get("/privacy").status_code == 200
     assert gate.get("/terms").status_code == 200
     assert gate.get("/healthz").status_code == 200
+    assert gate.get("/favicon.ico").status_code == 204
     foreign = gate.post(
         "/v1/preview/unlock",
         json={"code": "preview-invite-1"},

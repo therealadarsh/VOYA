@@ -31,13 +31,15 @@ A single Linux machine with Docker. HTTPS terminates at a reverse proxy on
 the same machine (Caddy or nginx). The app container speaks HTTP on loopback.
 
 ```sh
-docker build -t voya .
+docker compose build
+docker compose run --rm --entrypoint .venv/bin/alembic voya upgrade head
 docker compose up -d
 ```
 
 `docker-compose.yml` mounts a named volume on `/data`. The database file is
-`/data/voya.db`. Redeploying the container (`docker compose up -d --build`)
-keeps that volume.
+`/data/voya.db`. Redeploying keeps that volume: run `docker compose build`,
+the same migrate line, then `docker compose up -d`. Production refuses to
+start on a database that is not at the latest migration (see Migrations).
 
 Backups use SQLite's backup API and write into the same volume:
 
@@ -52,6 +54,27 @@ dies with the disk is not a backup. Restore by stopping the app and replacing
 Point the proxy at `127.0.0.1:8000`. The proxy owns the certificate. The
 container sends `Strict-Transport-Security` only when `VOYA_ENV=production`.
 
+## Client address
+
+Rate limits and the anonymous AI-spend scope use one helper,
+`client_address`. It trusts `X-Forwarded-For` only when the direct peer is
+listed in `VOYA_TRUSTED_PROXY_IPS`. The value used is the right-most hop that
+is not itself in that list. An empty setting (the default) ignores the
+header, so a caller cannot pick their own address.
+
+The image starts uvicorn with `--no-proxy-headers` and an empty
+`--forwarded-allow-ips`. Uvicorn therefore leaves `request.client.host` as
+the peer that opened the socket. Do not turn proxy headers on in the command
+or every bucket collapses to one address again.
+
+| Host | What to set |
+|---|---|
+| No proxy (the process is reached directly) | Leave `VOYA_TRUSTED_PROXY_IPS` empty. |
+| Docker Compose reverse proxy on the same machine | The address the app container sees for the proxy (often the compose-network gateway). Read it from the proxy container or from a connection to the app; do not guess a public address. |
+| Render | The proxy addresses Render uses to connect to the service. Leave the setting empty until those addresses are known. |
+| Fly | The edge addresses Fly uses as the peer. Leave the setting empty until those addresses are known. |
+| AWS load balancer (App Runner, Lightsail, or ECS) | The load balancer's private addresses, the only peers the task should accept. Leave the setting empty until those addresses are known. |
+
 Smoke check:
 
 ```sh
@@ -65,9 +88,59 @@ Access lines include the path and status, not the query string, so magic-link
 tokens are not logged.
 
 `/metrics` is Prometheus text: request count, error count, and total duration.
-Set `VOYA_METRICS_TOKEN` and send it as `X-Metrics-Token` so the scrape is not
-public. Point the host's scraper (or CloudWatch agent plus a sidecar) at that
-URL. No monitoring vendor account is created from this repo.
+In production the process refuses to start if `VOYA_METRICS_TOKEN` is missing.
+Send that token as `X-Metrics-Token`. A wrong token is 401. In development,
+with no token set, `/metrics` stays open. Point the host's scraper (or
+CloudWatch agent plus a sidecar) at that URL. No monitoring vendor account is
+created from this repo.
+
+## Migrations
+
+`make migrate` runs `alembic upgrade head` on the database chosen by `VOYA_DB`,
+then `DATABASE_URL`, then `VOYA_DATA_DIR/voya.db`. The same revisions apply to
+SQLite and Postgres. Production refuses to start when that database is not at
+the latest revision. Run `make migrate` before the new process starts,
+including the first boot.
+
+With Docker Compose the SQLite file lives in the `voya-data` volume, so
+`make migrate` on the host would migrate a different file. Run the migration
+inside the image instead, before `docker compose up`:
+
+```sh
+docker compose run --rm --entrypoint .venv/bin/alembic voya upgrade head
+```
+
+If you skip it, the container refuses to start and Compose keeps restarting it.
+
+To copy an existing SQLite file into a database that has already been migrated:
+
+```sh
+python -m voya.copy_db --from var/voya.db --to "$DATABASE_URL" --dry-run
+python -m voya.copy_db --from var/voya.db --to "$DATABASE_URL"
+```
+
+The command prints a row count per table and does not print the URL. It stops
+if the target already has rows, unless you pass `--force`.
+
+## Smoke test
+
+`scripts/smoke.sh` builds the image, migrates a temporary volume, and checks
+`/healthz`, `/readyz`, `/privacy`, a plan request without the invite cookie,
+a New York plan after unlock, `/metrics` without a token, and that the process
+is not root. It removes the container and the volume when it finishes. If
+Docker is not running it prints `Docker is not running.` and exits non-zero.
+The `docker` CI job runs this script.
+
+## After deploy
+
+1. `make migrate` finished against the production database.
+2. `/healthz` and `/readyz` return 200.
+3. `/privacy` returns 200.
+4. `POST /v1/plans` without the invite cookie returns 401.
+5. `/metrics` without `X-Metrics-Token` returns 401, and with the token returns 200.
+6. The process user is not root (`id -u` is not 0).
+7. `VOYA_TRUSTED_PROXY_IPS` is still empty unless the proxy's peer addresses are known.
+8. The Demo prices banner is still visible. Place prices are still the synthetic catalog.
 
 ## 2. AWS
 

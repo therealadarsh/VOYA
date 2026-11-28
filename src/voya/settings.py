@@ -11,6 +11,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from voya.client_ip import parse_trusted_proxies
+
 _TRUE = {"1", "true", "yes"}
 _FALSE = {"0", "false", "no"}
 
@@ -21,6 +23,18 @@ def _raw(env: Mapping[str, str], key: str) -> str | None:
         return None
     stripped = value.strip()
     return stripped or None
+
+
+def _int(value: str | None, *, default: int) -> int:
+    if value is None:
+        return default
+    try:
+        parsed = int(value)
+    except ValueError:
+        return default
+    if parsed < 0:
+        return default
+    return parsed
 
 
 def _bool(value: str | None, *, default: bool) -> bool:
@@ -48,6 +62,10 @@ class Settings:
     smtp_from: str | None
     preview_label: bool
     log_json: bool
+    signin_max_per_15min: int
+    signin_max_per_day: int
+    trusted_proxy_ips: frozenset[str]
+    metrics_token: str | None
 
     @property
     def production(self) -> bool:
@@ -81,6 +99,10 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
         smtp_from=_raw(env, "VOYA_SMTP_FROM"),
         preview_label=_bool(_raw(env, "VOYA_PREVIEW_LABEL"), default=True),
         log_json=log_format == "json",
+        signin_max_per_15min=_int(_raw(env, "VOYA_SIGNIN_MAX_PER_15MIN"), default=3),
+        signin_max_per_day=_int(_raw(env, "VOYA_SIGNIN_MAX_PER_DAY"), default=10),
+        trusted_proxy_ips=parse_trusted_proxies(_raw(env, "VOYA_TRUSTED_PROXY_IPS")),
+        metrics_token=_raw(env, "VOYA_METRICS_TOKEN"),
     )
 
 
@@ -119,4 +141,6 @@ def production_problems(settings: Settings) -> list[str]:
             "email use? Set VOYA_SMTP_HOST, VOYA_SMTP_PORT, VOYA_SMTP_USERNAME, "
             "VOYA_SMTP_PASSWORD, and VOYA_SMTP_FROM."
         )
+    if not settings.metrics_token:
+        problems.append("What token should scrape /metrics? Set VOYA_METRICS_TOKEN.")
     return problems

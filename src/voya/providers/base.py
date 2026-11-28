@@ -21,6 +21,8 @@ class PlaceStub:
     rating: float | None = None
     price_level: int | None = None
     observed_at: datetime | None = None
+    tags: tuple[str, ...] = ()
+    hours: str | None = None
 
 
 class PlacesProvider(Protocol):

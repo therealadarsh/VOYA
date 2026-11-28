@@ -1,16 +1,15 @@
 # VOYA
 
-**Status:** **130 tests** — private preview plus the NYC slice: Postgres when
-`DATABASE_URL` is set, a Foursquare client that stays off until a key and a
-budget are set, a rotating first-week idea bank, `/metrics`, and magic-link
-email through Amazon SES (tested locally, SES sandbox). The demo
-banner stays while any cost is still a guess. Strict mypy covers all of
-`src/voya`. CI runs `make verify`, a Postgres
-integration job, and a Docker build on PRs to `dev`/`uat`/`prod` (see
-`.github/workflows/ci.yml`). Owners may merge into `dev` with the `auto-merge`
-label after required checks pass (`docs/GITHUB_AUTOMATION.md`). Local Mac:
-`make verify RUN=` in conda `snakeenv`.
-Not deployed. See
+**Status:** **177 passed, 7 skipped** (`make verify`). Private preview plus the
+NYC slice: sign-in email limits, a trusted-proxy client address, a metrics
+token in production, per-slot classic picks, Alembic migrations, a SQLite copy
+command, and a fake places cache. Foursquare stays off until a key and a budget
+are set. The demo banner stays while any cost is still a guess. `make e2e`
+walks the preview in a browser. CI runs `verify`, `postgres` (migrate, then
+tests), `e2e`, and `docker` (`scripts/smoke.sh`). Owners may merge into `dev`
+with the `auto-merge` label after required checks pass
+(`docs/GITHUB_AUTOMATION.md`). Add `e2e` as a required check. Local Mac:
+`make verify RUN=` in conda `snakeenv`. Not deployed. See
 [`docs/README.md`](docs/README.md) (doc index) ·
 [`docs/AGENTIC_ENGINEERING.md`](docs/AGENTIC_ENGINEERING.md) (AI/agent register)
 · [`docs/DEPLOY.md`](docs/DEPLOY.md) · [`docs/PROGRESS.md`](docs/PROGRESS.md).
@@ -30,7 +29,7 @@ back under budget.
 ```sh
 uv sync                                   # Python 3.12 + dependencies
 make run                                  # http://localhost:8000
-make test                                 # 123 tests, no network, no AI tokens
+make test                                 # 175 passed, 7 skipped; no network, no AI tokens
 ```
 
 Optional: set `OPENROUTER_API_KEY` (and `VOYA_LLM_MODEL_HELPER`) in `.env` to

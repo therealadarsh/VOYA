@@ -22,6 +22,14 @@ terms forbid it. Test code uses fakes only (`LIVE=1` caps spend at $1/run).
 - **Why:** Fits the owner's one-time data budget for launch-city enrichment; official API only.
 - **Not in repo:** API key via `FOURSQUARE_API_KEY` (`.env.example` when wired).
 - **Spend ceiling:** Persisted counter; hard stop before exceeding budget (see plan 3.8).
+- **Cache:** This file does not state a Foursquare retention window. Live responses are not stored until the owner supplies the key, the monthly budget, and the USD per search, and a cache window is written here.
+
+## Places cache
+
+| Provider | `cache_until` | When it passes |
+|---|---|---|
+| **fake** (tests only, synthetic) | Observation time plus 1 day | The next import refreshes a row the provider still returns. A row that was not returned is dropped only after `cache_until`. A row still inside the window stays. |
+| **Foursquare** | Not set. Live import is blocked. | No live row is written. |
 
 ## Coordinates
 
